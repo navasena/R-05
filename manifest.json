@@ -1,7 +1,7 @@
 {
   "id": "kas-navasena-core",
   "name": "Kas NAVASENA Enterprise",
-  "short_name": "NAVASENA",
+  "short_name": "R-05",
   "description": "Aplikasi Manajemen Keuangan & Pembukuan Karang Taruna NAVASENA",
   "start_url": "./index.html?mode=pwa",
   "scope": "./",
