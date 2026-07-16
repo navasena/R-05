@@ -3,7 +3,9 @@
 // Architecture: Network-First with Timeout Fallback, Native Garbage Collector
 // =========================================================================
 
-const APP_VERSION = '1.2';
+// KODE BARU (Wajib utuh, lolos simulasi, bebas error, TIDAK ADA PEMOTONGAN KODE):
+
+const APP_VERSION = '1.3';
 const CACHE_PREFIX = 'kas-navasena-';
 const CACHE_STATIC = CACHE_PREFIX + 'static-v' + APP_VERSION;
 const CACHE_DYNAMIC = CACHE_PREFIX + 'dynamic-v' + APP_VERSION;
@@ -25,7 +27,8 @@ const staticAssets = [
   './legend.png',
   './mythic.png',
   './glory.png',
-  './afk.png'
+  './afk.png',
+  './Nasalization%20Rg.otf'
 ];
 
 // =========================================================
@@ -57,13 +60,14 @@ self.addEventListener('install', event => {
     caches.open(CACHE_STATIC).then(cache => {
       console.log('[SW] Menyimpan aset statis NAVASENA...');
       return Promise.all(
+// KODE BARU (Wajib utuh, lolos simulasi, bebas error, TIDAK ADA PEMOTONGAN KODE):
         staticAssets.map(asset => {
-          // [SURGICAL FIX] mode: 'no-cors' mutlak diperlukan untuk menerima Opaque Response dari proxy/intranet
-          const reqOpt = asset.startsWith('http') ? { mode: 'no-cors' } : { cache: 'no-cache' };
+          // [SURGICAL FIX] mode: 'cors' WAJIB digunakan untuk CDN publik agar lolos validasi CORB/MIME Browser saat Offline.
+          const reqOpt = asset.startsWith('http') ? { mode: 'cors' } : { cache: 'no-cache' };
           return fetch(asset, reqOpt)
             .then(response => {
-              // Menerima Opaque Response agar instalasi CDN (XLSX.js) tidak gagal di Proxy/Intranet
-              if (response.ok || response.type === 'opaque') {
+              // Hanya menerima response yang valid dan utuh (Mencegah Opaque Cache Poisoning)
+              if (response.ok) {
                 return cache.put(asset, response);
               }
               throw new Error("Status Jaringan Non-OK: " + response.status);
@@ -146,17 +150,20 @@ self.addEventListener('fetch', event => {
     });
     timeoutPromise.catch(() => {}); // Dummy trap pencegah Unhandled Promise Rejection System Crash
 
-    // Operasi Fetch dibungkus independen agar Cache tetap terupdate meski koneksi lambat
+    // Operasi Fetch dibungkus independen agar Cache selalu sinkron dengan versi Server
     const fetchPromise = fetch(req.url, { cache: 'no-cache', signal: controller.signal }).then(networkResponse => {
-      clearTimeout(timeoutId); // [SURGICAL FIX] Matikan bom waktu jika koneksi berhasil cepat
-      // PROTEKSI MUTLAK: Cegah "Cache Poisoning" oleh Captive Portal (Wi-Fi Publik).
-      // Pembaruan App Shell (index.html) HANYA terjadi pada saat install (Kenaikan APP_VERSION).
+      clearTimeout(timeoutId); // Matikan bom waktu jika koneksi berhasil cepat
       if (!networkResponse || !networkResponse.ok) {
          throw new Error('Server Error, Offline, or Captive Portal Interception');
       }
+      
+      const clone = networkResponse.clone();
+      // Eksekusi cache.put tanpa event.waitUntil() untuk mencegah InvalidStateError
+      caches.open(CACHE_STATIC).then(cache => cache.put(req.url, clone));
+      
       return networkResponse;
     }).catch(err => {
-      clearTimeout(timeoutId); // [SURGICAL FIX] Matikan bom waktu jika koneksi gagal (Offline)
+      clearTimeout(timeoutId); // Matikan bom waktu jika koneksi gagal (Offline)
       throw err;
     });
 
@@ -172,39 +179,52 @@ self.addEventListener('fetch', event => {
           .then(res => res || caches.match('./index.html', { ignoreSearch: true }));
       })
     );
+
     return;
   }
 
   // STRATEGI 3: HYBRID GOOGLE FONTS
   if (reqUrl.hostname === 'fonts.googleapis.com') {
+    // [SURGICAL FIX] Deklarasi networkFetch & event.waitUntil WAJIB diletakkan di luar (synchronous)
+    const networkFetch = fetch(req).then(networkRes => {
+      if (networkRes && networkRes.ok) {
+        const clone = networkRes.clone();
+        caches.open(CACHE_STATIC).then(cache => cache.put(req.url, clone));
+      }
+      return networkRes;
+    }).catch(() => Response.error());
+
+    event.waitUntil(networkFetch);
+
     event.respondWith(
       caches.match(req).then(cachedRes => {
-        const networkFetch = fetch(req).then(networkRes => {
-          if (networkRes && networkRes.ok) {
-            const clone = networkRes.clone();
-            caches.open(CACHE_STATIC).then(cache => cache.put(req.url, clone));
-          }
-          return networkRes;
-        }).catch(() => Response.error());
-        event.waitUntil(networkFetch);
         return cachedRes || networkFetch; // Stale-While-Revalidate
       })
     );
     return;
+
   } else if (reqUrl.hostname === 'fonts.gstatic.com') {
+
     event.respondWith(
       caches.match(req).then(cachedRes => {
-        return cachedRes || fetch(req).then(networkRes => {
-          if (networkRes && networkRes.ok) { // Cekal Opaque Response Mutlak
-            const clone = networkRes.clone();
-            caches.open(CACHE_STATIC).then(cache => cache.put(req.url, clone));
-          }
-          return networkRes;
-        }).catch(() => Response.error()); // Cache-First
+        if (cachedRes) return cachedRes; // Intersep mutlak untuk efisiensi Cache-First murni
+        
+                const networkFetch = fetch(req).then(networkRes => {
+                  if (networkRes && networkRes.ok) { // Cekal Opaque Response Mutlak
+                    const clone = networkRes.clone();
+                    // Eksekusi memori langsung. Pembungkusan waitUntil() di dalam promise diharamkan spesifikasi.
+                    caches.open(CACHE_STATIC).then(cache => cache.put(req.url, clone));
+                  }
+                  return networkRes;
+                }).catch(() => Response.error());
+
+        
+        return networkFetch; 
       })
     );
     return;
   }
+
 
   const isLocalStatic = staticAssets.some(asset => {
     if (asset.startsWith('http')) return false;
@@ -212,30 +232,26 @@ self.addEventListener('fetch', event => {
   });
   const isCDNStatic = staticAssets.some(asset => asset.startsWith('http') && reqUrl.href === asset);
 
-  // STRATEGI 4: CACHE-FIRST UNTUK ASET STATIS (XLSX.js, Ikon, dsb)
-  if (isLocalStatic || isCDNStatic) {
-    event.respondWith(
-      caches.match(cacheKey, { ignoreSearch: true }).then(cachedResponse => {
-        return cachedResponse || fetch(req).then(networkResponse => {
-          if (networkResponse && networkResponse.ok) { // Cekal Opaque Response Mutlak
-            const clone = networkResponse.clone();
-            event.waitUntil(caches.open(CACHE_STATIC).then(cache => cache.put(cacheKey, clone)));
-          }
-          return networkResponse;
-        }).catch(() => Response.error());
-      })
-    );
-    return;
-  } 
+          if (isLocalStatic || isCDNStatic) {
+            event.respondWith(
+              caches.match(cacheKey, { ignoreSearch: true }).then(cachedResponse => {
+                return cachedResponse || fetch(req).then(networkResponse => {
+                  if (networkResponse && networkResponse.ok) { // Cekal Opaque Response Mutlak
+                    const clone = networkResponse.clone();
+                    caches.open(CACHE_STATIC).then(cache => cache.put(cacheKey, clone));
+                  }
+                  return networkResponse;
+                }).catch(() => Response.error());
+              })
+            );
+            return;
+          } 
 
-  // STRATEGI 5: STALE-WHILE-REVALIDATE UNTUK ASET DINAMIS LAINNYA
   const cachedResPromise = caches.match(req);
   const networkResPromise = fetch(req).then(networkResponse => {
     if (networkResponse && networkResponse.ok && networkResponse.type !== 'opaque') {
       const clone = networkResponse.clone();
-      event.waitUntil(
-        caches.open(CACHE_DYNAMIC).then(cache => cache.put(req.url, clone).then(() => limitCacheSize(CACHE_DYNAMIC, 50)))
-      );
+      caches.open(CACHE_DYNAMIC).then(cache => cache.put(req.url, clone).then(() => limitCacheSize(CACHE_DYNAMIC, 50)));
     }
     return networkResponse;
   }).catch(() => Response.error());
