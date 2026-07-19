@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#1E3A8A" id="theme-color-meta">
-    <title>Kas NAVASENA</title>
+    <title>Portal NAVASENA</title>
 
     <!-- =========================================================
          PROTOCOL OPEN GRAPH (LINK PREVIEW) NAVASENA ENTERPRISE
@@ -14,14 +14,14 @@
     <!-- Open Graph / Facebook / WhatsApp -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://navasena.github.io/R-05/">
-    <meta property="og:title" content="Kas NAVASENA Enterprise">
+    <meta property="og:title" content="Portal NAVASENA">
     <meta property="og:description" content="Portal Transparansi Kas & Mutasi Keuangan Karang Taruna NAVASENA.">
     <meta property="og:image" content="https://navasena.github.io/R-05/icon-512.png">
     
     <!-- Twitter / X -->
     <meta name="twitter:card" content="summary">
     <meta name="twitter:url" content="https://navasena.github.io/R-05/">
-    <meta name="twitter:title" content="Kas NAVASENA Enterprise">
+    <meta name="twitter:title" content="Portal NAVASENA">
     <meta name="twitter:description" content="Portal Transparansi Kas & Mutasi Keuangan Karang Taruna NAVASENA.">
     <meta name="twitter:image" content="https://navasena.github.io/R-05/icon-512.png">
 
@@ -211,7 +211,7 @@
         .custom-select { width: 100%; padding: 14px 16px; background: var(--surface); border: 1.5px solid var(--border); color: var(--text-main); font-size: 14px; font-weight: 700; border-radius: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); transition: 0.2s; }
         .custom-select:active { transform: scale(0.98); border-color: var(--primary); }
         .custom-select::after { content: '▼'; font-size: 10px; color: var(--text-muted); }
-        #mod-select { align-items: flex-end; padding: 0; z-index: 4060; }
+        #mod-select { align-items: flex-end; padding: 0; z-index: 100000; }
         #mod-select .modal-box { border-radius: 24px 24px 0 0; margin: 0; animation: slideUpSheet 0.3s forwards; padding-bottom: 40px; }
         .option-item { padding: 16px; background: var(--bg); border: 1.5px solid var(--border); color: var(--text-main); border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-bottom: 8px;}
         .option-item.active { background: var(--primary-light); border-color: var(--primary); color: var(--primary); font-weight: 800; }
@@ -239,10 +239,12 @@
         body.role-warga #btn-hdr-load { display: flex !important; }
         /* CLASS DEVELOPER DIBUKA UNTUK SEMUA ROLE AGAR MEDIA SOSIAL TERLIHAT */
 
-        /* MISC & UTILITIES */ 
+       /* MISC & UTILITIES */ 
        .ticker-wrap { width: 100%; background: #0F172A; color: #38BDF8; font-size: 11px; font-weight: 700; overflow: hidden; white-space: nowrap; padding: 8px 0; border-bottom: 1px solid #1E293B; }
-        .ticker-text { display: inline-block; padding-left: 100%; animation: ticker 25s linear infinite; letter-spacing: 0.5px;}
+        .ticker-text { display: inline-block; padding-left: 100%; animation: ticker 45s linear infinite; letter-spacing: 0.5px; white-space: nowrap; }
         @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+
+
         
         #screensaver { position: fixed; inset: 0; background: #000; z-index: 999998; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 1.5s ease-in-out; }
         #screensaver.active { opacity: 1; pointer-events: all; }
@@ -300,7 +302,7 @@
          ========================================================= -->
     <script id="core-engine">
         /**
-         * BLUEPRINT: KAS NAVASENA ENTERPRISE - CORE MODULE
+         * BLUEPRINT: Portal NAVASENA - CORE MODULE
          * Didesain ulang oleh Ahli Chaos Engineering
          * - Single Source of Truth URL
          * - Promise-based IndexedDB Transaction
@@ -314,8 +316,8 @@
             document.head.appendChild(curtain);
         }
 
-        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbzMTVK7EDwj36m85nvrWJYpOetrN14_EBvbmHxefZ7OpYLWEh5hYzy_r3T6zz47JYKJ/exec";
-        const CLOUD_API_TOKEN = "Navasena2024"; // SURGICAL FIX: Dikembalikan ke 2024 agar sinkron dengan Google Script
+        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbyC7RKBrlU1h5ylpMxdDME4IkXs5-eh7SHu_mA7iWYRJeUd0BowOIMRVQXfdJZhTiQw/exec";
+        const CLOUD_API_TOKEN = "Navasena29082026"; // SURGICAL FIX: Dikembalikan ke 2024 agar sinkron dengan Google Script
 
         // --- KONFIGURASI INDEXEDDB LOKAL ---
         const DB_NAME = 'NavasenaFintechDB';
@@ -1070,127 +1072,27 @@
                 }
             }
          }
-        // 3. ENGINE MATEMATIKA DASHBOARD (AKUNTANSI SINGLE LOOP)
-        window.updateDashboard = function() {
-            let tInAnalitik = 0, tOutAnalitik = 0; 
-            let dompetMap = {};
-            
-            // Inisialisasi Map Saldo Dompet
-            state.dompet.forEach(d => dompetMap[d.id] = { in: 0, out: 0, pend: 0 });
 
-            // Iterasi Tunggal O(N) untuk seluruh perhitungan
-            for (let i = 0; i < state.trx.length; i++) {
-                let t = state.trx[i];
-                if (t.is_deleted) continue;
-                let idD = t.id_dompet || 'DP-UTAMA';
-                if (!dompetMap[idD]) dompetMap[idD] = { in: 0, out: 0, pend: 0 };
-
-                if (t.tipe === 'masuk' || t.tipe === 'iuran') {
-                    dompetMap[idD].in += t.nom_final;
-                    if (t.kat !== 'Saldo Awal' && t.kat !== 'Transfer Internal' && t.kat !== 'Sisa Uang Muka') tInAnalitik += t.nom_final;
-                } else if (t.tipe === 'keluar') {
-                    if (t.status === 'pending') dompetMap[idD].pend += t.nom_awal;
-                    else if (t.status === 'lunas') dompetMap[idD].out += t.nom_final;
-                    
-                    if (t.status === 'lunas' && t.kat !== 'Saldo Awal' && t.kat !== 'Koreksi Saldo Awal (Akumulasi Pengeluaran Pindahan)' && t.kat !== 'Uang Muka Kegiatan' && t.kat !== 'Transfer Internal') tOutAnalitik += t.nom_final;
-                }
-            }
-
-            // Hitung Kas Aktual (Hanya dompet aktif, mengabaikan dompet PJ/kepanitiaan)
-            let sUtama = 0;
-            state.dompet.filter(d => d.status !== 'arsip' && !d.is_pj).forEach(d => {
-                sUtama += (dompetMap[d.id].in - dompetMap[d.id].out - dompetMap[d.id].pend);
-            });
-
-            // Tembak Angka ke UI DOM
-            let elSaldo = document.getElementById('dash-saldo');
-            if(elSaldo) elSaldo.innerText = 'Rp ' + formatPrivacy(sUtama);
-            let elInSum = document.getElementById('dash-in-sum');
-            if(elInSum) elInSum.innerText = 'Rp ' + formatPrivacy(tInAnalitik);
-            let elOutSum = document.getElementById('dash-out-sum');
-            if(elOutSum) elOutSum.innerText = 'Rp ' + formatPrivacy(tOutAnalitik);
-            if (sUtama < 0) pulseHaptic('warn');
-            
-            // Render Distribusi Kas Horizontal (Hanya Dompet Valid, PJ otomatis disembunyikan)
-            let dHtml = '';
-            state.dompet.filter(d => d.status !== 'arsip' && !d.is_pj).forEach(d => {
-                let dm = dompetMap[d.id];
-                let sisa = dm.in - dm.out - dm.pend;
-                let namaTampil = d.id === 'DP-UTAMA' ? 'Kas Utama' : d.nama;
-                let isUtama = d.id === 'DP-UTAMA';
-                let bgBorder = isUtama ? 'border: 1.5px solid var(--primary); background: var(--primary-light);' : 'border: 1.5px solid var(--border); background: var(--surface);';
-                let iconDompet = isUtama ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="3" style="flex-shrink: 0;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>` : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="color:var(--text-muted); flex-shrink: 0;"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M22 10v4"/><circle cx="18" cy="12" r="1"/></svg>`;
-                
-                dHtml += `
-                <div class="no-select dompet-card" style="min-width: 155px; max-width: 180px; flex: 1 0 auto; ${bgBorder} border-radius: 16px; padding: 16px; display: flex; flex-direction: column; justify-content: center; scroll-snap-align: center; box-shadow: var(--shadow-sm); transition: 0.2s;">
-                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
-                        ${iconDompet}
-                        <div style="font-size: 11px; font-weight: 800; color: ${isUtama ? 'var(--primary)' : 'var(--text-muted)'}; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${esc(namaTampil)}">${esc(namaTampil)}</div>
-                    </div>
-                    <div style="font-size: 18px; font-weight: 900; color: var(--text-main); letter-spacing: -0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Rp ${formatPrivacy(sisa)}</div>
-                </div>`;
-            });
-
-            let dompetContainer = document.getElementById('dash-dompet-list');
-            if (dompetContainer) { dompetContainer.innerHTML = dHtml; }
-
-            // Logika Ticker Bloomberg
-            let tickerEl = document.getElementById('bloomberg-ticker');
-            if(tickerEl && isKiosk) {
-                let tNow = new Date();
-                let mmdd = String(tNow.getMonth()+1).padStart(2,'0') + '-' + String(tNow.getDate()).padStart(2,'0');
-                let bdayNames = state.anggota.filter(a => a.tgl_lahir && a.tgl_lahir.endsWith(mmdd)).map(a => {
-                    let y = parseInt(a.tgl_lahir.split('-')[0]);
-                    return `${esc(a.nama).toUpperCase()} (KE-${tNow.getFullYear() - y})`;
-                });
-                let bdayText = bdayNames.length > 0 ? `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🎂 🎉 SELAMAT ULANG TAHUN ${bdayNames.join(' & ')}! 🎉 🎂` : '';
-
-                let recent = state.trx.filter(t => !t.is_deleted && (t.tipe === 'masuk' || t.tipe === 'iuran')).slice(0, 5);
-                let tickText = bdayText;
-                if (recent.length > 0) {
-                    recent.forEach(t => {
-                        tickText += `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🟢 ${esc(t.kat).toUpperCase()}: + Rp ${fmtRp(t.nom_final)} (${esc(t.ket)})`;
-                    });
-                } else if (!bdayText) {
-                    tickText = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SISTEM SIAP. BELUM ADA DATA PEMASUKAN BARU.';
-                }
-
-                tickerEl.innerHTML = tickText;
-                let charCount = tickerEl.innerText.length;
-                let animDuration = charCount > 50 ? (charCount * 0.2) : 25; 
-                tickerEl.style.animationDuration = animDuration + 's';
-            }
-
-            // Panggil Render Widget Donasi Terakhir
-            window.renderFomoWidget();
-        };
-
-        // 4. MESIN WIDGET FOMO DONASI (BEBAS MEMORY LEAK)
+        // 1. DEFINISI GLOBAL FUNCTION TERLEBIH DAHULU (PENTING!)
         window.renderFomoWidget = function() {
             let fomoContainer = document.getElementById('fomo-widget-container');
             if (!fomoContainer) return;
-
             fomoContainer.style.display = 'block';
-            
-            // Pencarian Cerdas String "Donasi"
-            let donasiTrx = state.trx.filter(t => !t.is_deleted && t.tipe === 'masuk' && (t.kat === 'Donasi' || (t.kat && t.kat.toLowerCase().includes('donasi'))));
-
+            // SURGICAL FIX: Injeksi String() untuk mencegah TypeError Crash pada Data Cacat
+            let donasiTrx = state.trx.filter(t => !t.is_deleted && t.tipe === 'masuk' && (t.kat === 'Donasi' || (t.kat && String(t.kat).toLowerCase().includes('donasi'))));
             if (donasiTrx.length === 0) {
+
                 fomoContainer.innerHTML = '<div style="text-align:center; color:#9CA3AF; font-size:12px; padding:16px; border: 1.5px dashed var(--border); border-radius: 12px; margin-bottom: 24px;">Belum ada riwayat donasi</div>';
                 return;
             }
-
-            // Urutkan Waktu Nyata
             let sorted = [...donasiTrx].sort((a, b) => b.ts - a.ts);
             let top = sorted.slice(0, 3);
-
             let html = `
             <div class="fomo-container">
                 <div class="fomo-header">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Riwayat Donasi Terbaru
                 </div>
                 <div style="display:flex; flex-direction:column; gap:8px;">`;
-                
             top.forEach(t => {
                 let nama = t.id_anggota ? (state.anggota.find(a => a.id === t.id_anggota)?.nama || 'Anonim') : (t.ket || 'Hamba Allah');
                 let nominal = new Intl.NumberFormat('id-ID').format(t.nom_final || t.nom_awal || 0);
@@ -1201,30 +1103,467 @@
                                     </div>
                                     <div style="min-width:0; flex:1;">
                                         <p style="margin:0; font-size:12px; font-weight:800; color:#1F2937; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(nama)}</p>
-                                        <p style="margin:0; font-size:9px; font-weight:700; color:#6B7280; display:flex; align-items:center; gap:4px;">
-                                            <span style="background:#D1FAE5; color:#059669; padding:2px 4px; border-radius:4px;">BARU</span> 
-                                            ${t.tanggal || new Date(t.ts).toLocaleDateString('id-ID')}
-                                        </p>
+                                        <p style="margin:0; font-size:9px; font-weight:700; color:#6B7280;">${t.tanggal || new Date(t.ts).toLocaleDateString('id-ID')}</p>
                                     </div>
                                 </div>
                                 <span style="font-size:13px; font-weight:900; color:#059669; flex-shrink:0;">+Rp ${nominal}</span>
                             </div>`;
             });
             html += `</div>
-                <button class="no-select" style="width: 100%; margin-top: 16px; padding: 14px; background: var(--primary-grad); color: #FFFFFF; font-size: 12.5px; font-weight: 900; letter-spacing: 0.5px; border-radius: 50px; border: none; cursor: pointer; box-shadow: 0 8px 15px rgba(30, 58, 138, 0.25); transition: 0.2s;" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.96)'" ontouchend="this.style.transform='scale(1)'" onclick="window.openLeaderboard()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="vertical-align:middle; margin-right:6px;"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg> DAFTAR DONASI
+                <button class="no-select" style="width: 100%; margin-top: 16px; padding: 14px; background: var(--primary-grad); color: #FFFFFF; font-size: 12.5px; font-weight: 900; letter-spacing: 0.5px; border-radius: 50px; border: none; cursor: pointer; box-shadow: 0 8px 15px rgba(30, 58, 138, 0.25);" onclick="window.openLeaderboard()">
+                    DAFTAR DONASI
                 </button>
             </div>`;
             fomoContainer.innerHTML = html;
         };
 
+        // 2. ENGINE MATEMATIKA DASHBOARD
+        window.updateDashboard = function() {
+            let tInAnalitik = 0, tOutAnalitik = 0; 
+            let dompetMap = {};
+            state.dompet.forEach(d => dompetMap[d.id] = { in: 0, out: 0, pend: 0 });
+            for (let i = 0; i < state.trx.length; i++) {
+                let t = state.trx[i];
+                if (t.is_deleted) continue;
+                let idD = t.id_dompet || 'DP-UTAMA';
+                if (!dompetMap[idD]) dompetMap[idD] = { in: 0, out: 0, pend: 0 };
+                if (t.tipe === 'masuk' || t.tipe === 'iuran') {
+                    dompetMap[idD].in += t.nom_final;
+                    if (t.kat !== 'Saldo Awal' && t.kat !== 'Transfer Internal' && t.kat !== 'Sisa Uang Muka') tInAnalitik += t.nom_final;
+                } else if (t.tipe === 'keluar') {
+                    if (t.status === 'pending') dompetMap[idD].pend += t.nom_awal;
+                    else if (t.status === 'lunas') dompetMap[idD].out += t.nom_final;
+                    if (t.status === 'lunas' && t.kat !== 'Saldo Awal' && t.kat !== 'Koreksi Saldo Awal (Akumulasi Pengeluaran Pindahan)' && t.kat !== 'Uang Muka Kegiatan' && t.kat !== 'Transfer Internal') tOutAnalitik += t.nom_final;
+                }
+            }
+            let sUtama = 0;
+            state.dompet.filter(d => d.status !== 'arsip' && !d.is_pj).forEach(d => {
+                sUtama += (dompetMap[d.id].in - dompetMap[d.id].out - dompetMap[d.id].pend);
+            });
+            
+            if(document.getElementById('dash-saldo')) document.getElementById('dash-saldo').innerText = 'Rp ' + formatPrivacy(sUtama);
+            if(document.getElementById('dash-in-sum')) document.getElementById('dash-in-sum').innerText = 'Rp ' + formatPrivacy(tInAnalitik);
+            if(document.getElementById('dash-out-sum')) document.getElementById('dash-out-sum').innerText = 'Rp ' + formatPrivacy(tOutAnalitik);
+            
+            // SURGICAL FIX: Injeksi Rendering Dompet Interaktif
+            let dompetHtml = '';
+            state.dompet.filter(d => d.status !== 'arsip' && !d.is_pj).forEach(d => {
+                let saldoDompet = dompetMap[d.id].in - dompetMap[d.id].out - dompetMap[d.id].pend;
+                let bgStyle = d.id === 'DP-UTAMA' ? 'background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); color: white;' : 'background: var(--surface); border: 1.5px solid var(--border); color: var(--text-main);';
+                let textSub = d.id === 'DP-UTAMA' ? 'color: #BFDBFE;' : 'color: var(--text-muted);';
+                
+                dompetHtml += `
+                <div class="no-select" style="flex: 0 0 160px; scroll-snap-align: start; ${bgStyle} padding: 16px; border-radius: 16px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 12px; position: relative; overflow: hidden;">
+                    ${d.id === 'DP-UTAMA' ? '<div style="position: absolute; right: -20px; top: -20px; width: 80px; height: 80px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>' : ''}
+                    <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; ${textSub} white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; z-index: 2;">${esc(d.nama)}</div>
+                    <div style="font-size: 16px; font-weight: 900; position: relative; z-index: 2; letter-spacing: -0.5px;">Rp ${fmtRp(saldoDompet)}</div>
+                </div>`;
+            });
+            let dList = document.getElementById('dash-dompet-list');
+            if (dList) dList.innerHTML = dompetHtml;
+
+            // [INJEKSI KOGNITIF]: Engine Ticker Apresiasi Donatur (Real-Time Hydration)
+            let tickerEl = document.getElementById('bloomberg-ticker');
+            if (tickerEl) {
+                // Filter murni hanya untuk Pemasukan dengan kategori 'Donasi' (Dilindungi String Caster)
+                let donasiTrxTicker = state.trx.filter(t => !t.is_deleted && t.tipe === 'masuk' && (t.kat === 'Donasi' || (t.kat && String(t.kat).toLowerCase().includes('donasi')))).sort((a,b) => b.ts - a.ts).slice(0, 15);
+                
+                if (donasiTrxTicker.length > 0) {
+                    let tickerHtml = donasiTrxTicker.map(t => {
+                        let namaDonatur = t.id_anggota ? (state.anggota.find(a => a.id === t.id_anggota)?.nama || 'Anonim') : (t.ket || 'Hamba Allah');
+                        // Ekstraksi pembersih nama (Regex bedah identitas & Anti-Crash)
+                        namaDonatur = String(namaDonatur).replace(/^Donasi\s*(Umum)?\s*[:-]?\s*/i, '').split('-')[0].trim();
+
+                        if (!namaDonatur) namaDonatur = "Hamba Allah";
+                        
+                        let amt = t.nom_final;
+                        let dateStr = new Date(t.ts).toLocaleDateString('id-ID', {day: '2-digit', month: 'short'});
+                        // SURGICAL FIX: Mencabut display:inline-flex yang merusak webview render engine
+                        return `<span style="margin-right: 32px;"><span style="color: #64748B; font-weight: 800; margin-right: 6px;">[${dateStr}]</span><span style="color: #E2E8F0; margin-right: 6px;">Donasi Dari: <span style="color: #FDE68A;">${esc(namaDonatur).toUpperCase()}</span></span><span style="color: #34D399; font-weight: 900;">+RP ${fmtRp(amt)}</span></span>`;
+                    }).join('<span style="color: #38BDF8; font-weight: 900; margin-right: 32px; opacity: 0.7;">•</span>');
+                    tickerEl.innerHTML = tickerHtml;
+                } else {
+                    tickerEl.innerHTML = 'BELUM ADA DATA DONASI TEREKAM DI SISTEM...';
+                }
+            }
+
+            window.renderFomoWidget(); // PEMANGGILAN AMAN
+            window.renderWargaProfile();
+
+        };
+
+        window.openLabelSelect = function() {
+            // Tarik Master List & Normalisasi Ekstrem
+            let jStr = String(getSetting('jabatan_list', 'Ketum NAVASENA, Sekretaris Jenderal, Bendahara Umum, Koordinator Humas, Admin Medsos'));
+            let masterArr = jStr.split(',').map(s => s.replace(/\s+/g, ' ').trim()).filter(s => s !== '');
+            
+            // Tarik semua label yang sedang dipakai di database (Dilindungi String Caster)
+            let usedLabels = state.anggota.map(a => a.label ? String(a.label).replace(/\s+/g, ' ').trim().toLowerCase() : '');
+            
+            let labelEl = document.getElementById('ang-label-val');
+            let currentMemberLabel = String(labelEl ? labelEl.value : '').replace(/\s+/g, ' ').trim();
+            let opts = [{label: '-- Hapus Jabatan --', value: ''}];
+
+            
+            masterArr.forEach(j => {
+                let jClean = j.toLowerCase();
+                // Single-Slot Logic: Hanya tampilkan jika slot belum terisi, ATAU milik anggota yang sedang diedit ini
+                if (!usedLabels.includes(jClean) || jClean === currentMemberLabel.toLowerCase()) {
+                    opts.push({label: j, value: j});
+                }
+            });
+
+            // Tombol Manual Override (Tidak akan muncul di Executive Desk publik)
+            opts.push({label: '+ Buat Label Manual (Bypass)', value: 'MANUAL_OVERRIDE'});
+            
+            openSelectModal('Hierarki Jabatan Resmi', opts, document.getElementById('ang-label-val').value, (val) => {
+                if (val === 'MANUAL_OVERRIDE') {
+                    // Eksekusi Custom Prompt Premium (Anti-Freeze & Anti-Blocking DOM)
+                    if (typeof openCustomPrompt === 'function') {
+                        openCustomPrompt("Buat Label Manual", "Masukkan nama jabatan khusus yang tidak ada di daftar Master.", "Misal: Seksi Konsumsi", (manualLabel) => {
+                            let finalLabel = manualLabel.replace(/\s+/g, ' ').trim();
+                            document.getElementById('ang-label-val').value = finalLabel;
+                            document.getElementById('ang-label-btn').innerText = finalLabel;
+                        });
+                    }
+                } else {
+                    document.getElementById('ang-label-val').value = val;
+                    document.getElementById('ang-label-btn').innerText = val || '-- Pilih Jabatan --';
+                }
+            });
+        };
+
+        window.renderWargaProfile = function() {
+            if(!isKiosk) return; // Eksklusif Warga Mode
+            
+            // 1. MADING TRANSPARANSI
+            let madingEl = document.getElementById('warga-mading-ui');
+            if (madingEl && localStorage.getItem('nav_role') !== 'warga') {
+                madingEl.innerHTML = '';
+                madingEl.style.display = 'none';
+            } else if (madingEl && localStorage.getItem('nav_role') === 'warga') {
+                let tDana = 0;
+                state.trx.forEach(t => {
+                    if(!t.is_deleted && (t.tipe === 'masuk' || t.tipe === 'iuran') && t.kat !== 'Transfer Internal' && t.kat !== 'Sisa Uang Muka' && !(t.ket||'').includes('Koreksi Saldo Awal (Akumulasi Pengeluaran Pindahan)')) {
+                        tDana += t.nom_final;
+                    }
+                });
+                let pSukses = state.event.filter(e => e.status === 'arsip').length;
+                let sdm = state.anggota.length;
+                
+                madingEl.innerHTML = `
+                <div style="font-size: 11px; font-weight: 800; color: #94A3B8; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> STATISTIK KEUANGAN
+                </div>
+                <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; box-shadow: var(--shadow-sm); padding: 20px; display: grid; grid-template-columns: 1fr; gap: 16px;">
+                    <div style="display:flex; align-items:center; gap: 14px;">
+                        <div style="width:40px; height:40px; background:#ECFDF5; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#059669;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        </div>
+                        <div>
+                            <div style="font-size:10px; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:2px;">Dana Terkelola</div>
+                            <div style="font-size:16px; font-weight:900; color:var(--text-main);">Rp ${fmtRp(tDana)}</div>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap: 14px;">
+                        <div style="width:40px; height:40px; background:#EFF6FF; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#2563EB;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                        </div>
+                        <div>
+                            <div style="font-size:10px; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:2px;">Program Sukses</div>
+                            <div style="font-size:16px; font-weight:900; color:var(--text-main);">${pSukses} Kegiatan</div>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap: 14px;">
+                        <div style="width:40px; height:40px; background:#FFFBEB; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#D97706;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        </div>
+                        <div>
+                            <div style="font-size:10px; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:2px;">Pasukan Penggerak</div>
+                            <div style="font-size:16px; font-weight:900; color:var(--text-main);">${sdm} Anggota Terdaftar</div>
+                        </div>
+                    </div>
+                </div>`;
+                madingEl.style.display = 'block';
+            }
+
+                // 2. HONORARY CARD (THE INTERACTIVE CREDIT CARD STACK)
+            let honEl = document.getElementById('warga-honorary-ui');
+            let isUserWarga = localStorage.getItem('nav_role') === 'warga';
+            
+            // GATEKEEPER MUTLAK: Musnahkan isi jika bukan profil warga
+            if (honEl && (!isKiosk || !isUserWarga)) {
+                honEl.innerHTML = '';
+                honEl.style.display = 'none';
+            } else if (honEl && isKiosk && isUserWarga) {
+                let dLuar = {}; let dAnonim = 0;
+                let currY = new Date().getFullYear(); // YTD Filter Mutlak
+                const blRegex = /\b(hamba allah|anonim|nn)\b/i; // Regex Murni Anti-Collateral
+                
+                state.trx.forEach(t => {
+                    let tYear = t.year || new Date(t.ts).getFullYear();
+                    // Akuntansi Mutlak: Hanya Masuk, Eksternal, Tahun Ini, Bukan Saldo/Koreksi
+                    if (!t.is_deleted && t.tipe === 'masuk' && !t.id_anggota && tYear === currY && t.kat !== 'Transfer Internal' && t.kat !== 'Sisa Uang Muka' && t.kat !== 'Saldo Awal' && !(t.kat||'').includes('Koreksi Saldo')) {
+                        let nClean = (t.ket || '').replace(/^Donasi\s*(Umum)?\s*[:-]?\s*/i, '').split('-')[0].trim();
+                        // Sanitasi nama absolut
+                        nClean = nClean.replace(/[^a-zA-Z0-9\s]/g, '').trim();
+                        if (!nClean) nClean = "Warga Umum";
+                        
+                        if (blRegex.test(nClean)) dAnonim += t.nom_final;
+                        else dLuar[nClean] = (dLuar[nClean] || 0) + t.nom_final;
+                    }
+                });
+                
+                let arrHon = Object.keys(dLuar).map(k => ({nama: k, total: dLuar[k]})).sort((a,b) => b.total - a.total).slice(0,3);
+                
+                if (arrHon.length > 0) {
+                    // Padding Matrix: Memastikan selalu ada 3 kartu agar mesin animasi tidak crash
+                    while (arrHon.length < 3) {
+                        arrHon.push({ nama: 'SLOT TERBUKA', total: 0, is_ghost: true });
+                    }
+
+                    // Global Function Injection & State Reset
+                    window.honoraryStack = [0, 1, 2]; // Reset state memory setiap kali render (Anti-Desync Bug)
+                    window.bringCardToFront = function(id) {
+                        let idx = window.honoraryStack.indexOf(id);
+                        if (idx <= 0) return; // Abaikan jika sudah di depan
+                        window.honoraryStack.splice(idx, 1);
+                        window.honoraryStack.unshift(id); // Lempar ke posisi terdepan
+                        window.applyStackTransforms();
+                    };
+                    
+                    window.applyStackTransforms = function() {
+                        let zIndexes = [3, 2, 1];
+                        let transforms = [
+                            'translateY(0px) scale(1)',
+                            'translateY(40px) scale(0.95)',
+                            'translateY(80px) scale(0.90)'
+                        ];
+                        // Shadow negatif spread menahan kebocoran bayangan (Double-Layer untuk 3D Levitation)
+                        let shadows = [
+                            '0 25px 35px -10px rgba(0,0,0,0.8), 0 10px 15px -5px rgba(0,0,0,0.6)', // Rank 1: Double-Layer Melayang
+                            '0 15px 20px -8px rgba(0,0,0,0.6)', // Rank 2: Medium Shadow
+                            '0 8px 12px -5px rgba(0,0,0,0.4)'  // Rank 3: Flat Shadow
+                        ];
+                        
+                        window.honoraryStack.forEach((realId, pos) => {
+                            let el = document.getElementById('hc-card-' + realId);
+                            if (el) {
+                                el.style.zIndex = zIndexes[pos];
+                                el.style.transform = transforms[pos];
+                                el.style.boxShadow = shadows[pos];
+                            }
+                        });
+                    };
+
+                    let hHtml = `
+                    <div style="font-size: 11px; font-weight: 800; color: #94A3B8; text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Apresiasi Donatur Th ${currY}
+                    </div>`;
+                    
+                    // Container Collapse Prevention: Tinggi dikunci statis ke 280px untuk asuransi Anti-Clipping shadow lapis ganda
+                    hHtml += `<div style="position: relative; height: 280px; margin-bottom: 24px; width: 100%; max-width: 400px; margin-left: auto; margin-right: auto; overflow: visible;">`;
+                    
+                    let bgColors = [
+                        'linear-gradient(135deg, #020617 0%, #0F172A 100%)', // Black
+                        'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)', // Sapphire
+                        'linear-gradient(135deg, #B45309 0%, #F59E0B 100%)'  // Gold
+                    ];
+                    
+                    arrHon.forEach((h, i) => {
+                        let bg = bgColors[i];
+                        let isGhost = h.is_ghost;
+                        let namaTeks = isGhost ? "BELUM ADA" : esc(h.nama);
+                        let nomTeks = isGhost ? "-" : "RP " + fmtRp(h.total);
+                        let rankLabel = i === 0 ? "BLACK CARD" : (i === 1 ? "SAPPHIRE" : "GOLD");
+                        
+                        hHtml += `
+                        <div id="hc-card-${i}" class="no-select" style="position: absolute; top: 0; left: 0; width: 100%; height: 180px; border-radius: 20px; background: ${bg}; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; box-sizing: border-box; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: top center; cursor: pointer; opacity: ${isGhost ? '0.7' : '1'};" onclick="window.bringCardToFront(${i})">
+                            
+                            <!-- Giant Anchor NAVASENA Logo (Watermark Kanan Atas) -->
+                            <img src="icon-512.png" style="position: absolute; right: -20px; top: -20px; width: 140px; height: 140px; opacity: 0.15; object-fit: contain; filter: grayscale(100%) brightness(200%); pointer-events: none;" alt="Logo">
+                            
+                            <!-- Teks Wrap Protection: Bebas Font NASA & Dibatasi Max-Width -->
+                            <div style="position: absolute; top: 55px; left: 20px; right: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; pointer-events: none;">
+                                <div style="font-size: 16px; font-weight: 900; color: #FFFFFF; letter-spacing: 0.5px; text-transform: uppercase;">${namaTeks}</div>
+                                <div style="font-size: 9px; font-weight: 800; color: rgba(255,255,255,0.6); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 4px;">HONORARY CONTRIBUTOR</div>
+                            </div>
+                            
+                            <!-- Absolute Bottom Footer -->
+                            <div style="position: absolute; bottom: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: flex-end; pointer-events: none;">
+                                <div>
+                                    <div style="font-size: 8px; font-weight: 800; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;">TOTAL KONTRIBUSI</div>
+                                    <div style="font-size: 10px; font-weight: 900; color: rgba(255,255,255,0.8); text-transform: uppercase; letter-spacing: 1px;">RANK #${i+1} • ${rankLabel}</div>
+                                </div>
+                                <div style="font-size: 18px; font-weight: 900; color: #FFFFFF; letter-spacing: 0.5px;">${nomTeks}</div>
+                            </div>
+                        </div>`;
+                    });
+                    
+                    hHtml += `</div>`; // Close Stack Container
+                    
+                    // The Ghost Footer (Hamba Allah - Flat Design)
+                    if(dAnonim > 0) {
+                        hHtml += `
+                        <div style="background:#F1F5F9; border:1px solid #E2E8F0; padding:14px 16px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; box-shadow: var(--shadow-sm);">
+                            <div style="display:flex; flex-direction:column;">
+                                <span style="font-size:12px; font-weight:900; color:#475569; text-transform:uppercase;">Sumbangan Anonim</span>
+                                <span style="font-size:10px; font-weight:700; color:#94A3B8;">Hamba Allah (Kolektif)</span>
+                            </div>
+                            <span style="font-size:14px; font-weight:900; color:var(--success);">RP ${fmtRp(dAnonim)}</span>
+                        </div>`;
+                    }
+                    honEl.innerHTML = hHtml; 
+                    honEl.style.display = 'block';
+                    
+                    // Eksekusi Pengecatan Awal DOM (Render Transformasi)
+                    setTimeout(() => { window.applyStackTransforms(); }, 50);
+                } else {
+                    honEl.style.display = 'none';
+                }
+            }
+
+            // 3. EXECUTIVE DESK (MASTER-DRIVEN RENDER & COMPACT CAROUSEL)
+            let deskEl = document.getElementById('warga-desk-ui');
+            if (deskEl) {
+                let role = localStorage.getItem('nav_role');
+                // Keamanan RBAC Absolut: Eksklusif HANYA untuk Warga & Anggota
+                if (role !== 'warga' && role !== 'anggota') {
+                    deskEl.style.display = 'none';
+                    deskEl.innerHTML = '';
+                } else {
+                    // Absolute String Caster untuk mencegah Type Error Crash
+                    let jStr = String(getSetting('jabatan_list', 'Ketum NAVASENA, Sekretaris Jenderal, Bendahara Umum, Koordinator Humas, Admin Medsos'));
+                    let masterArr = jStr.split(',').map(s => s.replace(/\s+/g, ' ').trim()).filter(s => s !== '');
+                    
+                    window.masterDeskGroups = []; 
+                    let deskCardsHtml = '';
+                    
+                    masterArr.forEach(jabatan => {
+                        let cleanLabelMaster = jabatan.toLowerCase();
+                        
+                        // Cari SATU anggota pertama yang labelnya persis sama (Single-Slot Logic & Failsafe)
+                        let ag = state.anggota.find(a => a.label && String(a.label).replace(/\s+/g, ' ').trim().toLowerCase() === cleanLabelMaster);
+                        
+                        if (ag) {
+                            window.masterDeskGroups.push({ label: jabatan, members: [ag] }); 
+
+                            let cleanWa = String(ag.wa || '').replace(/\D/g,'');
+                            let phoneHtml = '';
+                            
+                            // Validasi No WA Ketat (Minimal 9 digit) - Poisoned Link Shield
+                            if (cleanWa.length >= 9) {
+                                let formatWa = cleanWa.startsWith('62') ? '0' + cleanWa.substring(2) : cleanWa;
+                                phoneHtml = `
+                                <a href="https://wa.me/${cleanWa}" target="_blank" style="display: flex; align-items: center; gap: 8px; text-decoration: none; background: #ECFDF5; padding: 4px 8px 4px 10px; border-radius: 20px; border: 1px solid #A7F3D0; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.1); transition: transform 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">
+                                    <span style="font-family: monospace; font-size: 12px; font-weight: 900; color: #059669; letter-spacing: 0.5px;">${formatWa}</span>
+                                    <div style="width: 26px; height: 26px; background: #25D366; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(37, 211, 102, 0.4); flex-shrink: 0;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                                    </div>
+                                </a>`;
+                            } else {
+                                phoneHtml = `<div style="font-size: 10px; font-weight: 800; color: #94A3B8; background: #F1F5F9; padding: 6px 12px; border-radius: 20px; border: 1px solid #E2E8F0;">Tak Ada Kontak</div>`;
+                            }
+
+                            deskCardsHtml += `
+                            <div class="no-select" style="flex: 0 0 auto; max-width: 240px; min-width: 140px; scroll-snap-align: start; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 16px; padding: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="font-size: 9px; font-weight: 900; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${esc(jabatan)}</div>
+                                    <div style="font-size: 14px; font-weight: 900; color: #1E293B; line-height: 1.3; margin-bottom: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${esc(ag.nama)}</div>
+                                </div>
+                                <div style="display: flex; justify-content: flex-end;">
+                                    ${phoneHtml}
+                                </div>
+                            </div>`;
+                        }
+                    });
+
+                    if (deskCardsHtml !== '') {
+                        deskEl.innerHTML = `
+                        <div style="font-size: 11px; font-weight: 900; color: var(--primary); text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; padding-left: 4px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> EXECUTIVE DESK
+                        </div>
+                        <div style="display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 16px; margin-bottom: 8px; transform: translateZ(0); will-change: transform;">
+                            ${deskCardsHtml}
+                            <div class="no-select" style="flex: 0 0 auto; width: 140px; scroll-snap-align: start; background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); border-radius: 16px; padding: 16px; box-shadow: 0 10px 20px rgba(30, 58, 138, 0.3); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; cursor: pointer; transition: transform 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" onclick="openDirektori()">
+                                <div style="background: rgba(255,255,255,0.2); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
+                                </div>
+                                <div style="font-size: 11px; font-weight: 900; color: white; text-transform: uppercase; letter-spacing: 0.5px;">DIREKTORI<br>LENGKAP</div>
+                            </div>
+                        </div>`;
+                        deskEl.style.display = 'block';
+                    } else {
+                        deskEl.style.display = 'none';
+                    }
+                }
+            }
+        };
+
+        window.openDirektori = function() {
+            document.getElementById('search-direktori').value = '';
+            filterDirektori('');
+            openModal('mod-direktori');
+        };
+
+        window.filterDirektori = function(query) {
+            let listEl = document.getElementById('direktori-list');
+            if(!listEl || !window.masterDeskGroups) return;
+            
+            let q = query.toLowerCase();
+            let html = '';
+            
+            window.masterDeskGroups.forEach(g => {
+                let matchG = g.label.toLowerCase().includes(q);
+                let mems = g.members.filter(m => m.nama.toLowerCase().includes(q));
+                
+                if (matchG || mems.length > 0) {
+                    let memHtml = '';
+                    let targetMems = matchG ? g.members : mems;
+                    targetMems.forEach(m => {
+                        let cleanWa = String(m.wa || '').replace(/\D/g,'');
+                        let btnWa = '';
+                        
+                        // Validasi No WA Ketat (Minimal 9 digit) - Poisoned Link Shield
+                        if (cleanWa.length >= 9) {
+                            let formatWa = cleanWa.startsWith('62') ? '0' + cleanWa.substring(2) : cleanWa;
+                            btnWa = `
+                            <a href="https://wa.me/${cleanWa}" target="_blank" style="display: flex; align-items: center; gap: 8px; text-decoration: none; background: #ECFDF5; padding: 6px 10px; border-radius: 20px; border: 1px solid #A7F3D0; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.1); transition: transform 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">
+                                <span style="font-family: monospace; font-size: 13px; font-weight: 900; color: #059669; letter-spacing: 0.5px;">${formatWa}</span>
+                                <div style="width: 28px; height: 28px; background: #25D366; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(37, 211, 102, 0.4); flex-shrink: 0;">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                                </div>
+                            </a>`;
+                        } else {
+                            btnWa = `<div style="font-size: 10px; font-weight: 800; color: #94A3B8; background: #F1F5F9; padding: 6px 12px; border-radius: 20px; border: 1px solid #E2E8F0;">Tak Ada Kontak</div>`;
+                        }
+                        
+                        memHtml += `
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:12px 16px;">
+                            <div style="font-size:14px; font-weight:800; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-right:12px;">${esc(m.nama)}</div>
+                            ${btnWa}
+                        </div>`;
+                    });
+                    
+                    html += `
+                    <div class="no-select" style="background:var(--surface); border:1.5px solid var(--border); border-radius:16px; padding:16px; margin-bottom:16px; box-shadow:var(--shadow-sm);">
+                        <div style="font-size:10.5px; font-weight:900; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">${esc(g.label)}</div>
+                        ${memHtml}
+                    </div>`;
+                }
+            });
+            
+            listEl.innerHTML = html || '<div style="text-align:center; color:var(--text-muted); font-size:12px; padding:24px;">Tidak ditemukan.</div>';
+        };
+
+
+        // 4. MESIN WIDGET FOMO DONASI (BEBAS MEMORY LEAK & PREMIUM UI)
         window.openLeaderboard = function() {
-            if(typeof renderDonasiList === 'function') renderDonasiList(); 
+            if(typeof window.renderDonasiList === 'function') window.renderDonasiList(); 
             if(typeof openModal === 'function') openModal('mod-donasi-list');
         };
 
-        // KLASEMEN DONASI (DUAL-CORE PODIUM PROTOCOL)
-        function renderDonasiList() {
+        window.renderDonasiList = function() {
             let donasiTrx = state.trx.filter(t => !t.is_deleted && t.tipe === 'masuk' && (t.kat || '').toLowerCase().includes('donasi'));
             
             let mapAnggota = {};
@@ -1249,7 +1588,6 @@
 
                 } else {
                     // Masuk Array Warga/Umum (Pemenggalan Cerdas Regex Mutlak)
-                    // Eksekutor akan menebas frasa "Donasi Umum:", "Donasi -", atau "Donasi:" tanpa ragu
                     let namaClean = ketRaw.replace(/^Donasi\s*(Umum)?\s*[:-]?\s*/i, '').split('-')[0].trim();
                     if (!namaClean) namaClean = "Warga / Umum";
                     
@@ -1261,10 +1599,11 @@
             let arrAnggota = Object.keys(mapAnggota).map(k => ({ nama: k, total: mapAnggota[k].total, earliest_ts: mapAnggota[k].earliest_ts }));
             let arrUmum = Object.keys(mapUmum).map(k => ({ nama: k, total: mapUmum[k].total, earliest_ts: mapUmum[k].earliest_ts }));
             
-            // Lapis 2: Dynamic UI Generator (Fungsi Render Sub-Modul)
-            function generateLeaderboardHTML(arr, isUmum) {
+            // Lapis 2: Dynamic UI Generator (Premium List Clean Style)
+            function generatePremiumListHTML(arr) {
+                let rows = '';
                 if (arr.length === 0) {
-                    return '<div class="no-select" style="text-align:center; color:var(--text-muted); font-size:12px; padding: 40px; border: 1.5px dashed var(--border); border-radius: 12px;">Belum ada donatur di kategori ini.</div>';
+                    return `<div style="text-align:center; padding: 40px 10px; color:var(--text-muted); font-size:12px; font-weight:600;">Belum ada donatur.</div>`;
                 }
                 
                 // Tie-Breaker (Nominal > Waktu Awal)
@@ -1273,102 +1612,69 @@
                     return a.earliest_ts - b.earliest_ts; 
                 });
 
-                // Ghost Slot Injection
-                let top3 = [];
-                for (let i = 0; i < 3; i++) {
-                    if (arr[i]) top3.push(arr[i]);
-                    else top3.push({ nama: 'Belum Ada', total: 0, is_ghost: true });
-                }
-
-                // Vector Heraldry (SVG Angka Tanpa Emoji)
-                let svgs = {
-                    rank1: `<svg width="36" height="36" viewBox="0 0 36 36" fill="none" style="filter: drop-shadow(0 4px 6px rgba(245,158,11,0.5)); margin-bottom:4px;"><circle cx="18" cy="18" r="18" fill="#F59E0B"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="#FFFFFF" font-size="20" font-weight="900" font-family="monospace">1</text></svg>`,
-                    rank2: `<svg width="28" height="28" viewBox="0 0 28 28" fill="none" style="filter: drop-shadow(0 4px 6px rgba(148,163,184,0.4)); margin-bottom:4px;"><circle cx="14" cy="14" r="14" fill="#94A3B8"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="#FFFFFF" font-size="16" font-weight="900" font-family="monospace">2</text></svg>`,
-                    rank3: `<svg width="28" height="28" viewBox="0 0 28 28" fill="none" style="filter: drop-shadow(0 4px 6px rgba(180,83,9,0.4)); margin-bottom:4px;"><circle cx="14" cy="14" r="14" fill="#B45309"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="#FFFFFF" font-size="16" font-weight="900" font-family="monospace">3</text></svg>`,
-                    ghost: `<svg width="28" height="28" viewBox="0 0 28 28" fill="none" style="margin-bottom:4px;"><circle cx="14" cy="14" r="13" stroke="#CBD5E1" stroke-width="2" stroke-dasharray="4 4"/></svg>`
-                };
-
-                let podiumOrder = [
-                    { data: top3[1], svg: top3[1].is_ghost ? svgs.ghost : svgs.rank2, bg: '#F8FAFC', border: '#CBD5E1', trans: 'translateY(12px)', clr: '#475569' },
-                    { data: top3[0], svg: top3[0].is_ghost ? svgs.ghost : svgs.rank1, bg: '#FFFBEB', border: '#FBBF24', trans: 'translateY(-4px)', clr: '#B45309', shadow: '0 10px 25px -5px rgba(245,158,11,0.3)' },
-                    { data: top3[2], svg: top3[2].is_ghost ? svgs.ghost : svgs.rank3, bg: '#F8FAFC', border: '#D97706', trans: 'translateY(16px)', clr: '#92400E' }
-                ];
-
-                let htmlStr = `<div style="display:flex; justify-content:center; align-items:flex-end; gap:8px; margin-bottom: 36px; padding-top:12px; width: 100%;">`;
-                
-                podiumOrder.forEach(p => {
-                    let badgeUI = (isUmum && !p.data.is_ghost) ? `<div style="font-size:7.5px; font-weight:900; background:#DBEAFE; color:#1D4ED8; padding:2px 6px; border-radius:4px; margin-bottom:4px; letter-spacing:0.5px;">WARGA</div>` : ``;
-                    let valHtml = p.data.is_ghost ? `<span style="font-size:10px; color:#94A3B8;">-</span>` : `<span style="font-size:12px; font-weight:900; color:var(--success); letter-spacing:-0.5px;">Rp ${fmtRp(p.data.total)}</span>`;
+                arr.forEach((d, i) => {
+                    let rankNode = '';
+                    if (i === 0) rankNode = `<div style="width:26px; height:26px; background:#FEF3C7; color:#D97706; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:12px; flex-shrink:0; box-shadow: 0 2px 4px rgba(217, 119, 6, 0.2);">1</div>`;
+                    else if (i === 1) rankNode = `<div style="width:26px; height:26px; background:#F1F5F9; color:#64748B; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:12px; flex-shrink:0; box-shadow: 0 2px 4px rgba(100, 116, 139, 0.2);">2</div>`;
+                    else if (i === 2) rankNode = `<div style="width:26px; height:26px; background:#FFEDD5; color:#92400E; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:12px; flex-shrink:0; box-shadow: 0 2px 4px rgba(146, 64, 14, 0.2);">3</div>`;
+                    else rankNode = `<div style="width:26px; text-align:center; font-weight:800; color:#9CA3AF; font-size:13px; flex-shrink:0;">${i+1}</div>`;
                     
-                    htmlStr += `
-                    <div class="no-select" style="display:flex; flex-direction:column; align-items:center; background:${p.bg}; border: 1.5px solid ${p.border}; border-radius: 14px; padding: 16px 6px 12px 6px; width: 31%; box-shadow: ${p.shadow || 'var(--shadow-sm)'}; transform: ${p.trans}; z-index: ${p.shadow ? 2 : 1}; position:relative;">
-                        ${p.svg}
-                        ${badgeUI}
-                        <div style="font-size:11.5px; font-weight:900; color:${p.clr}; width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center; margin-bottom:4px; letter-spacing:-0.2px; padding: 0 4px;" title="${esc(p.data.nama)}">${esc(p.data.nama)}</div>
-                        ${valHtml}
+                    rows += `
+                    <div style="display:flex; align-items:center; justify-content:space-between; padding: 14px 0; border-bottom: 1px dashed var(--border);">
+                        <div style="display:flex; align-items:center; gap: 12px; flex:1; min-width:0;">
+                            ${rankNode}
+                            <div style="font-size:13px; font-weight:800; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${esc(d.nama)}">${esc(d.nama)}</div>
+                        </div>
+                        <div style="font-size:13px; font-weight:900; color:var(--success); flex-shrink:0; margin-left:12px;">Rp ${fmtRp(d.total)}</div>
                     </div>`;
                 });
                 
-                htmlStr += `</div>`;
-
-                // The Executive List (Rank 4+)
-                if (arr.length > 3) {
-                    htmlStr += `<div style="display:flex; flex-direction:column; gap:10px;">`;
-                    for (let i = 3; i < arr.length; i++) {
-                        let d = arr[i];
-                        let rankNum = String(i + 1).padStart(2, '0');
-                        let tagUmum = isUmum ? `<div style="font-size:8.5px; background:#F1F5F9; color:#64748B; padding:2px 6px; border-radius:4px; font-weight:800; border: 1px solid #E2E8F0; margin-top:4px; display:inline-table;">WARGA</div>` : '';
-                        htmlStr += `
-                        <div class="no-select" style="display:flex; justify-content:space-between; align-items:center; padding: 16px; background:var(--surface); border: 1.5px solid var(--border); border-radius:14px; box-shadow:var(--shadow-sm); transition: 0.2s;">
-                            <div style="display:flex; align-items:center; gap: 16px; flex: 1; min-width: 0;">
-                                <div style="font-family: monospace; font-size:16px; font-weight:900; color:#94A3B8; width: 24px; text-align:center; flex-shrink:0;">${rankNum}</div>
-                                <div style="flex:1; min-width:0;">
-                                    <div style="font-size:13.5px; font-weight:800; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${esc(d.nama)}">${esc(d.nama)}</div>
-                                    ${tagUmum}
-                                </div>
-                            </div>
-                            <div style="font-size:15px; font-weight:900; color:var(--success); flex-shrink:0; margin-left: 8px;">Rp ${fmtRp(d.total)}</div>
-                        </div>`;
-                    }
-                    htmlStr += `</div>`;
-                }
-                return htmlStr;
+                return `
+                <div class="no-select" style="background:var(--surface); border:1.5px solid var(--border); border-radius:16px; box-shadow:var(--shadow-sm); padding: 0 16px 8px 16px; margin-bottom: 16px;">
+                    ${rows}
+                </div>`;
             }
 
-            // Lapis 3: Pre-rendering Architecture (No-Lag Tab Switching)
+            // Lapis 3: Merakit Tabs Segments
+            let listAnggota = generatePremiumListHTML(arrAnggota);
+            let listWarga = generatePremiumListHTML(arrUmum);
+
             let html = `
                 <div class="seg-control no-select" style="margin-bottom: 24px; position: sticky; top: -20px; z-index: 5; background: #F1F5F9; border: 1px solid #E2E8F0; padding: 4px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-                    <button class="seg-btn active" id="btn-tab-ldb-anggota" onclick="document.getElementById('ldb-anggota').style.display='block'; document.getElementById('ldb-umum').style.display='none'; this.classList.add('active'); document.getElementById('btn-tab-ldb-umum').classList.remove('active');">Donatur Anggota</button>
-                    <button class="seg-btn" id="btn-tab-ldb-umum" onclick="document.getElementById('ldb-umum').style.display='block'; document.getElementById('ldb-anggota').style.display='none'; this.classList.add('active'); document.getElementById('btn-tab-ldb-anggota').classList.remove('active');">Donatur Warga</button>
+                    <button class="seg-btn active" id="tab-donasi-anggota" onclick="document.getElementById('view-donasi-anggota').style.display='block'; document.getElementById('view-donasi-warga').style.display='none'; this.classList.add('active'); document.getElementById('tab-donasi-warga').classList.remove('active');">Donatur Anggota</button>
+                    <button class="seg-btn" id="tab-donasi-warga" onclick="document.getElementById('view-donasi-warga').style.display='block'; document.getElementById('view-donasi-anggota').style.display='none'; this.classList.add('active'); document.getElementById('tab-donasi-anggota').classList.remove('active');">Donatur Warga</button>
                 </div>
                 
-                <div id="ldb-anggota" style="display: block;">
-                    ${generateLeaderboardHTML(arrAnggota, false)}
+                <div id="view-donasi-anggota" style="display: block;">
+                    ${listAnggota}
                 </div>
-                <div id="ldb-umum" style="display: none;">
-                    ${generateLeaderboardHTML(arrUmum, true)}
+                <div id="view-donasi-warga" style="display: none;">
+                    ${listWarga}
                 </div>
             `;
 
-            // Lapis 4: The Ghost Footer (Hamba Allah)
+            // Lapis 4: Footer Hamba Allah (The Ghost Footer) - ditaruh paling bawah di luar tab
             if (totalAnonim > 0) {
                 html += `
-                <div style="margin-top: 24px; border-top: 1.5px dashed var(--border); padding-top: 16px;">
-                    <div class="no-select" style="display:flex; justify-content:space-between; align-items:center; padding: 14px 16px; background:#F1F5F9; border: 1px solid #E2E8F0; border-radius:14px;">
+                <div style="margin-top: 12px; border-top: 1.5px dashed var(--border); padding-top: 16px;">
+                    <div class="no-select" style="display:flex; justify-content:space-between; align-items:center; padding: 16px; background:#F1F5F9; border: 1px solid #E2E8F0; border-radius:16px;">
                         <div style="display:flex; align-items:center; gap: 12px; flex: 1; min-width: 0;">
-                            <div style="flex-shrink:0;">
+                            <div style="background:#E2E8F0; width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line x1="3" y1="3" x2="21" y2="21"/></svg>
                             </div>
-                            <div style="font-size:12px; font-weight:800; color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Sumbangan Anonim Kolektif</div>
+                            <div>
+                                <div style="font-size:13px; font-weight:900; color:var(--text-main); margin-bottom:2px;">Sumbangan Anonim</div>
+                                <div style="font-size:10px; font-weight:700; color:#64748B;">Hamba Allah (Kolektif)</div>
+                            </div>
                         </div>
-                        <div style="font-size:14px; font-weight:900; color:var(--text-main); flex-shrink:0; margin-left: 8px;">Rp ${fmtRp(totalAnonim)}</div>
+                        <div style="font-size:15px; font-weight:900; color:var(--success); flex-shrink:0; margin-left: 12px;">Rp ${fmtRp(totalAnonim)}</div>
                     </div>
                 </div>`;
             }
 
             let listContainer = document.getElementById('leaderboard-list');
             if (listContainer) listContainer.innerHTML = html;
-        }
+        };
 
         // 5. ENGINE LAPORAN WHATSAPP
         function generateLaporanWA() {
@@ -1399,7 +1705,7 @@
             txt += `🟢 Pemasukan Bulan Ini: Rp ${fmtRp(inAmt)}\n`;
             txt += `🔴 Pengeluaran Bulan Ini: Rp ${fmtRp(outAmt)}\n`;
             txt += `☑️ *TOTAL SALDO KAS: ${document.getElementById('dash-saldo').innerText}*\n\n`;
-            txt += `_Pesan dikirim dari Aplikasi kas NAVASENA_`;
+            txt += `_Pesan dikirim dari Aplikasi Portal NAVASENA_`;
             
             openWhatsAppBusiness('', encodeURIComponent(txt));
         }
@@ -1455,19 +1761,18 @@
                 </button>
 
                 <!-- POPOVER INFO XP -->
-                <div id="pop-xp-info" class="no-select" style="position: absolute; right: 48px; top: -10px; width: 240px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.15); border-radius: 16px; padding: 16px; color: white; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 100; opacity: 0; visibility: hidden; transform: translateX(10px); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none;">
-                    <div style="font-size: 10px; font-weight: 900; color: #38BDF8; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;">Penilaian (XP)</div>
+                <div id="pop-xp-info" class="no-select" style="position: absolute; right: 48px; top: -10px; width: 250px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.15); border-radius: 16px; padding: 16px; color: white; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 100; opacity: 0; visibility: hidden; transform: translateX(10px); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none;">
+                    <div style="font-size: 10px; font-weight: 900; color: #38BDF8; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;">Aturan Poin (XP)</div>
                     <div style="display: flex; flex-direction: column; gap: 6px; font-size: 11px; font-weight: 600; color: #E2E8F0;">
-                        <div style="display: flex; justify-content: space-between;"><span>Lunas (Tepat Waktu)</span> <span style="color:#10B981; font-weight:800;">+50 XP</span></div>
-                        <div style="display: flex; justify-content: space-between;"><span>Lunas (Bayar Di Muka)</span> <span style="color:#10B981; font-weight:800;">+75 XP</span></div>
-                        <div style="display: flex; justify-content: space-between;"><span>Bayar Telat (Recovery)</span> <span style="color:#FBBF24; font-weight:800;">+25 XP</span></div>
-                        <div style="display: flex; justify-content: space-between;"><span>Nunggak (Penalti)</span> <span style="color:#EF4444; font-weight:800;">-75 XP</span></div>
-                        <div style="display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 6px; margin-top: 2px;"><span>Talangan Kas</span> <span style="color:#38BDF8; font-weight:800;">+100 XP</span></div>
+                        <div style="display: flex; justify-content: space-between;"><span>Bayar Lebih Awal</span> <span style="color:#10B981; font-weight:800;">+75 XP</span></div>
+                        <div style="display: flex; justify-content: space-between;"><span>Bayar Tepat Waktu</span> <span style="color:#10B981; font-weight:800;">+50 XP</span></div>
+                        <div style="display: flex; justify-content: space-between;"><span>Telat 1 Bulan</span> <span style="color:#FBBF24; font-weight:800;">+25 XP</span></div>
+                        <div style="display: flex; justify-content: space-between;"><span>Telat 2 Bulan</span> <span style="color:#FBBF24; font-weight:800;">+15 XP</span></div>
+                        <div style="display: flex; justify-content: space-between;"><span>Nunggak / Belum Bayar</span> <span style="color:#EF4444; font-weight:800;">-75 XP</span></div>
+                        <div style="display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 6px; margin-top: 2px;"><span>Bantu Nalangi Acara</span> <span style="color:#38BDF8; font-weight:800;">+100 XP</span></div>
                     </div>
-                    <div style="font-size: 9px; font-weight: 700; color: #94A3B8; font-style: italic; margin-top: 8px; line-height: 1.4;">*Talangan dibatasi maks 5x / Tahun.</div>
-                    <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 9.5px; font-weight: 800; color: #FCD34D; line-height: 1.4; display: flex; align-items: flex-start; gap: 6px;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink: 0; margin-top: 1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                        <span>Sentuh ikon Peringkat pada daftar anggota untuk melihat KTA.</span>
+                    <div style="font-size: 9px; font-weight: 700; color: #94A3B8; margin-top: 10px; line-height: 1.5; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px;">
+                        <span style="color: #FCD34D; font-weight: 800;">*INFO:</span> Makin lama telat bayar, poin pemulihan makin kecil (hingga +1 XP). Hadiah nalangi acara dibatasi maksimal 5x dalam setahun.
                     </div>
                 </div>
             </div>
@@ -1496,16 +1801,52 @@
             
             // --- CORE FUNCTION: KALKULASI XP & GAMIFIKASI MUTLAK ---
             function calculateAllXP() {
+                // SINKRONISASI KAPSUL DEFINISI VAKTOR DEFS KELAS ATAS (HARDWARE ACCELERATED SVG FILTERS)
+                // SURGICAL FIX: Menggunakan Dimensi Kuantum (Absolute 0px) untuk memusnahkan Phantom Ghosting Render Bug pada Safari/Chrome Mobile
+                if (typeof document !== 'undefined' && !document.getElementById('svg-global-defs') && document.body) {
+                    let defs = document.createElement('div');
+                    defs.id = 'svg-global-defs';
+                    defs.style = 'position:absolute; width:0; height:0; opacity:0; pointer-events:none;';
+                    defs.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg"><defs>
+                        <filter id="svg-glow-pink" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                        <filter id="svg-glow-blood" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="blur1"/><feGaussianBlur stdDeviation="1" result="blur2"/><feMerge><feMergeNode in="blur1"/><feMergeNode in="blur2"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                        <filter id="svg-3d-gold" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0.5" dy="1.2" stdDeviation="0.3" flood-color="#78350F" flood-opacity="0.95"/></filter>
+                        <linearGradient id="svg-holo-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#38BDF8"/><stop offset="50%" stop-color="#F59E0B"/><stop offset="100%" stop-color="#EC4899"/>
+                            <animate attributeName="x1" values="0%;100%;0%" dur="4s" repeatCount="indefinite"/><animate attributeName="x2" values="100%;200%;100%" dur="4s" repeatCount="indefinite"/>
+                        </linearGradient>
+                    </defs></svg>`;
+                    document.body.appendChild(defs);
+                }
+
+                // INJEKSI GLOBAL INTERACTIVE SVG COMPONENT RENDERER ENGINE (10-TIER ABSOLUTE MATRIKS)
+                window.getSvgBadge = function(combo) {
+                    if (combo === 0) return '';
+                    let title = 'FIRST CASH'; let filterStyle = ""; let fillStyle = 'fill="#FFFFFF"'; let animateStr = ""; let scaleStr = "";
+                    
+                    if (combo === 1) { title = 'FIRST CASH'; fillStyle = 'fill="#B45309"'; }
+                    else if (combo === 2) { title = 'DOUBLE CASH'; fillStyle = 'fill="#06B6D4"'; }
+                    else if (combo === 3) { title = 'TRIPLE CASH'; fillStyle = 'fill="#A855F7"'; }
+                    else if (combo === 4) { title = 'MEGA CASH'; fillStyle = 'fill="#10B981"'; }
+                    else if (combo === 5) { title = 'UNSTOPPABLE'; fillStyle = 'fill="#3B82F6"'; }
+                    else if (combo === 6) { title = 'MONSTER'; fillStyle = 'fill="#F97316"'; scaleStr = 'transform="scale(1.05)" transform-origin="center"'; animateStr = '<animateTransform attributeName="transform" type="scale" values="1.05;1.01;1.05" dur="3s" repeatCount="indefinite" transform-origin="center"/>'; }
+                    else if (combo === 7) { title = 'GODLIKE'; fillStyle = 'fill="#F59E0B"'; filterStyle = 'filter="url(#svg-3d-gold)"'; }
+                    else if (combo === 8) { title = 'MANIAC'; fillStyle = 'fill="#EC4899"'; filterStyle = 'filter="url(#svg-glow-pink)"'; }
+                    else if (combo === 9) { title = 'SAVAGE'; fillStyle = 'fill="#EF4444"'; filterStyle = 'filter="url(#svg-glow-blood)"'; }
+                    else if (combo >= 10) { title = 'LEGENDARY'; fillStyle = 'fill="url(#svg-holo-gradient)"'; }
+                    
+                    return `<svg width="105" height="18" viewBox="0 0 105 18" style="overflow:visible; display:inline-block; vertical-align:middle; margin-left:6px; transform: translateZ(0); will-change: transform;"><text x="50%" y="13" text-anchor="middle" font-size="9.5" font-weight="900" letter-spacing="0.5" font-family="'Inter', sans-serif" ${fillStyle} ${filterStyle} ${scaleStr}>${title}${animateStr}</text></svg>`;
+                };
+
                 let tNow = new Date();
                 let currY = tNow.getFullYear();
                 let currM = tNow.getMonth() + 1;
-                let currAbsM = (currY * 12) + currM; // Absolute Temporal Index
+                let currAbsM = (currY * 12) + currM;
 
                 let iuranMap = {}; 
                 let talanganMap = {}; 
                 let donasiMap = {};
                 
-                // Iterasi Tunggal Pemetaan Akuntansi O(N)
                 for(let i=0; i < state.trx.length; i++) {
                     let t = state.trx[i];
                     if (t.is_deleted) continue;
@@ -1523,7 +1864,6 @@
                     }
                 }
 
-                // SURGICAL FIX: Injeksi Kapsul Waktu Arsip ke Mesin XP
                 state.anggota.forEach(ag => {
                     if(ag.arsip_iuran_map) {
                         ag.arsip_iuran_map.forEach(ym => { iuranMap[`${ag.id}-${ym}`] = 'archived'; });
@@ -1531,77 +1871,91 @@
                 });
 
                 state.anggota.forEach(ag => {
-                    let xp_kepatuhan = ag.hist_talangan_xp || 0; // Penyerapan XP Talangan Masa Lalu
-                    let xp_bonus = ag.hist_xp_bonus || 0; // Penyerapan XP Donasi Masa Lalu
-                    let current_arrears = 0;
+                    let xp_kepatuhan = ag.hist_kepatuhan_xp || 0; // SURGICAL PROTECTION: Pembekuan XP sejarah linier
+                    let xp_bonus = ag.hist_xp_bonus || 0; 
+                    let hasPastArrears = false;
 
-                    let jY = parseInt(ag.join_year) || 2000;
+                    let jY = parseInt(ag.join_year) || currY;
                     let jB = parseInt(ag.join_bln) || 1;
                     let joinAbsM = (jY * 12) + jB;
 
-                    // 1. XP Talangan Berjalan
                     for (let y = jY; y <= currY; y++) {
                         let talanganCount = talanganMap[`${ag.id}-${y}`] || 0;
-                        let cappedTalangan = Math.min(talanganCount, 5); 
-                        xp_kepatuhan += cappedTalangan * 100;
+                        xp_kepatuhan += Math.min(talanganCount, 5) * 100;
                     }
 
-                    // 2. Mesin Evaluasi Iuran Mutlak (Tahan Banting terhadap Cut-Off)
-                    for (let absM = joinAbsM; absM <= currAbsM + 12; absM++) { 
+                    // FASE LINIER: Evaluasi kepatuhan riil dari bulan bergabung s.d bulan berjalan
+                    for (let absM = joinAbsM; absM <= currAbsM; absM++) { 
                         let y = Math.floor((absM - 1) / 12);
                         let m = ((absM - 1) % 12) + 1;
                         let trx = iuranMap[`${ag.id}-${y}-${m}`];
 
-                        if (absM < currAbsM) { // Masa lalu
+                        if (absM < currAbsM) { 
                             if (!trx) {
-                                current_arrears++;
-                                xp_kepatuhan -= 75; // Mutlak hukuman nunggak menembus batas arsip
+                                hasPastArrears = true;
+                                xp_kepatuhan -= 75; 
+                            } else if (trx === 'archived') {
+                                // Perlindungan Amnesia: Data dilewati karena nilainya sudah masuk dalam pembekuan hist_kepatuhan_xp
+                                continue;
                             } else {
-                                if (trx === 'archived') {
-                                    xp_kepatuhan += 50; // Arsip mutlak dianggap On-Time (+50 XP)
-                                } else {
-                                    let tTs = new Date(trx.ts);
-                                    let trxAbsM = (tTs.getFullYear() * 12) + (tTs.getMonth() + 1);
-                                    let delay = trxAbsM - absM;
-
-                                    if (delay <= -1) xp_kepatuhan += 75;
-                                    else if (delay === 0) xp_kepatuhan += 50;
-                                    else if (delay === 1) xp_kepatuhan += 25;
-                                    else if (delay === 2) xp_kepatuhan += 15;
-                                    else if (delay === 3) xp_kepatuhan += 5;
-                                    else xp_kepatuhan += 1;
-                                }
-                            }
-                        } else if (absM === currAbsM) { // Bulan Berjalan Saat Ini
-                            if (trx) {
                                 let tTs = new Date(trx.ts);
                                 let trxAbsM = (tTs.getFullYear() * 12) + (tTs.getMonth() + 1);
                                 let delay = trxAbsM - absM;
-                                if (delay <= -1) xp_kepatuhan += 75; 
-                                else xp_kepatuhan += 50; 
+                                if (delay <= -1) xp_kepatuhan += 75;
+                                else if (delay === 0) xp_kepatuhan += 50;
+                                else if (delay === 1) xp_kepatuhan += 25;
+                                else if (delay === 2) xp_kepatuhan += 15;
+                                else if (delay === 3) xp_kepatuhan += 5;
+                                else xp_kepatuhan += 1;
                             }
-                        } else { // Bulan Depan
-                            if (trx) xp_kepatuhan += 75; 
+                        } else if (absM === currAbsM) { 
+                            if (trx && trx !== 'archived') {
+                                let tTs = new Date(trx.ts);
+                                let trxAbsM = (tTs.getFullYear() * 12) + (tTs.getMonth() + 1);
+                                if (trxAbsM < absM) xp_kepatuhan += 75; 
+                                else xp_kepatuhan += 50; 
+                            } else if (!trx) {
+                                hasPastArrears = true;
+                                xp_kepatuhan -= 75;
+                            }
                         }
                     }
 
-                    // 3. XP Donasi (Sistem Proporsional Bonus Berjalan)
-                    for (let y = jY; y <= currY; y++) {
-                        for (let m = 1; m <= 12; m++) {
-                            let donasiBulanIni = donasiMap[`${ag.id}-${y}-${m}`] || 0;
-                            if (donasiBulanIni > 0) {
-                                let xpD = Math.floor(donasiBulanIni / 10000) * 10;
-                                xp_bonus += Math.min(xpD, 500); 
+                    // FASE RADAR: Pindai Rantai Combo Masa Depan (Max 24 Bulan Whale Cap Protection)
+                    let hitunganCombo = 0;
+                    if (!hasPastArrears) {
+                        let titikPindai = currAbsM + 1;
+                        for (let langkah = 0; langkah < 24; langkah++) {
+                            let targetTahun = Math.floor((titikPindai - 1) / 12);
+                            let targetBulan = ((titikPindai - 1) % 12) + 1;
+                            let trxMasaDepan = iuranMap[`${ag.id}-${targetTahun}-${targetBulan}`];
+
+                            if (trxMasaDepan) {
+                                hitunganCombo++;
+                                xp_kepatuhan += 75; 
+                                titikPindai++;
+                            } else {
+                                break;
                             }
                         }
                     }
+
+                    for (let y = jY; y <= currY; y++) {
+                        let yearlyDonasiXP = 0;
+                        for (let m = 1; m <= 12; m++) {
+                            let donasiBulanIni = donasiMap[`${ag.id}-${y}-${m}`] || 0;
+                            if (donasiBulanIni > 0) yearlyDonasiXP += Math.floor(donasiBulanIni / 10000) * 10;
+                        }
+                        xp_bonus += Math.min(yearlyDonasiXP, 500); 
+                    }
                     
-                    if (current_arrears >= 3) xp_bonus = 0; // Hukuman Sultan Nunggak
+                    if (hasPastArrears) xp_bonus = Math.max(0, xp_bonus - 100); 
 
                     ag.xp_total = xp_kepatuhan + xp_bonus;
                     ag.is_deficit = ag.xp_total < 0;
+                    ag.advance_count = hitunganCombo;
+                    ag.has_arrears = hasPastArrears;
 
-                    // 5. Matriks Ranking KTA (Dengan Skala Batas Min/Max Untuk Relatif UI)
                     let xp = ag.xp_total;
                     if (xp < 0) { ag.rank_name = 'AFK'; ag.rank_class = 'r-afk'; ag.rank_min = -99999; ag.rank_max = 0; }
                     else if (xp <= 150) { ag.rank_name = 'WARRIOR'; ag.rank_class = 'r-warrior'; ag.rank_min = 0; ag.rank_max = 150; }
@@ -1866,8 +2220,9 @@
                                     let originalDbTrx = await new Promise(r => {
                                         const req = idb.transaction('trx', 'readonly').objectStore('trx').get(tTarget.id);
                                         req.onsuccess = e => r(e.target.result);
+                                        req.onerror = () => r(null);
                                     });
-                                    let t_update = {...originalDbTrx, is_deleted: true};
+                                    let t_update = {...(originalDbTrx || tTarget), is_deleted: true};
                                     await saveStore('trx', t_update);
                                     
                                     state.trx[idx] = t_update;
@@ -2053,6 +2408,15 @@
                     }
                 });
 
+                // SURGICAL FIX: Injeksi data arsip ke sinkronisasi peta global agar sistem tidak halusinasi tunggakan hantu di Omni-Button
+                state.anggota.forEach(ag => {
+                    if (ag.arsip_iuran_map) {
+                        ag.arsip_iuran_map.forEach(ym => {
+                            iuranMapGlobalSync[`${ag.id}-${ym}`] = true;
+                        });
+                    }
+                });
+
                 state.anggota.forEach(ag => {
                     let isBdayToday = ag.tgl_lahir && ag.tgl_lahir.endsWith(dMMDDGlobal);
                     if (isBdayToday && !isKiosk) window.systemBirthdayList.push(ag);
@@ -2148,33 +2512,8 @@
                         let joinYear = ag.join_year || 2000;
                         let isMe = (meId === ag.id);
 
-                        // Absolute Streak Engine (Advance Payer Bug Fixed)
-                        let streak = 0;
-                        let maxPaidAbsM = 0;
-                        
-                        // Pemindai pembayaran terjauh di masa depan
-                        Object.keys(iuranMapGlobal).forEach(key => {
-                            let parts = key.split('-');
-                            if (parts[0] === ag.id) {
-                                let y = parseInt(parts[1]); let m = parseInt(parts[2]);
-                                let abs = (y * 12) + m;
-                                if (abs > maxPaidAbsM) maxPaidAbsM = abs;
-                            }
-                        });
-
-                        let currAbsM = (currYearReal * 12) + currMonthReal;
-                        
-                        // Syarat streak hidup: Harus bayar minimal bulan kemarin
-                        if (maxPaidAbsM >= (currAbsM - 1)) {
-                            let checkM = maxPaidAbsM;
-                            while(true) {
-                                let y = Math.floor((checkM - 1) / 12);
-                                let m = ((checkM - 1) % 12) + 1;
-                                if(iuranMapGlobal[`${ag.id}-${y}-${m}`]) {
-                                    streak++; checkM--;
-                                } else { break; }
-                            }
-                        }
+                        // SURGICAL REVISION: Mengganti total mesin streak lama dengan sensor hitungan rantai advance dari core engine
+                        let hitunganCombo = ag.advance_count || 0;
 
                         // Rendering Label & Legacy
                         let legacyHtml = '';
@@ -2236,7 +2575,8 @@
                                 }
                             }
 
-                            let rText = ag.is_deficit ? `<span style="color:var(--danger)">AFK ${ag.xp_total} XP</span>` : `⚔️ ${ag.rank_name} (${ag.xp_total} XP) <span style="color:#F59E0B; margin-left: 6px;"> ${streak} Streak</span>`;
+                            let badgeComboSvg = window.getSvgBadge ? window.getSvgBadge(hitunganCombo) : '';
+                            let rText = ag.is_deficit ? `<span style="color:var(--danger)">AFK ${ag.xp_total} XP</span>` : `⚔️ ${ag.rank_name} (${ag.xp_total} XP) ${badgeComboSvg}`;
                             let bCol = ag.is_deficit ? 'border-color: var(--danger);' : (ag.xp_total > 4000 ? 'border-color: #F59E0B;' : 'border-color: transparent;');
                             let bdayGlowStyle = isBdayToday ? 'animation: bdayPulse 1.5s infinite alternate; border-color: #FBBF24 !important;' : '';
 
@@ -2279,9 +2619,15 @@
                                     bgColor = 'linear-gradient(180deg, #F87171 0%, #EF4444 100%)';
                                     innerShadow = 'box-shadow: inset 0 2px 4px rgba(255,255,255,0.3);';
                                 }
+
                                 if (idTrx && isFuture) {
-                                    bgColor = 'linear-gradient(180deg, #FBBF24 0%, #F59E0B 100%)'; 
-                                    innerShadow = 'box-shadow: inset 0 2px 4px rgba(255,255,255,0.5);';
+                                    if (ag.has_arrears) {
+                                        bgColor = 'linear-gradient(180deg, #F97316 0%, #EA580C 100%)'; // Warning Orange
+                                        innerShadow = 'box-shadow: inset 0 2px 4px rgba(255,255,255,0.3);';
+                                    } else {
+                                        bgColor = 'linear-gradient(180deg, #FBBF24 0%, #F59E0B 100%)'; // Glowing Gold
+                                        innerShadow = 'box-shadow: inset 0 2px 4px rgba(255,255,255,0.5);';
+                                    }
                                 }
 
                                 let isCurrent = (y === currYearReal && i === currMonthReal);
@@ -2291,7 +2637,8 @@
                                 gridBoxes += `<div style="flex: 1; height: 12px; border-radius: 4px; background: ${bgColor}; ${innerShadow} ${activeFx} transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);" title="${bNames[i-1]}"></div>`;
                             }
 
-                            let rText = ag.is_deficit ? `<span style="color:var(--danger)">AFK ${ag.xp_total} XP</span>` : `⚔️ <span style="color:var(--text-muted);">${ag.rank_name}</span> <span style="color:var(--primary); font-weight:900;">(${ag.xp_total} XP)</span> <span style="color:#F59E0B; margin-left: 6px;"> ${streak} Streak</span>`;
+                            let badgeComboSvg = window.getSvgBadge ? window.getSvgBadge(hitunganCombo) : '';
+                            let rText = ag.is_deficit ? `<span style="color:var(--danger)">AFK ${ag.xp_total} XP</span>` : `⚔️ <span style="color:var(--text-muted);">${ag.rank_name}</span> <span style="color:var(--primary); font-weight:900;">(${ag.xp_total} XP)</span> ${badgeComboSvg}`;
                             let bCol = isMe ? 'border: 2px solid var(--primary); background: #F8FAFC; box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.15); transform: scale(1.01); order: -1;' : (ag.is_deficit ? 'border: 1.5px solid var(--danger); box-shadow: 0 0 15px rgba(239,68,68,0.1); background: var(--surface); opacity: 0.95;' : 'border: 1.5px solid var(--border); background: var(--surface);');
                             let bdayGlowStylePublic = isBdayToday ? 'animation: bdayPulse 1.5s infinite alternate; border-color: #FBBF24 !important;' : '';
                             
@@ -2336,16 +2683,54 @@
                     let topHof = hofScores.slice(0, 4).filter(h => h.score > 0);
                     
                     if(topHof.length > 0) {
-                        let hofHtml = '';
-                        let medals = ['🥇', '🥈', '🥉', '🎖️'];
+                        // SURGICAL FIX: Sembunyikan judul hardcoded agar tidak double title dengan Tombol Bento
+                        let container = document.getElementById('hall-of-fame-container');
+                        if (container && container.firstElementChild) container.firstElementChild.style.display = 'none';
+
+                        let hofHtml = `
+                        <div class="no-select" style="background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); border: 1.5px solid #FDE68A; border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(217, 119, 6, 0.05); cursor: pointer; position: relative; overflow: hidden; transition: 0.2s;" onclick="let b = document.getElementById('hof-cards-wrap'); let i = document.getElementById('hof-chevron'); if(b.style.display==='none'){b.style.display='flex'; i.style.transform='rotate(180deg)';}else{b.style.display='none'; i.style.transform='rotate(0deg)';}">
+                            <div style="position: absolute; right: -15px; top: -15px; opacity: 0.15; transform: rotate(15deg); pointer-events: none;">
+                                <svg width="80" height="80" viewBox="0 0 24 24" fill="#FDE68A" stroke="#D97706" stroke-width="2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+                            </div>
+                            <div style="display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 2;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 38px; height: 38px; background: #FEF3C7; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1.5px solid #FCD34D; box-shadow: 0 2px 4px rgba(217,119,6,0.1);">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="#FDE68A" stroke="#D97706" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 10px; font-weight: 900; color: #B45309; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;">Apresiasi Teladan</div>
+                                        <div style="font-size: 13px; font-weight: 900; color: #92400E;">Lihat ${topHof.length} Anggota MVP</div>
+                                    </div>
+                                </div>
+                                <div style="color: #92400E; background: rgba(255,255,255,0.5); border-radius: 50%; padding: 4px; display: flex; align-items: center; justify-content: center;">
+                                    <svg id="hof-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="hof-cards-wrap" style="display: none; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 8px;">`;
+                        
+                        let rStyle = [
+                            { bg: 'linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)', border: '#FDE68A', tM: '#92400E', tS: '#B45309', fill: '#FDE68A', stroke: '#D97706', lbl: '1ST MVP' },
+                            { bg: 'linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%)', border: '#E2E8F0', tM: '#334155', tS: '#64748B', fill: '#E2E8F0', stroke: '#64748B', lbl: '2ND MVP' },
+                            { bg: 'linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%)', border: '#FED7AA', tM: '#9A3412', tS: '#C2410C', fill: '#FED7AA', stroke: '#C2410C', lbl: '3RD MVP' },
+                            { bg: 'linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)', border: '#A7F3D0', tM: '#065F46', tS: '#059669', fill: '#A7F3D0', stroke: '#059669', lbl: 'ELITE' }
+                        ];
                         topHof.forEach((h, i) => {
+                            let s = rStyle[i] || rStyle[3];
                             hofHtml += `
-                            <div class="hof-card">
-                                <div style="font-size:24px; margin-bottom:4px;">${medals[i]||'🎖️'}</div>
-                                <div style="font-size:12px; font-weight:900; color:#92400E; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:110px; margin:0 auto;">${esc(h.nama)}</div>
-                                <div style="font-size:10px; font-weight:700; color:#B45309; margin-top:2px;">LUNAS ${h.score} BULAN</div>
+                            <div class="no-select" style="flex: 0 0 130px; scroll-snap-align: start; background: ${s.bg}; border: 1.5px solid ${s.border}; border-radius: 16px; padding: 16px 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.04); display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; overflow: hidden;">
+                                <div style="position: absolute; top: -15px; right: -15px; opacity: 0.15; transform: rotate(15deg); pointer-events: none;">
+                                    <svg width="70" height="70" viewBox="0 0 24 24" fill="${s.fill}" stroke="${s.stroke}" stroke-width="2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+                                </div>
+                                <div style="margin-bottom: 10px; position: relative; z-index: 2;">
+                                    <svg width="34" height="34" viewBox="0 0 24 24" fill="${s.fill}" stroke="${s.stroke}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+                                </div>
+                                <div style="font-size: 10px; font-weight: 900; color: ${s.tS}; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; position: relative; z-index: 2;">${s.lbl}</div>
+                                <div style="font-size: 14px; font-weight: 900; color: ${s.tM}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; margin-bottom: 12px; position: relative; z-index: 2;">${esc(h.nama)}</div>
+                                <div style="background: rgba(255,255,255,0.7); border-radius: 8px; padding: 6px; font-size: 10px; font-weight: 900; color: ${s.tM}; border: 1px solid ${s.border}; width: 100%; position: relative; z-index: 2; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">LUNAS ${h.score} BLN</div>
                             </div>`;
                         });
+                        hofHtml += '</div>';
                         document.getElementById('hof-list').innerHTML = hofHtml;
                         document.getElementById('hall-of-fame-container').style.display = 'block';
                     } else {
@@ -2536,19 +2921,21 @@
                 <div style="position: absolute; bottom: -50px; right: -50px; width: 150px; height: 150px; background: rgba(16, 185, 129, 0.15); filter: blur(30px); border-radius: 50%;"></div>
                 
                 <input type="file" id="logo-upload" accept="image/*" class="hidden" onchange="handleLogoUpload(event)">
+
                 <div class="logo-wrapper kiosk-hide" style="margin-bottom: 20px; position: relative; z-index: 2; display: flex; justify-content: center;" onclick="document.getElementById('logo-upload').click()" title="Ketuk untuk mengubah logo">
                     <!-- SURGICAL FIX: Cincin Holografik & mix-blend-mode untuk memusnahkan background hitam -->
                     <div style="width: 140px; height: 140px; background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); border-radius: 50%; padding: 3px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);">
-                        <div style="background: #0F172A; width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);">
-                            <img src="icon-512.png" alt="Logo Navasena" class="prof-logo-img" id="prof-logo-img" onerror="this.style.display='none'; document.getElementById('prof-logo-fb').style.display='flex';" style="width: 75%; height: 75%; object-fit: contain; margin: 0; mix-blend-mode: screen; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); transform: none;">
+                        <div style="background: #0F172A; width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: visible; border: 1px solid rgba(255,255,255,0.2);">
+                            <img src="icon-512.png" alt="Logo Navasena" class="prof-logo-img" id="prof-logo-img" onerror="this.style.display='none'; document.getElementById('prof-logo-fb').style.display='flex';" style="width: 115%; height: 115%; object-fit: contain; margin: 0; mix-blend-mode: screen; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); transform: none;">
                             <div class="prof-logo-fallback" id="prof-logo-fb" style="display:none; width: 100%; height: 100%; border: none; margin: 0; align-items: center; justify-content: center;">N</div>
                         </div>
                     </div>
                 </div>
+
                 <div class="guest-only" style="margin-bottom: 20px; position: relative; z-index: 2; display: flex; justify-content: center;">
                     <div style="width: 140px; height: 140px; background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); border-radius: 50%; padding: 3px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);">
-                        <div style="background: #0F172A; width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);">
-                            <img src="icon-512.png" alt="Logo Navasena" class="prof-logo-img guest-logo-img" onerror="this.style.display='none'; document.getElementById('guest-logo-fb').style.display='flex';" style="width: 75%; height: 75%; object-fit: contain; margin: 0; mix-blend-mode: screen; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); transform: none;">
+                        <div style="background: #0F172A; width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: visible; border: 1px solid rgba(255,255,255,0.2);">
+                            <img src="icon-512.png" alt="Logo Navasena" class="prof-logo-img guest-logo-img" onerror="this.style.display='none'; document.getElementById('guest-logo-fb').style.display='flex';" style="width: 115%; height: 115%; object-fit: contain; margin: 0; mix-blend-mode: screen; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); transform: none;">
                             <div class="prof-logo-fallback guest-logo-fb" id="guest-logo-fb" style="display:none; width: 100%; height: 100%; border: none; margin: 0; align-items: center; justify-content: center;">N</div>
                         </div>
                     </div>
@@ -2571,7 +2958,7 @@
                     <div id="kta-rank-shield" class="rank-shield r-warrior" style="position:absolute; top: 10px; right: 10px; width:100px; height:100px; z-index:2; filter:drop-shadow(0 15px 25px rgba(0,0,0,0.9)); transform: translateZ(0); transition: background-image 0.5s ease;"></div>
                     
                     <div style="position: relative; z-index: 3; display: flex; flex-direction: column; height: 100%; min-height: 180px; justify-content: space-between;">
-                        <div style="font-size: 9px; font-weight: 900; letter-spacing: 2px; color: rgba(255,255,255,0.85); text-transform: uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">NAVASENA EXECUTIVE PASS</div>
+                        <div style="font-size: 9px; font-weight: 900; letter-spacing: 2px; color: rgba(255,255,255,0.85); text-transform: uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.8);"><span class="font-nasa" style="font-size: 1.2em;">NAVASENA</span> EXECUTIVE PASS</div>
                         <div style="margin-top: 28px; margin-bottom: 24px; max-width: 65%; overflow: hidden;">
                             <h2 id="kta-nama" style="font-size: 20px; font-weight: 900; color: #FFFFFF; letter-spacing: -0.5px; line-height: 1.2; text-shadow: 0 4px 12px rgba(0,0,0,0.9); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase;">NAMA ANGGOTA</h2>
                             <div id="kta-jabatan" style="font-size: 8.5px; font-weight: 800; color: #FBBF24; text-transform: uppercase; letter-spacing: 1.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">ANGGOTA AKTIF</div>
@@ -2612,24 +2999,9 @@
             <!-- PREMIUM SETTINGS LIST (IOS STYLE) -->
             <div id="profil-admin-settings" class="kiosk-hide">
 
-                <!-- GRUP 1: PELAPORAN & EKSPOR -->
-                <label style="font-size: 10.5px; font-weight: 800; color: #94A3B8; text-transform: uppercase; margin-bottom: 6px; display: block; padding-left: 16px; letter-spacing: 0.5px;">Pelaporan & Ekspor</label>
-                <div class="ios-group no-select" style="border-radius: 16px; margin-bottom: 24px;">
-                    <button class="ios-item" onclick="generateLPJ()">
-                        <div class="ios-icon" style="background: transparent; color: #334155;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
-                        <span style="flex: 1;">Cetak Laporan PDF (LPJ)</span>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                    </button>
-                    <button class="ios-item" onclick="exportExcel()">
-                        <div class="ios-icon" style="background: transparent; color: #334155;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
-                        <span style="flex: 1;">Save Laporan (Excel)</span>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                    </button>
-                </div>
-
-                <!-- GRUP 2: MANAJEMEN SISTEM -->
+                <!-- GRUP 1: MANAJEMEN SISTEM (REPOSISI KE ATAS) -->
                 <label style="font-size: 10.5px; font-weight: 800; color: #94A3B8; text-transform: uppercase; margin-bottom: 6px; display: block; padding-left: 16px; letter-spacing: 0.5px;">Manajemen Sistem</label>
-                <div class="ios-group no-select" style="border-radius: 16px; margin-bottom: 32px;">
+                <div class="ios-group no-select" style="border-radius: 16px; margin-bottom: 24px;">
                     <button class="ios-item" onclick="openModal('mod-settings')">
                         <div class="ios-icon" style="background: transparent; color: #334155;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></div>
                         <span style="flex: 1;">Konfigurasi Sistem</span>
@@ -2647,21 +3019,74 @@
                     </button>
                 </div>
 
-                <!-- GRUP 3: ZONA KRITIS -->
-                <label style="font-size: 10.5px; font-weight: 800; color: #94A3B8; text-transform: uppercase; margin-bottom: 6px; display: block; padding-left: 16px; letter-spacing: 0.5px;">Zona Kritis</label>
-                <div class="ios-group no-select" style="border-radius: 16px; margin-bottom: 24px; border: 1.5px solid rgba(220, 38, 38, 0.2);">
-                    <button class="ios-item" onclick="openRecycleBin()">
-                        <div class="ios-icon" style="background: transparent; color: #DC2626;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div>
-                        <span style="color: #DC2626; flex: 1;">Keranjang Sampah</span>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FECACA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                    </button>
-                    <button class="ios-item" onclick="cutOffYear()">
-                        <div class="ios-icon" style="background: transparent; color: #DC2626;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-                        <span style="color: #DC2626; flex: 1;">Tutup Buku Tahunan</span>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FECACA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                    </button>
+                <!-- GRUP 2: PELAPORAN & EKSPOR (BENTO BOX ACCORDION) -->
+                <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 32px;" class="no-select">
+                    <!-- Trigger Header -->
+                    <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="let b = document.getElementById('pelaporan-body'); let i = document.getElementById('pelaporan-icon'); if(b.style.display === 'none'){ b.style.display = 'block'; i.style.transform = 'rotate(180deg)'; } else { b.style.display = 'none'; i.style.transform = 'rotate(0deg)'; }">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="color: var(--primary); display: flex; align-items: center;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                            </div>
+                            <b style="font-size: 14px; color: var(--text-main); letter-spacing: 0.5px; text-transform: uppercase;">PELAPORAN & EKSPOR</b>
+                        </div>
+                        <div style="color: var(--text-muted); display: flex; align-items: center;">
+                            <svg id="pelaporan-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                    </div>
+                    <!-- Hidden Body -->
+                    <div id="pelaporan-body" style="display: none; border-top: 1.5px solid var(--border); background: var(--bg);">
+                        <div class="ios-group" style="border-radius: 0; margin-bottom: 0; border: none; box-shadow: none;">
+                            <button class="ios-item" onclick="generateLPJ()" style="border-bottom: 1px solid var(--border);">
+                                <div class="ios-icon" style="background: transparent; color: #334155;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
+                                <span style="flex: 1;">Cetak Laporan PDF (LPJ)</span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                            </button>
+                            <button class="ios-item" onclick="exportExcel()">
+                                <div class="ios-icon" style="background: transparent; color: #334155;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+                                <span style="flex: 1;">Save Laporan (Excel)</span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GRUP 3: ZONA KRITIS (ACCORDION ENCAPSULATION) -->
+                <div style="background: var(--surface); border: 1.5px solid rgba(220, 38, 38, 0.3); border-radius: 16px; box-shadow: 0 4px 10px rgba(220, 38, 38, 0.05); overflow: hidden; margin-bottom: 24px;" class="no-select">
+                    <!-- Trigger Header -->
+                    <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: #FEF2F2; transition: background 0.2s;" onclick="let b = document.getElementById('zona-kritis-body'); let i = document.getElementById('zona-kritis-icon'); if(b.style.display === 'none'){ b.style.display = 'block'; i.style.transform = 'rotate(180deg)'; } else { b.style.display = 'none'; i.style.transform = 'rotate(0deg)'; }">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="color: #DC2626; display: flex; align-items: center;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            </div>
+                            <b style="font-size: 14px; color: #DC2626; letter-spacing: 0.5px;">ZONA KRITIS</b>
+                        </div>
+                        <div style="color: #DC2626; display: flex; align-items: center;">
+                            <svg id="zona-kritis-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                    </div>
+                    <!-- Hidden Body -->
+                    <div id="zona-kritis-body" style="display: none; border-top: 1.5px solid rgba(220, 38, 38, 0.2); background: var(--bg);">
+                        <div class="ios-group" style="border-radius: 0; margin-bottom: 0; border: none; box-shadow: none;">
+                            <button class="ios-item" onclick="openRecycleBin()" style="border-bottom: 1px solid rgba(220, 38, 38, 0.1);">
+                                <div class="ios-icon" style="background: transparent; color: #DC2626;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div>
+                                <span style="color: #DC2626; flex: 1;">Keranjang Sampah</span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FECACA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                            </button>
+                            <button class="ios-item" onclick="cutOffYear()">
+                                <div class="ios-icon" style="background: transparent; color: #DC2626;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+                                <span style="color: #DC2626; flex: 1;">Tutup Buku Tahunan</span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FECACA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <!-- THE PUBLIC TRUST CENTER (INJEKSI 3 IDE BRILIAN) -->
+            <div id="warga-mading-ui" class="guest-only" style="display:none; margin-bottom: 24px;"></div>
+            <div id="warga-honorary-ui" class="guest-only" style="display:none; margin-bottom: 24px;"></div>
+            <div id="warga-desk-ui" class="no-select" style="display:none; margin-bottom: 24px;"></div>
+
             
             <!-- BUTTONS GLOBAL (PANDUAN & AKSES) -->
             <div style="position: relative; z-index: 10; display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; width: 100%;">
@@ -2732,6 +3157,26 @@
         <!-- CORE MODALS (SYSTEM & UTILITIES)      -->
         <!-- ===================================== -->
         
+        <!-- MODAL DIREKTORI PENGURUS -->
+        <div id="mod-direktori" class="modal">
+            <div class="modal-box" style="background: var(--bg); padding: 0; display: flex; flex-direction: column; max-height: 85vh;">
+                <div style="background: var(--surface); padding: 20px 24px 16px 24px; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border); border-radius: 24px 24px 0 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 style="font-size: 18px; font-weight: 900; color: var(--primary); display: flex; align-items: center; gap: 8px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            Direktori Pengurus
+                        </h3>
+                        <button class="close-modal" style="position: static;" onclick="closeModal('mod-direktori')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                    </div>
+                    <div style="position: relative;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%);"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" id="search-direktori" placeholder="Cari divisi atau nama..." style="padding-left: 40px; background: #F1F5F9; border: none; border-radius: 12px; font-size: 14px;" oninput="if(window.dirTo) clearTimeout(window.dirTo); window.dirTo = setTimeout(() => filterDirektori(this.value), 300);">
+                    </div>
+                </div>
+                <div id="direktori-list" style="padding: 20px 24px; overflow-y: auto; flex: 1;"></div>
+            </div>
+        </div>
+
         <!-- SELECT MODAL -->
         <div id="mod-select" class="modal">
             <div class="modal-box">
@@ -2754,6 +3199,25 @@
                 </div>
             </div>
         </div>
+
+        <!-- CUSTOM INPUT PROMPT MODAL -->
+        <div id="mod-input-prompt" class="modal" style="z-index: 4060;">
+            <div class="modal-box" style="text-align: center; max-width: 320px; padding: 32px 24px;">
+                <div style="margin: 0 auto 20px auto; width: 52px; height: 52px; background: var(--primary-light); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(30, 58, 138, 0.15);">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                </div>
+                <h3 id="prompt-title" style="font-size: 18px; font-weight: 900; color: var(--text-main); margin-bottom: 8px;">Input Data</h3>
+                <p id="prompt-desc" style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 24px;">Keterangan</p>
+                <div class="form-group" style="margin-bottom: 24px; text-align: left;">
+                    <input type="text" id="prompt-input-val" placeholder="Ketik di sini..." style="text-align: center; font-size: 16px; font-weight: 800; border-radius: 12px; padding: 16px;" onkeyup="if(event.key === 'Enter') document.getElementById('prompt-btn-save').click();">
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn btn-outline no-select" style="flex:1; padding: 12px; font-size: 13px;" onclick="closeModal('mod-input-prompt')">Batal</button>
+                    <button class="btn btn-primary no-select" id="prompt-btn-save" style="flex:1; padding: 12px; font-size: 13px; box-shadow: 0 4px 10px rgba(30, 58, 138, 0.3);">Terapkan</button>
+                </div>
+            </div>
+        </div>
+
 
         <!-- MODAL ANGGOTA (MASTER DATA - TABBED UI) -->
         <div id="mod-anggota" class="modal">
@@ -2818,8 +3282,9 @@
                             <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Status Organisasi</div>
                             
                             <div class="form-group" style="margin-bottom: 16px;">
-                                <label>Label / Jabatan <span style="font-weight: 600; color: var(--text-muted);">(Opsional)</span></label>
-                                <input type="text" id="ang-label" placeholder="Contoh: Ketua, Bendahara, Warga..." style="border-radius: 10px; background: var(--bg);">
+                                <label style="color: var(--primary);">Label / Jabatan Resmi</label>
+                                <input type="hidden" id="ang-label-val" value="">
+                                <div id="ang-label-btn" class="custom-select" style="background: var(--bg); border-color: var(--border); color: var(--text-main);" onclick="openLabelSelect()">-- Pilih Jabatan --</div>
                             </div>
                             
                             <div class="form-group" style="margin-bottom: 0;">
@@ -2895,7 +3360,7 @@
                     
 <div class="seg-control no-select" style="margin-bottom: 16px; background: #F1F5F9; border: 1px solid #E2E8F0; padding: 4px;">
                         <button class="seg-btn seg-set active" style="font-size: 11px; padding: 10px 4px;" onclick="document.getElementById('set-tab-1').style.display='block'; document.getElementById('set-tab-2').style.display='none'; document.getElementById('set-tab-3').style.display='none'; document.querySelectorAll('.seg-set').forEach(b=>b.classList.remove('active')); this.classList.add('active');">Kas & Dompet</button>
-                        <button class="seg-btn seg-set" style="font-size: 11px; padding: 10px 4px;" onclick="document.getElementById('set-tab-1').style.display='none'; document.getElementById('set-tab-2').style.display='block'; document.getElementById('set-tab-3').style.display='none'; document.querySelectorAll('.seg-set').forEach(b=>b.classList.remove('active')); this.classList.add('active');">Mutasi</button>
+                        <button class="seg-btn seg-set" style="font-size: 11px; padding: 10px 4px;" onclick="document.getElementById('set-tab-1').style.display='none'; document.getElementById('set-tab-2').style.display='block'; document.getElementById('set-tab-3').style.display='none'; document.querySelectorAll('.seg-set').forEach(b=>b.classList.remove('active')); this.classList.add('active');">Label</button>
                         <button class="seg-btn seg-set" style="font-size: 11px; padding: 10px 4px;" onclick="document.getElementById('set-tab-1').style.display='none'; document.getElementById('set-tab-2').style.display='none'; document.getElementById('set-tab-3').style.display='block'; document.querySelectorAll('.seg-set').forEach(b=>b.classList.remove('active')); this.classList.add('active');">Keamanan</button>
                     </div>
                 </div>
@@ -2940,7 +3405,7 @@
                                     <label style="margin-bottom: 0; font-size: 12px; color: var(--text-main); display: flex; align-items: center; gap: 6px;"><div style="width: 8px; height: 8px; border-radius: 50%; background: #10B981;"></div> Dana Masuk</label>
                                     <span style="font-size: 9px; font-weight: 700; color: #94A3B8; background: #F1F5F9; padding: 2px 6px; border-radius: 4px;">Pemisah: Koma ( , )</span>
                                 </div>
-                                <textarea id="set-kat-masuk" rows="3" style="line-height: 1.6; font-size: 13px; font-weight: 600; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.03); resize: none;">Donasi, Sponsor, Iuran Anggota, Kas, Hamba Allah</textarea>
+                                <textarea id="set-kat-masuk" rows="3" style="line-height: 1.6; font-size: 13px; font-weight: 600; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.03); resize: none;">Donasi, Sponsor,</textarea>
                             </div>
                             
                             <div class="form-group" style="margin-bottom: 4px;">
@@ -2948,7 +3413,19 @@
                                     <label style="margin-bottom: 0; font-size: 12px; color: var(--text-main); display: flex; align-items: center; gap: 6px;"><div style="width: 8px; height: 8px; border-radius: 50%; background: #EF4444;"></div> Dana Keluar</label>
                                     <span style="font-size: 9px; font-weight: 700; color: #94A3B8; background: #F1F5F9; padding: 2px 6px; border-radius: 4px;">Pemisah: Koma ( , )</span>
                                 </div>
-                                <textarea id="set-kat-keluar" rows="3" style="line-height: 1.6; font-size: 13px; font-weight: 600; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.03); resize: none;">Operasional, Konsumsi, Darurat, Belanja Alat, Lainnya</textarea>
+                                
+                                <textarea id="set-kat-keluar" rows="3" style="line-height: 1.6; font-size: 13px; font-weight: 600; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.03); resize: none;">Operasional, Konsumsi, HUT RI</textarea>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 4px; padding-top: 16px; border-top: 1px dashed var(--border);">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px;">
+                                    <label style="margin-bottom: 0; font-size: 12px; color: var(--primary); display: flex; align-items: center; gap: 6px;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                        Hierarki Jabatan Resmi
+                                    </label>
+                                    <span style="font-size: 9px; font-weight: 700; color: #94A3B8; background: #F1F5F9; padding: 2px 6px; border-radius: 4px;">Pemisah: Koma ( , )</span>
+                                </div>
+                                <textarea id="set-jabatan-list" rows="3" style="line-height: 1.6; font-size: 13px; font-weight: 600; background: var(--primary-light); border: 1.5px solid rgba(59, 130, 246, 0.3); color: var(--primary); border-radius: 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); resize: none;">Ketum NAVASENA, Sekretaris Jenderal, Bendahara Umum, Koordinator Humas, Admin Medsos</textarea>
                             </div>
                         </div>
                     </div>
@@ -3050,10 +3527,11 @@
         <div id="mod-identity" class="modal" style="background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 99999;">
             <div class="modal-box no-select" style="overflow: visible; margin-top: 25px; background: linear-gradient(180deg, #1E293B 0%, #0F172A 100%); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 28px; text-align: center; max-width: 340px; display: flex; flex-direction: column; align-items: center; padding: 60px 24px 24px 24px; position: relative; box-shadow: 0 40px 80px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1);">
                 <div style="position: absolute; top: -65px; left: 50%; transform: translateX(-50%); width: 140px; height: 140px; background: rgba(59, 130, 246, 0.3); filter: blur(25px); border-radius: 50%; z-index: 0;"></div>
+
                 <div style="position: absolute; top: -60px; left: 50%; transform: translateX(-50%); width: 120px; height: 120px; background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); border-radius: 50%; padding: 3px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6); z-index: 1;">
-                    <div style="background: #0F172A; width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);">
-                        <!-- SURGICAL FIX: width 75% agar tidak full, mix-blend-mode untuk memusnahkan background hitam -->
-                        <img src="icon-512.png" alt="Logo" style="width: 75%; height: 75%; object-fit: contain; mix-blend-mode: screen; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div style="background: #0F172A; width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: visible; border: 1px solid rgba(255,255,255,0.2);">
+                        <!-- SURGICAL FIX: width 115% & overflow visible agar logo meluap menutupi lingkaran biru -->
+                        <img src="icon-512.png" alt="Logo" style="width: 115%; height: 115%; object-fit: contain; mix-blend-mode: screen; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <div style="display:none; font-weight: 900; font-size: 58px; color: #38BDF8;">N</div>
                     </div>
                 </div>
@@ -3061,7 +3539,7 @@
                 <div style="margin-top: 8px; width: 100%; position: relative; z-index: 2;">
                     <div id="ident-title" style="font-size: 18px; font-weight: 900; color: #FFFFFF; letter-spacing: 2px; margin-bottom: 2px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); text-transform: uppercase;">PORTAL</div>
                     <h3 class="font-nasa" style="font-size: 28px; color: #FFFFFF; letter-spacing: 1.5px; margin-bottom: 8px; text-shadow: 0 4px 10px rgba(0,0,0,0.5);">NAVASENA<sup style="font-size: 12px; margin-left: -3px; letter-spacing: 0;">®</sup></h3>
-                    <p style="font-size: 10px; font-weight: 800; color: #38BDF8; margin-bottom: 32px; letter-spacing: 2px; text-transform: uppercase;">Executive Access</p>
+                    <p style="font-size: 10px; font-weight: 800; color: #38BDF8; margin-bottom: 32px; letter-spacing: 2px; text-transform: uppercase;">Dk. Kestalan 05</p>
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 16px; width: 100%; position: relative; z-index: 2;">
@@ -3071,7 +3549,7 @@
                         </div>
                         <div style="text-align: left; flex: 1;">
                             <div style="font-size: 15px; font-weight: 900; color: #FFFFFF; margin-bottom: 2px; letter-spacing: -0.3px;">ANGGOTA</div>
-                            <div style="font-size: 10px; font-weight: 700; color: #BFDBFE; letter-spacing: 0.5px;">NAVASENA</div>
+                            <div class="font-nasa" style="font-size: 11px; color: #BFDBFE; letter-spacing: 1px;">NAVASENA</div>
                         </div>
                         <div style="background: rgba(255,255,255,0.1); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
@@ -3246,17 +3724,34 @@
                 closeModal('mod-confirm');
             }
 
+            function openCustomPrompt(title, desc, placeholder, onConfirm) {
+                document.getElementById('prompt-title').innerText = title;
+                document.getElementById('prompt-desc').innerText = desc;
+                
+                let inp = document.getElementById('prompt-input-val');
+                inp.placeholder = placeholder;
+                inp.value = ''; // Bersihkan sisa input sebelumnya
+                
+                let btnSave = document.getElementById('prompt-btn-save');
+                btnSave.onclick = function() {
+                    let val = inp.value.trim();
+                    if (!val) return showToast("⚠️ Gagal: Teks tidak boleh kosong!");
+                    if (onConfirm) onConfirm(val);
+                    closeModal('mod-input-prompt');
+                };
+                
+                openModal('mod-input-prompt');
+                setTimeout(() => inp.focus(), 300); // Fokus otomatis ke keyboard
+            }
+
             let selectCallback = null;
             function openSelectModal(title, options, selectedVal, callback) {
+
                 let modSelect = document.getElementById('mod-select');
                 let closeBtn = modSelect.querySelector('.close-modal');
-                if (title.includes('Pilih Nama Anda')) { 
-                    if (closeBtn) closeBtn.style.display = 'none';
-                    modSelect.onclick = null;
-                } else {
-                    if (closeBtn) closeBtn.style.display = 'flex';
-                    modSelect.onclick = function(event) { if(event.target === this) closeModal('mod-select'); };
-                }
+                
+                if (closeBtn) closeBtn.style.display = 'flex';
+                modSelect.onclick = function(event) { if(event.target === this) closeModal('mod-select'); };
                 
                 document.getElementById('select-title').innerText = title;
                 
@@ -3299,10 +3794,12 @@
                 } else if (id === 'mod-anggota') {
                     resetAnggotaForm();
                     renderListAnggota();
+
                 } else if (id === 'mod-settings') {
                     document.getElementById('set-iuran-nom').value = fmtRp(getSetting('iuran_nom', 10000));
-                    document.getElementById('set-kat-masuk').value = getSetting('kat_masuk', 'Donasi, Sponsor, Iuran Anggota, Kas, Hamba Allah');
-                    document.getElementById('set-kat-keluar').value = getSetting('kat_keluar', 'Operasional, Konsumsi, Darurat, Belanja Alat, Lainnya');
+                    document.getElementById('set-kat-masuk').value = getSetting('kat_masuk', 'Donasi, Sponsor,');
+                    document.getElementById('set-kat-keluar').value = getSetting('kat_keluar', 'Operasional, Konsumsi, HUT RI');
+                    document.getElementById('set-jabatan-list').value = getSetting('jabatan_list', 'Ketum NAVASENA, Sekretaris Jenderal, Bendahara Umum, Koordinator Humas, Admin Medsos');
                     if(document.getElementById('set-pin-baru')) document.getElementById('set-pin-baru').value = '';
                 } else if (id === 'mod-tutorial') {
                     const sopAdmin = document.getElementById('sop-admin');
@@ -3347,7 +3844,7 @@
                 
                 let n = document.getElementById('ang-nama').value.trim();
                 let w = document.getElementById('ang-wa').value.replace(/\D/g, '');
-                let lbl = document.getElementById('ang-label').value.trim();
+                let lbl = document.getElementById('ang-label-val').value.trim();
                 
                 let tlTgl = document.getElementById('ang-tl-tgl').value.padStart(2, '0');
                 let tlBln = document.getElementById('ang-tl-bln-val').value.padStart(2, '0');
@@ -3420,7 +3917,13 @@
                 if(phoneVal.startsWith('62')) phoneVal = phoneVal.substring(2);
                 document.getElementById('ang-wa').value = phoneVal;
                 
-                document.getElementById('ang-label').value = ag.label || '';
+                let currentLabel = ag.label ? ag.label.replace(/\s+/g, ' ').trim() : '';
+                let jArr = getSetting('jabatan_list', 'Ketum NAVASENA, Sekretaris Jenderal, Bendahara Umum, Koordinator Humas, Admin Medsos').split(',').map(s=>s.replace(/\s+/g, ' ').trim()).filter(s=>s!=='');
+                if (currentLabel && !jArr.find(j => j.toLowerCase() === currentLabel.toLowerCase())) {
+                    jArr.push(`[Legacy] ${currentLabel}`);
+                }
+                document.getElementById('ang-label-val').value = currentLabel;
+                document.getElementById('ang-label-btn').innerText = currentLabel || '-- Pilih Jabatan --';
                 
                 if (ag.tgl_lahir) {
                     let parts = ag.tgl_lahir.split('-');
@@ -3465,7 +3968,8 @@
                 document.getElementById('ang-id').value = '';
                 document.getElementById('ang-nama').value = '';
                 document.getElementById('ang-wa').value = '';
-                document.getElementById('ang-label').value = '';
+                document.getElementById('ang-label-val').value = '';
+                document.getElementById('ang-label-btn').innerText = '-- Pilih Jabatan --';
                 document.getElementById('ang-tl-tgl').value = '';
                 document.getElementById('ang-tl-bln-val').value = '';
                 document.getElementById('ang-tl-bln-btn').innerText = 'Bulan';
@@ -3686,9 +4190,6 @@
                                 pjControlHtml += `
                                 <div style="display:flex; justify-content:space-between; align-items:center; padding: 14px 0; border-bottom: 1px solid #E2E8F0;">
                                     <div style="display:flex; align-items:center; gap: 14px; flex: 1; min-width: 0;">
-                                        <div style="width: 36px; height: 36px; border-radius: 10px; background: #F1F5F9; color: #3B82F6; display: flex; align-items: center; justify-content: center; flex-shrink:0;">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                                        </div>
                                         <div style="flex: 1; min-width: 0;">
                                             <div style="font-size:13px; font-weight:800; color:#0F172A; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(pjAg ? pjAg.nama : 'Panitia')}</div>
                                             <div style="font-size:10px; font-weight:600; color:#64748B; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(purposeText)}</div>
@@ -3938,9 +4439,11 @@
             function saveSettings() {
                 if(isKiosk) return showToast("DITOLAK: Sistem Terkunci dalam Mode Audit.");
                 let newIuran = getRawRp(document.getElementById('set-iuran-nom').value);
+
                 setSetting('iuran_nom', newIuran);
                 setSetting('kat_masuk', document.getElementById('set-kat-masuk').value);
                 setSetting('kat_keluar', document.getElementById('set-kat-keluar').value);
+                setSetting('jabatan_list', document.getElementById('set-jabatan-list').value);
                 
                 let pBaru = document.getElementById('set-pin-baru');
                 if (pBaru && pBaru.value.trim() !== '') {
@@ -4124,8 +4627,9 @@
                         let originalDbTrx = await new Promise(r => {
                             const req = idb.transaction('trx', 'readonly').objectStore('trx').get(id);
                             req.onsuccess = e => r(e.target.result);
+                            req.onerror = () => r(null);
                         });
-                        let t_update = {...originalDbTrx, is_deleted: false};
+                        let t_update = {...(originalDbTrx || targetTrx), is_deleted: false};
                         await saveStore('trx', t_update);
                         
                         state.trx[idx] = t_update;
@@ -4162,7 +4666,7 @@
                 
                 // SURGICAL FIX: Scoped Selector untuk menghindari DOM Collision dengan Menu Profil Warga
                 let modTitle = document.querySelector('#mod-identity #ident-title');
-                if (modTitle) modTitle.innerText = "Loading...";
+                if (modTitle) modTitle.innerText = "R 05";
 
                 let fetchSuccess = false;
                 try {
@@ -4245,11 +4749,8 @@
                 } else if (matchedMembers.length === 1) {
                     processMemberLogin(matchedMembers[0]);
                 } else {
-                    document.getElementById('mod-auth-phone').style.display = 'none';
-                    let modSelect = document.getElementById('mod-select');
-                    let closeBtn = modSelect.querySelector('.close-modal');
-                    if (closeBtn) closeBtn.style.display = 'none'; 
-                    modSelect.onclick = null;
+                    closeModal('mod-auth-phone'); // Menutup gerbang WA secara resmi (Validasi DOM)
+                    document.getElementById('auth-phone-input').value = ''; // Sterilisasi kognitif
                     
                     let opts = matchedMembers.map(a => ({label: a.nama, value: a.id}));
                     openSelectModal('Akun Ganda: Pilih Nama Anda!', opts, '', (val) => {
@@ -4260,7 +4761,7 @@
             }
 
             function processMemberLogin(member) {
-                document.getElementById('mod-auth-phone').style.display = 'none';
+                closeModal('mod-auth-phone'); // Memastikan sisa modal tertutup bersih
                 localStorage.setItem('nav_user_id', member.id);
                 
                 let modIdent = document.getElementById('mod-identity');
@@ -4272,6 +4773,7 @@
                         modIdent.style.display = "none";
                         modIdent.style.opacity = "1";
                         modIdent.style.transform = "none";
+                        document.body.classList.remove('modal-open'); // THE SCROLL-LOCK EXORCISM (Pelepasan Kunci Layar)
                     }, 500);
                 }
 
@@ -4367,19 +4869,21 @@
                 openModal('mod-pin');
             }
 
-            async function verifyPIN() {
-                let p = document.getElementById('kiosk-pin').value.trim(); 
-                if(!p) return showToast("Mohon masukkan PIN Anda.");
-                document.getElementById('btn-verify-pin').disabled = true;
+        async function verifyPIN() {
+            let p = document.getElementById('kiosk-pin').value.trim(); 
+            if(!p) return showToast("Mohon masukkan PIN Anda.");
+            document.getElementById('btn-verify-pin').disabled = true;
 
-                try {
-                    let masterTkn = getSetting('kiosk_pin', 'MTcwODIz');
-                    if (!masterTkn || masterTkn.trim() === '') masterTkn = 'MTcwODIz';
-                    let decodedMaster = '170823';
-                    try { decodedMaster = atob(masterTkn); } catch(e) { decodedMaster = masterTkn; }
-                    if (!decodedMaster || decodedMaster.trim() === '') decodedMaster = '170823';
+            try {
+                let masterTkn = getSetting('kiosk_pin', 'MTcwODIz');
+                // SURGICAL FIX: Absolute Type Casting untuk mencegah Integer Crash
+                if (!masterTkn || String(masterTkn).trim() === '') masterTkn = 'MTcwODIz';
+                let decodedMaster = '170823';
+                try { decodedMaster = atob(String(masterTkn)); } catch(e) { decodedMaster = masterTkn; }
+                if (!decodedMaster || String(decodedMaster).trim() === '') decodedMaster = '170823';
 
-                    if(currentPinAction === 'kiosk') {
+                if(currentPinAction === 'kiosk') {
+
                         if(p === decodedMaster) {
                             sessionStorage.setItem('_nx_auth_tk', btoa(p + '_valid'));
                             localStorage.removeItem('nav_role'); 
@@ -4692,11 +5196,21 @@
                     });
 
                     // Konversi XP Masa Lalu agar Abadi
+                    let xpTahunanMap = {};
                     Object.keys(deletedDonasiMap).forEach(key => {
-                        let idAg = key.split('-')[0];
-                        let xpD = Math.floor(deletedDonasiMap[key] / 10000) * 10;
-                        if (anggotaUpdates[idAg]) anggotaUpdates[idAg].hist_xp_bonus += Math.min(xpD, 500);
+                        let parts = key.split('-');
+                        let idAg = parts[0];
+                        let dY = parts[1];
+                        let xpBulanIni = Math.floor(deletedDonasiMap[key] / 10000) * 10;
+                        let yearKey = idAg + '-' + dY;
+                        xpTahunanMap[yearKey] = (xpTahunanMap[yearKey] || 0) + xpBulanIni;
                     });
+                    
+                    Object.keys(xpTahunanMap).forEach(yearKey => {
+                        let idAg = yearKey.split('-')[0];
+                        if (anggotaUpdates[idAg]) anggotaUpdates[idAg].hist_xp_bonus += Math.min(xpTahunanMap[yearKey], 500);
+                    });
+
                     Object.keys(deletedTalanganMap).forEach(key => {
                         let idAg = key.split('-')[0];
                         let count = Math.min(deletedTalanganMap[key], 5);
@@ -4721,6 +5235,11 @@
                             else if (top3[1] === ag.id && ag.xp_total > 0) agUpdate.badges.push(`🥈 Runner-Up ${currY-1}`);
                             else if (top3[2] === ag.id && ag.xp_total > 0) agUpdate.badges.push(`🥉 Elite ${currY-1}`);
                             
+                            // SURGICAL FIX: Pembekuan nilai kepatuhan linier asli tanpa inflasi Combo Masa Depan (Advance Payer Protection)
+                            let currentBonusXp = anggotaUpdates[ag.id].hist_xp_bonus || 0;
+                            let currentAdvanceXp = (ag.advance_count || 0) * 75;
+                            agUpdate.hist_kepatuhan_xp = (ag.xp_total || 0) - currentBonusXp - currentAdvanceXp;
+
                             // Injeksi Permanen Kapsul Waktu
                             agUpdate.hist_iuran_rp = anggotaUpdates[ag.id].hist_iuran_rp;
                             agUpdate.hist_donasi_rp = anggotaUpdates[ag.id].hist_donasi_rp;
@@ -4733,7 +5252,14 @@
                         });
 
                         // Sapu Bersih Arsip Program (Meringankan Memori)
-                        state.event.filter(e => e.status === 'arsip').forEach(e => storeEvt.delete(e.id));
+                        let evToDel = state.event.filter(e => e.status === 'arsip');
+                        evToDel.forEach(e => storeEvt.delete(e.id));
+                        
+                        // SURGICAL FIX: Anihilasi Dompet PJ Yatim Piatu (Mencegah Phantom Wallet Leak)
+                        let dompetPjToDel = state.dompet.filter(d => d.is_pj && evToDel.some(e => e.id === d.id_event));
+                        dompetPjToDel.forEach(d => tx.objectStore('dompet').delete(d.id));
+                        state.dompet = state.dompet.filter(d => !dompetPjToDel.some(del => del.id === d.id));
+
                         oldTrxAll.forEach(t => storeTrx.delete(t.id));
                         
                         Object.keys(saldoAwalDompet).forEach(d => {
@@ -4771,9 +5297,9 @@
                     </div>
                     <div style="flex: 1;">
                         <h3 id="tutorial-title" style="font-size: 18px; font-weight: 900; margin-bottom: 2px; letter-spacing: -0.3px; color: #FFFFFF;">Buku Panduan Bendahara</h3>
-                        <div style="font-size: 11.5px; color: #E2E8F0; font-weight: 500; line-height: 1.4;">Dokumentasi & Standar Operasional NAVASENA®</div>
+                        <div style="font-size: 11.5px; color: #E2E8F0; font-weight: 500; line-height: 1.4;">Dokumentasi & Standar Operasional <span class="font-nasa" style="font-size: 1.2em;">NAVASENA<sup style="font-size: 8px; margin-left: -1px;">®</sup></span></div>
                     </div>
-                          <button class="close-modal" style="position: static; background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; flex-shrink: 0;" onclick="closeModal('mod-tutorial')">
+                    <button class="close-modal" style="position: static; background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; flex-shrink: 0;" onclick="closeModal('mod-tutorial')">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     </button>
                 </div>
@@ -4786,7 +5312,7 @@
                             </div>
                             <div>
                                 <b style="color: #991B1B; font-size: 14px; text-transform: uppercase;">HUKUM MUTLAK "OFFLINE-FIRST"</b>
-                                <p style="font-size: 12px; color: #7F1D1D; line-height: 1.5; margin-top: 4px; font-weight: 500;">Sistem NAVASENA bekerja di dalam memori HP Anda agar super cepat. Seluruh data yang Anda ketik HANYA tersimpan di perangkat ini. Agar data aman dan bisa dilihat oleh Warga, Anda <b>WAJIB</b> menyentuh tombol <b>UPLOAD</b> <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; transform:translateY(-1.5px); margin:0 2px;"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg> di pojok kanan atas setiap selesai bekerja. <br><br><i>Perhatian: Jangan menekan Keluar/Logout sebelum memastikan data sudah di-Upload.</i></p>
+                                <p style="font-size: 12px; color: #7F1D1D; line-height: 1.5; margin-top: 4px; font-weight: 500;">Sistem <span class="font-nasa" style="font-size: 1.1em;">NAVASENA</span> bekerja di dalam memori HP Anda agar super cepat. Seluruh data yang Anda ketik HANYA tersimpan di perangkat ini.
                             </div>
                         </div>
 
@@ -4907,7 +5433,7 @@
                                 </div>
                                 <div id="tut-ang-2" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
-                                        <p style="margin-bottom: 8px;">NAVASENA menggunakan sistem Pangkat berbasis Kedisiplinan (Gamifikasi). Membayar kas sebelum ganti bulan akan menaikkan XP Anda.</p>
+                                        <p style="margin-bottom: 8px;"><span class="font-nasa" style="font-size: 1.1em;">NAVASENA</span> menggunakan sistem Pangkat berbasis Kedisiplinan (Gamifikasi). Membayar kas sebelum ganti bulan akan menaikkan XP Anda.</p>
                                         <p style="margin-bottom: 8px;">Sentuh ikon <b>Perisai Pangkat</b> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; transform:translateY(-1.5px); margin:0 2px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> di samping kiri nama Anda pada daftar untuk membuka preview KTA. Anda akan melihat Progress Bar Pangkat Anda menuju Rank Legend atau Mythical Glory.</p>
                                         <p><i>Perhatian:</i> Menunggak uang kas akan memotong XP Anda. Jika XP Anda menyentuh angka minus, KTA dan pangkat Anda akan berubah menjadi merah (Status: AFK). Ini adalah sanksi otomatis dari sistem, bukan error pada aplikasi.</p>
                                     </div>
@@ -4941,7 +5467,7 @@
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
                                         <ul style="padding-left: 16px;">
                                             <li style="margin-bottom: 8px;"><b>Executive Billing:</b> Tepat di bawah KTA Profil Anda, terdapat Panel Tagihan. Jika panel tersebut berwarna <b style="color:var(--danger);">Merah</b>, artinya Anda memiliki tanggungan kas yang belum dilunasi. Segera hubungi Bendahara.</li>
-                                            <li style="margin-bottom: 8px;"><b>Navasena Rewind:</b> Sentuh tombol <b>REKAM JEJAK KEUANGAN</b> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; transform:translateY(-1.5px); margin:0 2px;"><polygon points="11 19 2 12 11 5 11 19"/><polygon points="22 19 13 12 22 5 22 19"/></svg>. Layar ini merangkum total seluruh sumbangsih kekayaan yang pernah Anda berikan kepada organisasi (Gabungan Total Iuran, Total Donasi, dan Persentase Akurasi Pembayaran) sejak Anda bergabung. Banggalah pada kontribusi Anda.</li>
+                                            <li style="margin-bottom: 8px;"><b><span class="font-nasa" style="font-size: 1.1em;">NAVASENA</span> Rewind:</b> Sentuh tombol <b>REKAM JEJAK KEUANGAN</b> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; transform:translateY(-1.5px); margin:0 2px;"><polygon points="11 19 2 12 11 5 11 19"/><polygon points="22 19 13 12 22 5 22 19"/></svg>. Layar ini merangkum total seluruh sumbangsih kekayaan yang pernah Anda berikan kepada organisasi (Gabungan Total Iuran, Total Donasi, dan Persentase Akurasi Pembayaran) sejak Anda bergabung. Banggalah pada kontribusi Anda.</li>
                                             <li><b>Kotak Aspirasi Anonim:</b> Di pojok kiri bawah layar, terdapat tombol merah melayang (Ikon Kotak Pesan). Sentuh tombol tersebut untuk mengirimkan saran, kritik, atau teguran ke Bendahara. Pesan Anda dilindungi Enkripsi Anonim sehingga identitas Anda tidak akan pernah diketahui oleh pengurus.</li>
                                         </ul>
                                     </div>
@@ -5134,7 +5660,7 @@
                     <input type="hidden" id="pj-event-id">
 
                     <div class="form-group" style="margin-bottom: 16px;">
-                        <label style="font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase;">Pilih Panitia PJ <span style="color:var(--danger)">*</span></label>
+                        <label style="font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase;">Pilih PJ <span style="color:var(--danger)">*</span></label>
                         <input type="hidden" id="pj-member-val">
                         <div id="pj-member-btn" class="custom-select" style="border-color: var(--primary); color: var(--primary);" onclick="openPjMemberSelect()">-- Pilih Anggota --</div>
                     </div>
@@ -5156,9 +5682,10 @@
             <!-- MODAL BLAST QUEUE (WA BLAST) -->
             <div id="mod-blast-queue" class="modal" style="z-index: 99999; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); background: rgba(15, 23, 42, 0.85);">
                 <div class="modal-box no-select" style="background: linear-gradient(180deg, #1E3A8A 0%, #0F172A 100%); border: 1px solid rgba(255,255,255,0.1); border-radius: 28px; text-align: center; color: white;">
+
                     <div style="display: flex; justify-content: center; margin-bottom: 16px;">
                         <div style="width: 60px; height: 60px; background: rgba(37, 211, 102, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(37, 211, 102, 0.4); box-shadow: 0 0 20px rgba(37, 211, 102, 0.3);">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#25D366" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                         </div>
                     </div>
                     <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 8px; letter-spacing: 1px;">SISTEM PENAGIHAN</h3>
@@ -5271,23 +5798,19 @@
         </div>
 
         <!-- MODAL PREVIEW KTA (HOLOGRAFIK) -->
-        <div id="mod-kta-preview" class="modal" style="z-index: 99999; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); background: rgba(2, 6, 23, 0.85);">
+        <div id="mod-kta-preview" class="modal" style="z-index: 99999; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); background: rgba(2, 6, 23, 0.85);" onclick="closeModal('mod-kta-preview')">
             <div class="modal-box no-select" style="background: transparent; box-shadow: none; padding: 0; display: flex; justify-content: center; align-items: center; overflow: visible;">
 
                 <!-- KTA Card Replicated -->
                 <div class="kta-wrapper" style="width: 100%; max-width: 360px;">
                     <div id="prev-kta-card-element" class="kta-card deficit-mode" style="margin-bottom: 0; pointer-events: none;">
-                        <!-- SURGICAL FIX: Elegant Close Button Inside Card -->
-                        <button class="close-modal no-select" style="position: absolute; top: 16px; right: 16px; width: 30px; height: 30px; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); color: #FFFFFF; border: 1px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 20; cursor: pointer; pointer-events: auto; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 10px rgba(0,0,0,0.5);" onclick="closeModal('mod-kta-preview')" onmousedown="this.style.transform='scale(0.85)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.85)'" ontouchend="this.style.transform='scale(1)'">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                        </button>
                         
                         <div style="position: absolute; inset: 0; background: rgba(0, 0, 0, 0.4); z-index: 1; border-radius: 20px;"></div>
                         <div id="prev-kta-rank-shield" class="rank-shield r-afk" style="position:absolute; top: 10px; right: 10px; width:100px; height:100px; z-index:2; filter:drop-shadow(0 15px 25px rgba(0,0,0,0.9)); transform: translateZ(0); transition: background-image 0.5s ease;"></div>
 
                         <div style="position: relative; z-index: 3; display: flex; flex-direction: column; height: 100%; min-height: 180px; justify-content: space-between;">
 
-                            <div style="font-size: 9px; font-weight: 900; letter-spacing: 2px; color: rgba(255,255,255,0.85); text-transform: uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">NAVASENA EXECUTIVE PASS</div>
+                            <div style="font-size: 9px; font-weight: 900; letter-spacing: 2px; color: rgba(255,255,255,0.85); text-transform: uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.8);"><span class="font-nasa" style="font-size: 1.2em;">NAVASENA</span> EXECUTIVE PASS</div>
                             <div style="margin-top: 28px; margin-bottom: 24px; max-width: 65%; overflow: hidden;">
                                 <h2 id="prev-kta-nama" style="font-size: 20px; font-weight: 900; color: #FFFFFF; letter-spacing: -0.5px; line-height: 1.2; text-shadow: 0 4px 12px rgba(0,0,0,0.9); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase;">NAMA</h2>
                                 <div id="prev-kta-jabatan" style="font-size: 8.5px; font-weight: 800; color: #FBBF24; text-transform: uppercase; letter-spacing: 1.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">JABATAN</div>
@@ -5331,7 +5854,7 @@
                     <div style="display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 60px; background: rgba(56, 189, 248, 0.1); border-radius: 50%; margin-bottom: 12px; border: 1px solid rgba(56, 189, 248, 0.2); box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2.5"><polygon points="11 19 2 12 11 5 11 19"/><polygon points="22 19 13 12 22 5 22 19"/></svg>
                     </div>
-                    <h3 style="font-size: 18px; font-weight: 900; color: #FFFFFF; letter-spacing: 1px; text-transform: uppercase;">NAVASENA REWIND</h3>
+                    <h3 style="font-size: 18px; font-weight: 900; color: #FFFFFF; letter-spacing: 1px; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 6px;"><span class="font-nasa" style="font-size: 1.1em;">NAVASENA</span> REWIND</h3>
                     <p style="font-size: 11px; color: #94A3B8; font-weight: 600; margin-top: 4px;">Rekam Jejak Kontribusi Finansial Anda</p>
                 </div>
 
@@ -5402,7 +5925,7 @@
                 if(document.getElementById('trx-keluar-tipe-btn')) document.getElementById('trx-keluar-tipe-btn').innerText = 'Selesai (Lunas)';
                 toggleUangMukaNama();
 
-                let kStr = tipe === 'masuk' ? getSetting('kat_masuk', 'Donasi, Sponsor, Iuran Anggota, Kas, Hamba Allah') : getSetting('kat_keluar', 'Operasional, Konsumsi, Darurat, Belanja Alat, Lainnya');
+                let kStr = tipe === 'masuk' ? getSetting('kat_masuk', 'Donasi, Sponsor,') : getSetting('kat_keluar', 'Operasional, Konsumsi, HUT RI');
                 let kArr = kStr.split(',').map(s=>s.trim());
                 let cHtml = '';
                 kArr.forEach(k => { if(k) cHtml += `<div class="chip no-select" onclick="selTrxKat(this, this.innerText)">${esc(k)}</div>`; });
@@ -5622,9 +6145,10 @@
                     let originalDbTrx = await new Promise(r => {
                         const req = idb.transaction('trx', 'readonly').objectStore('trx').get(state.trx[idx].id);
                         req.onsuccess = e => r(e.target.result);
+                        req.onerror = () => r(null);
                     });
                     
-                    let t_update = { ...originalDbTrx, nom_final: final, status: 'lunas', ket: state.trx[idx].ket + addKet };
+                    let t_update = { ...(originalDbTrx || state.trx[idx]), nom_final: final, status: 'lunas', ket: state.trx[idx].ket + addKet };
 
                     await saveStore('trx', t_update);
                     state.trx[idx] = t_update;
@@ -5792,10 +6316,20 @@
                         dUpdate = {...state.dompet[idxD], status: 'arsip'};
                     }
                     
+                    // SURGICAL FIX: Isolasi Dompet Mutlak untuk memburu dan menyelesaikan nota uang muka awal PJ bersangkutan (Anti-Double Expense Cross-Wallet)
+                    let parentPendingTrxs = state.trx.filter(t => !t.is_deleted && t.id_event === idEvent && t.id_dompet === idDompet && t.status === 'pending');
+
                     // EKSEKUSI ATOMIK MUTLAK (Anti-Corruption)
                     await new Promise((resolve, reject) => {
                         let tx = idb.transaction(['trx', 'dompet'], 'readwrite');
                         let storeTrx = tx.objectStore('trx');
+                        
+                        parentPendingTrxs.forEach(tLama => {
+                            tLama.status = 'lunas';
+                            tLama.nom_final = tLama.nom_awal;
+                            storeTrx.put(tLama);
+                        });
+                        
                         trxToSave.forEach(t => storeTrx.put(t));
                         if (dUpdate) tx.objectStore('dompet').put(dUpdate);
                         tx.oncomplete = resolve;
@@ -5803,6 +6337,10 @@
                     });
                     
                     localStorage.setItem('nav_unsynced', 'true');
+                    parentPendingTrxs.forEach(tLama => {
+                        let idxMem = state.trx.findIndex(t => t.id === tLama.id);
+                        if (idxMem > -1) state.trx[idxMem] = tLama;
+                    });
                     trxToSave.reverse().forEach(t => state.trx.unshift(t));
                     if (dUpdate) state.dompet[idxD] = dUpdate;
                     
@@ -5879,7 +6417,7 @@
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                                     </div>
                                     <div style="flex: 1; min-width: 0;">
-                                        <div style="font-size:12px; font-weight:900; color:#92400E; margin-bottom: 2px;">Dana Dibawah PJ</div>
+                                        <div style="font-size:12px; font-weight:900; color:#92400E; margin-bottom: 2px;">PJ Dana Acara</div>
                                         <div style="font-size:9.5px; font-weight:700; color:#B45309;">(Wajib di-LPJ-kan)</div>
                                     </div>
                                     <div style="font-size:15px; font-weight:900; color:#D97706; text-align: right; flex-shrink: 0;">Rp ${fmtRp(totalDanaDiTangan)}</div>
@@ -6150,14 +6688,15 @@
                     };
 
                     if (isAuthMaster) {
+                        await loadData(); // SURGICAL FIX: Sinkronisasi mutlak RAM dengan IDB sebelum Payload dirakit untuk cegah Data Overwrite
                         payload.trs = state.trx;
                         payload.anggota = state.anggota;
                         payload.event = state.event;
                         payload.dompet = state.dompet;
                         payload.settings = {
                             iuran_nom: getSetting('iuran_nom', 10000),
-                            kat_masuk: getSetting('kat_masuk', 'Donasi, Sponsor, Iuran Anggota, Kas, Hamba Allah'),
-                            kat_keluar: getSetting('kat_keluar', 'Operasional, Konsumsi, Darurat, Belanja Alat, Lainnya'),
+                            kat_masuk: getSetting('kat_masuk', 'Donasi, Sponsor,'),
+                            kat_keluar: getSetting('kat_keluar', 'Operasional, Konsumsi, HUT RI'),
                             kiosk_pin: getSetting('kiosk_pin', btoa('170823'))
                         };
                     }
@@ -6183,7 +6722,8 @@
                         if (localAspirasi && localAspirasi.length > 0) {
                             try {
                                 let txAsp = idb.transaction('aspirasi', 'readwrite');
-                                txAsp.objectStore('aspirasi').clear();
+                                let storeAsp = txAsp.objectStore('aspirasi');
+                                localAspirasi.forEach(asp => storeAsp.delete(asp.id));
                                 await new Promise(r => { txAsp.oncomplete = r; txAsp.onerror = r; });
                             } catch (e) {}
                         }
@@ -6317,7 +6857,7 @@
                 let maxOutVal = maxOutMonth !== '-' ? mData[maxOutMonth].out : 0;
                 let statusKas = saldo >= (tOut * 0.2) ? "SANGAT SEHAT dengan rasio likuiditas aman" : "WASPADAI (Membutuhkan efisiensi pengeluaran)";
                 
-                let nlgText = `Berdasarkan rekapitulasi data akuntansi sistem per tanggal ${dStr}, arus Pemasukan kas masuk (Kredit) organisasi secara kumulatif mencapai <b>Rp ${fmtRp(tIn)}</b>. Di sisi lain, serapan anggaran riil (Debit) tercatat sebesar <b>Rp ${fmtRp(tOut)}</b>, sehingga mengunci Posisi Saldo Kas Akhir pada angka <b>Rp ${fmtRp(saldo)}</b>.<br><br>Secara analitis, neraca organisasi saat ini dinilai <b>${statusKas}</b>. Volume transaksi pengeluaran tertinggi tercatat pada periode <b>${maxOutMonth}</b> dengan nominal serapan mencapai <b>Rp ${fmtRp(maxOutVal)}</b>. Seluruh entri dokumen ini bersifat valid, bebas dari transaksi yang dibatalkan, dan dilindungi oleh protokol integritas Kas NAVASENA.`;
+                let nlgText = `Berdasarkan rekapitulasi data akuntansi sistem per tanggal ${dStr}, arus Pemasukan kas masuk (Kredit) organisasi secara kumulatif mencapai <b>Rp ${fmtRp(tIn)}</b>. Di sisi lain, serapan anggaran riil (Debit) tercatat sebesar <b>Rp ${fmtRp(tOut)}</b>, sehingga mengunci Posisi Saldo Kas Akhir pada angka <b>Rp ${fmtRp(saldo)}</b>.<br><br>Secara analitis, neraca organisasi saat ini dinilai <b>${statusKas}</b>. Volume transaksi pengeluaran tertinggi tercatat pada periode <b>${maxOutMonth}</b> dengan nominal serapan mencapai <b>Rp ${fmtRp(maxOutVal)}</b>. Seluruh entri dokumen ini bersifat valid, bebas dari transaksi yang dibatalkan, dan dilindungi oleh protokol integritas Portal <span class="font-nasa" style="font-size: 1.1em;">NAVASENA</span>.`;
 
                 let mHtml = '';
                 Object.keys(mData).forEach(k => {
@@ -6389,7 +6929,7 @@
                 let html = `
                 <div style="font-family: 'Times New Roman', Times, serif; color: #000; line-height: 1.6;">
                     <h2 style="text-align:center; text-decoration:underline; font-size:18px; margin-bottom:5px; text-transform:uppercase;">LAPORAN PERTANGGUNGJAWABAN KAS ORGANISASI</h2>
-                    <p style="text-align:center; margin-top:0; margin-bottom:30px; font-size:13px;">Dicetak otomatis oleh Sistem Integrasi Offline NAVASENA pada ${dStr}</p>
+                    <p style="text-align:center; margin-top:0; margin-bottom:30px; font-size:13px;">Dicetak otomatis oleh Sistem Integrasi Offline <span class="font-nasa" style="font-size: 1.1em;">NAVASENA</span> pada ${dStr}</p>
                     <h3 style="font-size:14px; margin-bottom:8px; border-bottom: 2px solid #000; display:inline-block;">BAB I: RINGKASAN EKSEKUTIF (AI ANALYSIS)</h3>
                     <p style="text-align:justify; font-size:13px;">${nlgText}</p>
                     <h3 style="font-size:14px; margin-top:25px; margin-bottom:8px; border-bottom: 2px solid #000; display:inline-block;">BAB II: MATRIKS KAS BULANAN (GLOBAL)</h3>
@@ -6490,7 +7030,7 @@
                 if (window.systemArrearsList && window.systemArrearsList.length > 0) {
                     btnHtml += `
                         <button class="btn no-select" style="background: var(--primary-grad); color: white; font-size:14px; font-weight:900; padding: 16px; width: 100%; box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.4); border: none; letter-spacing: -0.3px;" onclick="startBlastQueue()">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;"><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> 🚀 Penagihan Tunggakan Massal
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;"><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Penagihan Tunggakan Massal
                         </button>`;
                 }
 
@@ -6516,6 +7056,11 @@
                 let iuranMapGlobal = {};
                 state.trx.forEach(t => { if (t.tipe === 'iuran' && !t.is_deleted) iuranMapGlobal[`${t.id_anggota}-${t.year}-${t.bln}`] = true; });
 
+                // SURGICAL FIX: Injeksi Kapsul Waktu Arsip agar anggota tidak ditagih utang hantu setelah Tutup Buku Tahunan
+                if (ag.arsip_iuran_map) {
+                    ag.arsip_iuran_map.forEach(ym => { iuranMapGlobal[`${memberId}-${ym}`] = true; });
+                }
+
                 for(let y = jY; y <= currY; y++) {
                     let startM = (y === jY) ? jB : 1; let endM = (y === currY) ? currM : 12; 
                     for(let m = startM; m <= endM; m++) {
@@ -6536,7 +7081,7 @@
                 let idx = (new Date().getFullYear() + idNum) % 12;
 
                 let pujian = [
-                    `🎉 Met Ultah ke-${umur}, *${nama}*! 🎂 Fakta tersembunyi: Nama kamu sudah di-stabilo emas di buku kas. Saldo tunggakan Rp 0 bikin Bendahara bisa tidur nyenyak. Semoga rezekinya selancar kecepatan kamu bayar iuran! 🥳💸`,
+                    `🎉 Met Ultah ke-${umur}, *${nama}*! 🎂 Fakta tersembunyi: Nama kamu sudah di-stabilo emas di buku kas. Saldo tunggakan Rp 0 bikin Bendahara bisa tidur nyenyak. Semoga rezekinya selancar kecepatan kamu bayar iuran! ??💸`,
                     `👑 Yang Mulia Sultan *${nama}* berulang tahun ke-${umur}! 👑 Kesehatan, kekayaan, dan kebahagiaan semoga selalu melimpah. Terima kasih telah menjadi 'Penyumbang Kas Anti-Ribet'. Tinggal kedip, iuran lunas! Sehat selalu panutanku! ✨🥂`,
                     `🎈 HBD *${nama}*! 🎈 Konon kabarnya, anggota yang bayar uang kas tepat waktu tanpa ditagih itu amal ibadahnya dilipatgandakan. Saldo tunggakan kamu saat ini *Rp 0*! Semoga di umur ke-${umur} ini segala urusannya dipermudah jalur VIP! 🤲🚀`,
                     `🎁 Beli tomat di pasar baru... Selamat Ulang Tahun buat kamu! 🎁 HBD *${nama}*! Saldo kas kamu bersih banget nol rupiah. Coba teman-teman lain pada belajar dari kedisiplinan ${nama} dong! Sukses terus kawan! 😜🔥`,
@@ -6605,7 +7150,7 @@
                         txt += `👤 *${esc(t.nama)}*\n💬 _"${msg}"_\n\n`;
                     }
 
-                    txt += `📌 _Pesan ini di-generate otomatis oleh Sistem Kas NAVASENA._\n_Mari bersama-sama membangun Karang Taruna yang transparan dan mandiri!_`;
+                    txt += `📌 _Pesan ini di-generate otomatis oleh Sistem Portal NAVASENA._\n_Mari bersama-sama membangun Karang Taruna yang transparan dan mandiri!_`;
                     
                     let waEncoded = encodeURIComponent(txt).replace(/'/g, "%27");
                     let url = `https://wa.me/?text=${waEncoded}`;
@@ -6653,7 +7198,7 @@
                 let isLintasTahun = ar.text.includes("'");
                 let headerBuku = isLintasTahun ? "periode berjalan" : `Tahun Buku ${new Date().getFullYear()}`;
 
-                let waText = `*TAGIHAN KAS NAVASENA*\n──────────────────\nAssalamualaikum Sdr/i *${esc(data.member.nama).split(' ')[0]}*,\nSemoga selalu dalam keadaan sehat dan lancar aktivitasnya. ✨\n\nBerikut kami informasikan rincian tunggakan iuran kas untuk *${headerBuku}* yang saat ini tercatat belum diselesaikan:\n\nRincian Tunggakan:\n• Periode : *${ar.text}* (${ar.count} Bulan)\n• Tarif : Rp ${fmtRp(parseInt(getSetting('iuran_nom', 10000), 10) || 0)} / bulan\n\nTOTAL TAGIHAN : *Rp ${fmtRp(ar.nominal)}*\n\nJika Anda sudah melakukan pembayaran, mohon abaikan pesan ini.\n\n*Besok, petugas kami berencana mampir ke rumah Anda untuk mengambil tunggakan iuran tersebut. Apabila Anda berhalangan atau sedang tidak berada di rumah, mohon bantuannya untuk menitipkan pembayaran tersebut kepada penghuni rumah lainnya.*\n\nTerima kasih banyak atas kemudahan dan kerja samanya. 🙏\n\n— Pesan otomatis Sistem Kas NAVASENA`;
+                let waText = `*TAGIHAN KAS NAVASENA*\n──────────────────\nAssalamualaikum Sdr/i *${esc(data.member.nama).split(' ')[0]}*,\nSemoga selalu dalam keadaan sehat dan lancar aktivitasnya. ✨\n\nBerikut kami informasikan rincian tunggakan iuran kas untuk *${headerBuku}* yang saat ini tercatat belum diselesaikan:\n\nRincian Tunggakan:\n• Periode : *${ar.text}* (${ar.count} Bulan)\n• Tarif : Rp ${fmtRp(parseInt(getSetting('iuran_nom', 10000), 10) || 0)} / bulan\n\nTOTAL TAGIHAN : *Rp ${fmtRp(ar.nominal)}*\n\nJika Anda sudah melakukan pembayaran, mohon abaikan pesan ini.\n\n*Besok, petugas kami berencana mampir ke rumah Anda untuk mengambil tunggakan iuran tersebut. Apabila Anda berhalangan atau sedang tidak berada di rumah, mohon bantuannya untuk menitipkan pembayaran tersebut kepada penghuni rumah lainnya.*\n\nTerima kasih banyak atas kemudahan dan kerja samanya. 🙏\n\n— Pesan otomatis Sistem Portal NAVASENA`;
 
                 let waEncoded = encodeURIComponent(waText).replace(/'/g, "%27");
                 let url = `https://wa.me/${noWa}?text=${waEncoded}`;
