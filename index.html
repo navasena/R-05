@@ -270,11 +270,12 @@
         /* TOAST NOTIFICATION (OMNI-TOAST PROTOCOL) */
         #toast { position: fixed; top: 32px; left: 50%; transform: translate(-50%, -20px) scale(0.95); background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); color: var(--text-main); padding: 14px 16px; border-radius: 16px; font-size: 13px; font-weight: 700; opacity: 0; pointer-events: none !important; z-index: 999999; display: flex; align-items: flex-start; gap: 10px; box-shadow: 0 14px 40px -10px rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.6); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); width: 90vw; max-width: 420px; }
         #toast.show { opacity: 1; transform: translate(-50%, 0) scale(1); }
-        #toast-logo-container { width: 16px; height: 16px; border-radius: 50%; overflow: hidden; flex-shrink: 0; margin-top: 3px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        #toast-logo-container img { width: 100%; height: 100%; object-fit: cover; }
+        #toast-logo-container { width: 28px; height: 28px; flex-shrink: 0; margin-top: -3px; display: flex; align-items: center; justify-content: center; overflow: visible; }
+        #toast-logo-container img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
         #toast-divider { width: 1.5px; align-self: stretch; background: rgba(0,0,0,0.08); margin: 0 2px; flex-shrink: 0; border-radius: 2px; }
         #toast-icon { display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; margin-top: 0; }
         #toast-msg { flex: 1; word-break: break-word; line-height: 1.4; padding-top: 2px; letter-spacing: -0.2px; }
+
 
         /* KTA FLAT PREMIUM ENGINE & 3D CINEMATIC FLIP */
         .kta-wrapper { perspective: 2000px; width: 100%; transform-style: preserve-3d; }
@@ -1197,7 +1198,7 @@
                     let donasiArr = donasiTrxTicker.map(t => {
                         let namaDonatur = t.id_anggota ? (state.anggota.find(a => a.id === t.id_anggota)?.nama || 'Anonim') : (t.ket || 'Hamba Allah');
                         namaDonatur = String(namaDonatur).replace(/^Donasi\s*(Umum)?\s*[:-]?\s*/i, '').split('-')[0].trim() || "Hamba Allah";
-                        return `<span style="margin-right: 36px;"><span style="color: #94A3B8; font-weight: 900; margin-right: 8px;">[DONASI BARU]</span><span style="color: #FDE68A; font-weight: 800; margin-right: 8px;">${esc(namaDonatur).toUpperCase()}</span><span style="color: #34D399; font-weight: 900;">+RP ${fmtRp(t.nom_final)}</span></span>`;
+                        return `<span style="margin-right: 36px;"><span style="color: #94A3B8; font-weight: 900; margin-right: 8px;">DONASI DARI:</span><span style="color: #FDE68A; font-weight: 800; margin-right: 8px;">${esc(namaDonatur).toUpperCase()}</span><span style="color: #34D399; font-weight: 900;">+RP ${fmtRp(t.nom_final)}</span></span>`;
                     });
 
                     // 2. Ekstraksi Data MVP Teladan (Top 5 - Zero CPU Spiking)
@@ -1427,33 +1428,55 @@
                         let bg = bgColors[i];
                         let isGhost = h.is_ghost;
                         let namaTeks = isGhost ? "BELUM ADA" : esc(h.nama);
-                        let nomTeks = isGhost ? "-" : "RP " + fmtRp(h.total);
                         let rankLabel = i === 0 ? "BLACK CARD" : (i === 1 ? "SAPPHIRE" : "GOLD");
+                        
+                        // MATERIAL INJECTION: Foil Stamping Gradients (Efek Tinta Logam)
+                        let foilColor = '';
+                        if (i === 0) foilColor = 'linear-gradient(to bottom right, #FFFFFF 0%, #E2E8F0 40%, #94A3B8 100%)'; // Platinum / Silver
+                        else if (i === 1) foilColor = 'linear-gradient(to bottom right, #E0F2FE 0%, #BAE6FD 40%, #38BDF8 100%)'; // Ice Blue Metallic
+                        else foilColor = 'linear-gradient(to bottom right, #FEF3C7 0%, #FDE68A 40%, #D97706 100%)'; // Pure Gold
+                        
+                        // SUPERSCRIPT CURRENCY FORMATTING (Tipografi Swiss Bank)
+                        let nomTeksFull = isGhost ? "-" : fmtRp(h.total);
+                        let nomRender = isGhost ? `<span style="font-size: 26px; padding-right: 4px;">-</span>` : `<sup style="font-size: 11px; margin-right: 3px; font-weight: 800; opacity: 0.85; position: relative; top: -8px;">RP</sup><span style="font-size: 26px; letter-spacing: -0.5px;">${nomTeksFull}</span>`;
                         
                         hHtml += `
 
-                            <div id="hc-card-${i}" class="no-select" style="position: absolute; top: 0; left: 0; width: 100%; height: 180px; border-radius: 20px; background: ${bg}; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; box-sizing: border-box; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: top center; cursor: pointer; opacity: ${isGhost ? '0.7' : '1'};" onclick="window.bringCardToFront(${i})">
+                            <div id="hc-card-${i}" class="no-select" style="position: absolute; top: 0; left: 0; width: 100%; height: 180px; border-radius: 20px; background: ${bg}; border: 1px solid rgba(255,255,255,0.15); overflow: hidden; box-sizing: border-box; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: top center; cursor: pointer; opacity: ${isGhost ? '0.7' : '1'}; box-shadow: inset 0 1px 1px rgba(255,255,255,0.2);" onclick="window.bringCardToFront(${i})">
                                 
-                                <!-- Giant Anchor NAVASENA Logo (Watermark Kanan Atas) -->
-                                <img src="icon-512.png" style="position: absolute; right: -40px; top: -40px; width: 240px; height: 240px; opacity: 0.12; object-fit: contain; filter: grayscale(100%) brightness(200%); transform: scale(1.1); pointer-events: none;" alt="Logo">
+                                <!-- Glass Glare (Pantulan Cahaya Diagonal) -->
+                                <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(135deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0) 70%); transform: rotate(15deg); pointer-events: none; z-index: 1;"></div>
 
-                            
-                            <!-- Teks Wrap Protection: Bebas Font NASA & Dibatasi Max-Width -->
-                            <div style="position: absolute; top: 55px; left: 20px; right: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; pointer-events: none;">
-                                <div style="font-size: 16px; font-weight: 900; color: #FFFFFF; letter-spacing: 0.5px; text-transform: uppercase;">${namaTeks}</div>
-                                <div style="font-size: 9px; font-weight: 800; color: rgba(255,255,255,0.6); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 4px;">HONORARY CONTRIBUTOR</div>
-                            </div>
-                            
-                            <!-- Absolute Bottom Footer -->
-                            <div style="position: absolute; bottom: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: flex-end; pointer-events: none;">
-                                <div>
-                                    <div style="font-size: 8px; font-weight: 800; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;">TOTAL KONTRIBUSI</div>
-                                    <div style="font-size: 10px; font-weight: 900; color: rgba(255,255,255,0.8); text-transform: uppercase; letter-spacing: 1px;">RANK #${i+1} • ${rankLabel}</div>
+                                <!-- Security Watermark (Sandblasted Textures) -->
+                                <img src="icon-512.png" style="position: absolute; right: -50px; bottom: -50px; width: 280px; height: 280px; opacity: 0.05; object-fit: contain; filter: grayscale(100%) contrast(200%); pointer-events: none; z-index: 0;" alt="Watermark">
+
+                                <!-- Micro Authenticity Seal (Emblem Kanan Atas ala Kartu Kredit) -->
+                                <div style="position: absolute; top: 22px; right: 22px; width: 34px; height: 34px; z-index: 2; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.8));">
+                                    <img src="icon-512.png" style="width: 100%; height: 100%; object-fit: contain; opacity: 0.9;" alt="Seal">
                                 </div>
-                                <div style="font-size: 18px; font-weight: 900; color: #FFFFFF; letter-spacing: 0.5px;">${nomTeks}</div>
-                            </div>
-                        </div>`;
+
+                                <!-- Top Left: Tipografi Eksekutif (Dibalik Hierarkinya) -->
+                                <div style="position: absolute; top: 22px; left: 24px; right: 64px; pointer-events: none; z-index: 2;">
+                                    <div style="font-size: 8px; font-weight: 800; color: rgba(255,255,255,0.6); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 6px;">HONORARY CONTRIBUTOR</div>
+                                    <div style="font-size: 18px; font-weight: 900; background: ${foilColor}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.8)); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-bottom: 2px;">${namaTeks}</div>
+                                </div>
+                                
+                                <!-- Absolute Bottom Footer dengan Micro-Divider -->
+                                <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 0 24px 20px 24px; pointer-events: none; z-index: 2;">
+                                    <div style="width: 100%; height: 1px; background: linear-gradient(90deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 100%); margin-bottom: 12px;"></div>
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                                        <div style="padding-bottom: 2px;">
+                                            <div style="font-size: 8px; font-weight: 800; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">TOTAL KONTRIBUSI</div>
+                                            <div style="font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.9); text-transform: uppercase; letter-spacing: 1px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));">RANK ${String(i+1).padStart(2, '0')} <span style="opacity:0.4; margin: 0 4px;">|</span> <span class="font-nasa" style="font-size:1.1em;">${rankLabel}</span></div>
+                                        </div>
+                                        <div style="font-weight: 900; background: ${foilColor}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 6px 8px rgba(0,0,0,0.8)); line-height: 1; padding-bottom: 2px;">
+                                            ${nomRender}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`;
                     });
+
                     
                     hHtml += `</div>`; // Close Stack Container
                     
@@ -1752,8 +1775,8 @@
             
             let inAmt = 0, outAmt = 0;
             state.trx.filter(x => !x.is_deleted && new Date(x.ts).getMonth() === m && new Date(x.ts).getFullYear() === y).forEach(x => {
-                if (x.tipe === 'masuk' || x.tipe === 'iuran') inAmt += x.nom_final;
-                if (x.tipe === 'keluar') outAmt += (x.status === 'pending' ? x.nom_awal : (x.status === 'talangan' ? 0 : x.nom_final));
+                if ((x.tipe === 'masuk' || x.tipe === 'iuran') && x.kat !== 'Transfer Internal' && x.kat !== 'Sisa Uang Muka' && x.kat !== 'Saldo Awal') inAmt += x.nom_final;
+                if (x.tipe === 'keluar' && x.kat !== 'Transfer Internal' && x.kat !== 'Uang Muka Kegiatan' && x.kat !== 'Saldo Awal' && x.kat !== 'Koreksi Saldo Awal (Akumulasi Pengeluaran Pindahan)') outAmt += (x.status === 'pending' ? x.nom_awal : (x.status === 'talangan' ? 0 : x.nom_final));
             });
             
             let txt = `*LAPORAN KAS NAVASENA - ${bNames[m].toUpperCase()} ${y}*\n\n`;
@@ -2942,26 +2965,19 @@
                 
                 <input type="file" id="logo-upload" accept="image/*" class="hidden" onchange="handleLogoUpload(event)">
 
-                <div class="logo-wrapper kiosk-hide" style="margin-bottom: 20px; position: relative; z-index: 2; display: flex; justify-content: center;" onclick="document.getElementById('logo-upload').click()" title="Ketuk untuk mengubah logo">
-                    <!-- SURGICAL FIX: Cincin Holografik & mix-blend-mode untuk memusnahkan background hitam -->
-                    <div style="width: 140px; height: 140px; background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); border-radius: 50%; padding: 3px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);">
-                        <div style="background: #0F172A; width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: visible; border: 1px solid rgba(255,255,255,0.2);">
-                            <img src="icon-512.png" alt="Logo Navasena" class="prof-logo-img" id="prof-logo-img" onerror="this.style.display='none'; document.getElementById('prof-logo-fb').style.display='flex';" style="width: 115%; height: 115%; object-fit: contain; margin: 0; mix-blend-mode: screen; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.8)); transform: scale(1.35);">
-                            <div class="prof-logo-fallback" id="prof-logo-fb" style="display:none; width: 100%; height: 100%; border: none; margin: 0; align-items: center; justify-content: center;">N</div>
-                        </div>
-                    </div>
+                <!-- SURGICAL FIX: Standalone Logo Protocol -->
+                <div class="logo-wrapper kiosk-hide" style="margin-bottom: 24px; position: relative; z-index: 2; display: flex; justify-content: center; width: 100%;" onclick="document.getElementById('logo-upload').click()" title="Ketuk untuk mengubah logo">
+                    <img src="icon-512.png" alt="Logo Navasena" class="prof-logo-img" id="prof-logo-img" onerror="this.style.display='none'; document.getElementById('prof-logo-fb').style.display='flex';" style="width: 130px; height: 130px; object-fit: contain; margin: 0; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6));">
+                    <div class="prof-logo-fallback" id="prof-logo-fb" style="display:none; width: 130px; height: 130px; border: none; margin: 0; align-items: center; justify-content: center; background: transparent; color: #FFFFFF; font-size: 58px; text-shadow: 0 10px 20px rgba(0,0,0,0.5);">N</div>
                 </div>
 
-                <div class="guest-only" style="margin-bottom: 20px; position: relative; z-index: 2; display: flex; justify-content: center;">
-                    <div style="width: 140px; height: 140px; background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); border-radius: 50%; padding: 3px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);">
-                        <div style="background: #0F172A; width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: visible; border: 1px solid rgba(255,255,255,0.2);">
-                            <img src="icon-512.png" alt="Logo Navasena" class="prof-logo-img guest-logo-img" onerror="this.style.display='none'; document.getElementById('guest-logo-fb').style.display='flex';" style="width: 115%; height: 115%; object-fit: contain; margin: 0; mix-blend-mode: screen; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.8)); transform: scale(1.35);">
-                            <div class="prof-logo-fallback guest-logo-fb" id="guest-logo-fb" style="display:none; width: 100%; height: 100%; border: none; margin: 0; align-items: center; justify-content: center;">N</div>
-                        </div>
-                    </div>
+                <div class="guest-only" style="margin-bottom: 24px; position: relative; z-index: 2; display: flex; justify-content: center; width: 100%;">
+                    <img src="icon-512.png" alt="Logo Navasena" class="prof-logo-img guest-logo-img" onerror="this.style.display='none'; document.getElementById('guest-logo-fb').style.display='flex';" style="width: 130px; height: 130px; object-fit: contain; margin: 0; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6));">
+                    <div class="prof-logo-fallback guest-logo-fb" id="guest-logo-fb" style="display:none; width: 130px; height: 130px; border: none; margin: 0; align-items: center; justify-content: center; background: transparent; color: #FFFFFF; font-size: 58px; text-shadow: 0 10px 20px rgba(0,0,0,0.5);">N</div>
                 </div>
              
                 <div style="margin-top: 0; width: 100%; position: relative; z-index: 2;">
+
                     <div id="ident-title" style="font-size: 18px; font-weight: 900; color: #FFFFFF; letter-spacing: 2px; margin-bottom: 2px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); text-transform: uppercase;">PORTAL</div>
                     <h3 class="font-nasa" style="font-size: 28px; color: #FFFFFF; letter-spacing: 1.5px; margin-bottom: 8px; text-shadow: 0 4px 10px rgba(0,0,0,0.5);">NAVASENA<sup style="font-size: 12px; margin-left: -3px; letter-spacing: 0;">®</sup></h3>
                 </div>
@@ -3555,19 +3571,18 @@
         <!-- SECURITY & IDENTITY MODALS (BENTO UI) -->
         <div id="mod-identity" class="modal" style="background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 99999;">
             <div class="modal-box no-select" style="overflow: visible; margin-top: 25px; background: linear-gradient(180deg, #1E293B 0%, #0F172A 100%); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 28px; text-align: center; max-width: 340px; display: flex; flex-direction: column; align-items: center; padding: 60px 24px 24px 24px; position: relative; box-shadow: 0 40px 80px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1);">
-                <div style="position: absolute; top: -65px; left: 50%; transform: translateX(-50%); width: 140px; height: 140px; background: rgba(59, 130, 246, 0.3); filter: blur(25px); border-radius: 50%; z-index: 0;"></div>
 
-                <div style="position: absolute; top: -60px; left: 50%; transform: translateX(-50%); width: 120px; height: 120px; background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); border-radius: 50%; padding: 3px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6); z-index: 1;">
-                    <div style="background: #0F172A; width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: visible; border: 1px solid rgba(255,255,255,0.2);">
-                        <!-- SURGICAL FIX: width 115% & overflow visible agar logo meluap menutupi lingkaran biru -->
-                        <img src="icon-512.png" alt="Logo" style="width: 115%; height: 115%; object-fit: contain; mix-blend-mode: screen; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.8)); transform: scale(1.35);" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                        <div style="display:none; font-weight: 900; font-size: 58px; color: #38BDF8;">N</div>
-                    </div>
+                <div style="position: absolute; top: -65px; left: 50%; transform: translateX(-50%); width: 140px; height: 140px; background: rgba(59, 130, 246, 0.3); filter: blur(35px); border-radius: 50%; z-index: 0; pointer-events: none;"></div>
+
+                <!-- SURGICAL FIX: Standalone Logo Protocol & Anti-Collision Space -->
+                <div style="position: absolute; top: -70px; left: 50%; transform: translateX(-50%); width: 135px; height: 135px; z-index: 1; display: flex; align-items: center; justify-content: center;">
+                    <img src="icon-512.png" alt="Logo" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6));" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div style="display:none; font-weight: 900; font-size: 58px; color: #FFFFFF; text-shadow: 0 10px 20px rgba(0,0,0,0.5);">N</div>
                 </div>
 
-
-                <div style="margin-top: 8px; width: 100%; position: relative; z-index: 2;">
+                <div style="margin-top: 75px; width: 100%; position: relative; z-index: 2;">
                     <div id="ident-title" style="font-size: 18px; font-weight: 900; color: #FFFFFF; letter-spacing: 2px; margin-bottom: 2px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); text-transform: uppercase;">PORTAL</div>
+
                     <h3 class="font-nasa" style="font-size: 28px; color: #FFFFFF; letter-spacing: 1.5px; margin-bottom: 8px; text-shadow: 0 4px 10px rgba(0,0,0,0.5);">NAVASENA<sup style="font-size: 12px; margin-left: -3px; letter-spacing: 0;">®</sup></h3>
                     <p style="font-size: 10px; font-weight: 800; color: #38BDF8; margin-bottom: 32px; letter-spacing: 2px; text-transform: uppercase;">Dk. Kestalan 05</p>
                 </div>
@@ -6387,7 +6402,7 @@
                         let idxMem = state.trx.findIndex(t => t.id === tLama.id);
                         if (idxMem > -1) state.trx[idxMem] = tLama;
                     });
-                    trxToSave.reverse().forEach(t => state.trx.unshift(t));
+                    trxToSave.forEach(t => state.trx.unshift(t));
                     if (dUpdate) state.dompet[idxD] = dUpdate;
                     
                     showToast("LPJ Ditutup sesuai rekapan nota aktual.");
@@ -6628,8 +6643,8 @@
                     
                     localStorage.setItem('nav_unsynced', 'true');
                     if (newDompet) state.dompet.push(newDompet);
-                    state.trx.unshift(trxIn);
                     state.trx.unshift(trxOut);
+                    state.trx.unshift(trxIn);
                     
                     showToast("Dana cair ke Panitia.");
                     activeModal.style.display = 'none'; document.body.classList.remove('modal-open');
