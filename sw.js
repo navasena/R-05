@@ -4,7 +4,7 @@
  * Protection: Opaque Quota Shield, Thread Lockdown GC, Fault-Tolerant Pre-Caching
  */
 
-const APP_VERSION = '2.3'; // Versi final, akan memicu pemusnahan memori lama
+const APP_VERSION = '2.4'; // Versi final, akan memicu pemusnahan memori lama
 const CACHE_PREFIX = 'portal-navasena-';
 const CACHE_STATIC = CACHE_PREFIX + 'static-v' + APP_VERSION;
 const CACHE_DYNAMIC = CACHE_PREFIX + 'dynamic-v' + APP_VERSION;
