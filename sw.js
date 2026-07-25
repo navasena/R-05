@@ -4,7 +4,7 @@
  * Protection: Opaque Quota Shield, Thread Lockdown GC, Fault-Tolerant Pre-Caching
  */
 
-const APP_VERSION = '2.4'; // Versi final, akan memicu pemusnahan memori lama
+const APP_VERSION = '2.5'; // Versi final, akan memicu pemusnahan memori lama
 const CACHE_PREFIX = 'portal-navasena-';
 const CACHE_STATIC = CACHE_PREFIX + 'static-v' + APP_VERSION;
 const CACHE_DYNAMIC = CACHE_PREFIX + 'dynamic-v' + APP_VERSION;
@@ -135,20 +135,27 @@ self.addEventListener('fetch', event => {
 
   const isHtmlRequest = targetReq.url.includes('index.html') || (req.headers.get('accept') && req.headers.get('accept').includes('text/html'));
   
-
   // STRATEGI 2: THE APEX HYBRID SWR (Stale-While-Revalidate untuk File Utama)
   // Tidak ada lagi Timeout 3 Detik yang membunuh koneksi desa.
   if (isHtmlRequest) {
-    const fetchPromise = fetch(targetReq).then(async networkRes => {
+    let bgHtmlTask;
+    const fetchPromise = fetch(targetReq).then(networkRes => {
       if (networkRes && networkRes.ok) {
-        const cache = await caches.open(CACHE_STATIC);
-        await cache.put(targetReq, networkRes.clone());
+        const clone = networkRes.clone();
+        bgHtmlTask = (async () => {
+          try {
+            const cache = await caches.open(CACHE_STATIC);
+            await cache.put(targetReq, clone);
+          } catch (err) {
+            console.warn('[SW] Disk I/O Caching HTML gagal:', err);
+          }
+        })();
       }
       return networkRes;
     }).catch(() => null); // Jika offline, fetch gagal dengan tenang tanpa crash
 
               // Thread Lockdown Mutlak: Wajib dipanggil secara sinkron SEBELUM event loop listener berakhir
-              event.waitUntil(fetchPromise);
+              event.waitUntil((async () => { await fetchPromise; if (bgHtmlTask) await bgHtmlTask; })());
               event.respondWith((async () => {
                 // PROTEKSI CROSS-DATA: Abaikan parameter URL HANYA jika target adalah file root SPA (index.html)
                 const shouldIgnoreQuery = targetReq.url.includes('index.html');
