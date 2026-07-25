@@ -153,7 +153,7 @@
         .trx-header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
         .trx-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .trx-icon.in { background: #ECFDF5; color: #10B981; }
-        .trx-icon.out { background: #F1F5F9; color: #475569; }
+        .trx-icon.out { background: var(--danger-light); color: var(--danger); }
         .trx-icon.pend { background: #FFFBEB; color: #D97706; }
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; word-break: break-word; }
         .trx-title { font-size: 14px; font-weight: 800; color: var(--text-main); line-height: 1.4; margin-bottom: 4px; }
@@ -347,7 +347,7 @@
             document.head.appendChild(curtain);
         }
 
-        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbyqAjU6KMkeP0GiVB3hM6QJ0i29SCap4axHBKTvC4w3HOR6lTzBYWMFTizofvc2U7g/exec";
+        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbz_CJwqylpZ3rB4QPjLAszAFAcjoLoRUJNjjwbF8_BZXedglfxnWsWks6N6NeZ4q0bs/exec";
         const CLOUD_API_TOKEN = "Navasena29082026";
 
         // --- KONFIGURASI INDEXEDDB LOKAL ---
@@ -926,6 +926,43 @@
          ========================================================= -->
     <script id="ui-dashboard-engine">
         
+        // THE OMNI-CLIPBOARD & SVG BANK REGISTRY (100% ORIGINAL LOGOS CDN CALIBRATED)
+        window.getBankLogoSVG = function(bankName) {
+            // Regex Cerdas: Membersihkan kata "Bank" agar pencocokan nama lebih absolut
+            let bn = String(bankName).toUpperCase().replace(/BANK\s/g, '').trim();
+            let url = ''; let h = '16px';
+            
+            // Jaringan Distribusi Konten Global (Wikimedia Asset Link Terkalibrasi)
+            if(bn.includes('BCA') || bn.includes('CENTRAL ASIA')) { url = 'https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg'; h = '18px'; }
+            else if(bn.includes('MANDIRI')) { url = 'https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo_of_Bank_Mandiri.svg'; h = '15px'; }
+            else if(bn.includes('BRI') || bn.includes('RAKYAT INDONESIA')) { url = 'https://upload.wikimedia.org/wikipedia/commons/2/2e/BRI_2020.svg'; h = '15px'; }
+            else if(bn.includes('BNI') || bn.includes('NEGARA INDONESIA')) { url = 'https://upload.wikimedia.org/wikipedia/id/5/55/BNI_logo.svg'; h = '14px'; }
+            else if(bn.includes('BSI') || bn.includes('SYARIAH INDONESIA')) { url = 'https://upload.wikimedia.org/wikipedia/commons/a/a4/Bank_Syariah_Indonesia.svg'; h = '16px'; }
+            else if(bn.includes('DANA')) { url = 'https://upload.wikimedia.org/wikipedia/commons/7/7f/Dana_logo.png'; h = '16px'; }
+            else if(bn.includes('GOPAY')) { url = 'https://upload.wikimedia.org/wikipedia/commons/8/86/Gopay_logo.svg'; h = '18px'; }
+            else if(bn.includes('OVO')) { url = 'https://upload.wikimedia.org/wikipedia/commons/e/eb/Logo_ovo_purple.svg'; h = '16px'; }
+            else if(bn.includes('SHOPEEPAY')) { url = 'https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee_Pay_logo.svg'; h = '24px'; }
+            
+            let displayName = bn.length > 8 ? bn.substring(0, 8) + '...' : bn;
+            
+            if (url) {
+                // Injeksi onerror fallback yang elegan jika Warga benar-benar Offline dan Cache mati
+                return `<img src="${url}" alt="${bn}" style="height:${h}; width:auto; object-fit:contain; flex-shrink:0;" onerror="this.onerror=null; this.outerHTML='<span style=\\'font-weight:900; font-size:10px; color:#475569; background:#E2E8F0; padding:4px 8px; border-radius:6px;\\'>${displayName}</span>';">`;
+            }
+            return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2.5"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="18" cy="12" r="1"/></svg>`;
+        };
+
+        window.copyRekening = function(text, bank) {
+            pulseHaptic('light');
+            let dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = text;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+            showToast("✔️ Rekening " + bank + " berhasil disalin!");
+        };
+
         // 1. TANGGAL HEADER DINAMIS
         function updateHeaderDate() {
             if(isKiosk) return;
@@ -1617,28 +1654,69 @@
 
                             let cleanWa = String(ag.wa || '').replace(/\D/g,'');
                             let phoneHtml = '';
+                            let bankHtml = '';
                             
-                            // Validasi No WA Ketat (Minimal 9 digit) - Poisoned Link Shield
-                            if (cleanWa.length >= 9) {
-                                let formatWa = cleanWa.startsWith('62') ? '0' + cleanWa.substring(2) : cleanWa;
-                                phoneHtml = `
-                                <a href="https://wa.me/${cleanWa}" target="_blank" style="display: flex; align-items: center; gap: 8px; text-decoration: none; background: #ECFDF5; padding: 4px 8px 4px 10px; border-radius: 20px; border: 1px solid #A7F3D0; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.1); transition: transform 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">
-                                    <span style="font-family: monospace; font-size: 12px; font-weight: 900; color: #059669; letter-spacing: 0.5px;">${formatWa}</span>
-                                    <div style="width: 26px; height: 26px; background: #25D366; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(37, 211, 102, 0.4); flex-shrink: 0;">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                            if (ag.bank_nama && ag.bank_rek) {
+                                let svgLogo = window.getBankLogoSVG(ag.bank_nama);
+                                // TOMBOL SALIN REKENING (ANTI-TRUNCATION ABSOLUTE FLEX)
+                                bankHtml = `
+                                <div class="no-select" style="display: flex; align-items: center; justify-content: space-between; background: #F8FAFC; border: 1.5px solid #E2E8F0; padding: 12px 14px; border-radius: 14px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);" onmousedown="this.style.transform='scale(0.96)'; this.style.borderColor='#94A3B8';" onmouseup="this.style.transform='scale(1)'; this.style.borderColor='#E2E8F0';" onclick="window.copyRekening('${esc(ag.bank_rek)}', '${esc(ag.bank_nama)}')">
+                                    <div style="display: flex; align-items: center; justify-content: center; width: 45px; height: 24px; flex-shrink: 0;">${svgLogo}</div>
+                                    <div style="width: 1.5px; height: 18px; background: #E2E8F0; flex-shrink: 0; margin: 0 10px;"></div>
+                                    <span style="font-family: monospace; font-size: 15px; font-weight: 900; color: #0F172A; letter-spacing: 1px; flex: 1; text-align: left;">${esc(ag.bank_rek)}</span>
+                                    <div style="background: #E2E8F0; width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: 8px;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                                     </div>
-                                </a>`;
-                            } else {
-                                phoneHtml = `<div style="font-size: 10px; font-weight: 800; color: #94A3B8; background: #F1F5F9; padding: 6px 12px; border-radius: 20px; border: 1px solid #E2E8F0;">Tak Ada Kontak</div>`;
+                                </div>`;
                             }
 
+                            if (cleanWa.length >= 9) {
+                                // FORMATTER NOMOR LOKAL (087834984990 TANPA SPASI/STRIP AGAR MUAT)
+                                let formatWaDisplay = cleanWa;
+                                if (cleanWa.startsWith('62')) {
+                                    formatWaDisplay = '0' + cleanWa.substring(2);
+                                }
+                                
+                                let formatWaLink = cleanWa.startsWith('62') ? cleanWa : '62' + cleanWa.substring(1);
+                                
+                                // TOMBOL WHATSAPP (ANTI-TRUNCATION ABSOLUTE FLEX)
+                                phoneHtml = `
+                                <a href="https://wa.me/${formatWaLink}" target="_blank" class="no-select" style="text-decoration: none; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%); border: 1.5px solid #BBF7D0; padding: 12px 14px; border-radius: 14px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 10px rgba(22, 163, 74, 0.1);" onmousedown="this.style.transform='scale(0.96)'; this.style.boxShadow='none';" onmouseup="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 10px rgba(22, 163, 74, 0.1)';">
+                                    <div style="background: #22C55E; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 6px rgba(34, 197, 94, 0.4);">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                                    </div>
+                                    <div style="width: 1.5px; height: 18px; background: #BBF7D0; flex-shrink: 0; margin: 0 10px;"></div>
+                                    <span style="font-family: monospace; font-size: 15px; font-weight: 900; color: #166534; letter-spacing: 1px; flex: 1; text-align: left;">${formatWaDisplay}</span>
+                                    <div style="background: rgba(34, 197, 94, 0.15); padding: 6px 10px; border-radius: 8px; display: flex; align-items: center; gap: 4px; flex-shrink: 0; margin-left: 8px;">
+                                        <span style="font-size: 10px; font-weight: 900; color: #15803D; text-transform: uppercase; letter-spacing: 0.5px;">Chat</span>
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                                    </div>
+                                </a>`;
+                            } else if (!bankHtml) {
+                                phoneHtml = `<div style="font-size: 10px; font-weight: 800; color: #94A3B8; padding: 6px 0; text-align: center;">Tidak ada kontak yang ditampilkan</div>`;
+                            }
+
+                            // KARTU LEBAR 340px (MAX-WIDTH 88VW) AGAR TEKS NAFAS LEGA
                             deskCardsHtml += `
-                            <div class="no-select" style="flex: 0 0 auto; max-width: 240px; min-width: 140px; scroll-snap-align: start; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 16px; padding: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between;">
-                                <div>
-                                    <div style="font-size: 9px; font-weight: 900; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${esc(jabatan)}</div>
-                                    <div style="font-size: 14px; font-weight: 900; color: #1E293B; line-height: 1.3; margin-bottom: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${esc(ag.nama)}</div>
+                            <div class="no-select" style="flex: 0 0 auto; width: 340px; max-width: 88vw; scroll-snap-align: start; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 20px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.08); display: flex; flex-direction: column; overflow: hidden;">
+                                
+                                <!-- KEPALA KARTU (AKORDION TRIGGER) -->
+                                <div style="padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: background 0.2s;" onclick="let isClosed = document.getElementById('desk-body-${ag.id}').style.display === 'none'; document.querySelectorAll('.desk-body-item').forEach(el => el.style.display = 'none'); document.querySelectorAll('.desk-ic-item').forEach(el => el.style.transform = 'rotate(0deg)'); if(isClosed){ document.getElementById('desk-body-${ag.id}').style.display = 'flex'; document.getElementById('desk-ic-${ag.id}').style.transform = 'rotate(180deg)'; }" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='transparent'">
+                                    <div style="flex: 1; min-width: 0;">
+                                        <div style="font-size: 10px; font-weight: 900; color: #3B82F6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                                            ${esc(jabatan)}
+                                        </div>
+                                        <div style="font-size: 16px; font-weight: 900; color: #0F172A; letter-spacing: -0.5px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${esc(ag.nama)}</div>
+                                    </div>
+                                    <div style="width: 32px; height: 32px; background: #F1F5F9; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: 12px; border: 1px solid #E2E8F0;">
+                                        <svg id="desk-ic-${ag.id}" class="desk-ic-item" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="3" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg>
+                                    </div>
                                 </div>
-                                <div style="display: flex; justify-content: flex-end;">
+
+                                <!-- BADAN KARTU (KONTAK - DEFAULT HIDDEN) -->
+                                <div id="desk-body-${ag.id}" class="desk-body-item" style="display: none; flex-direction: column; gap: 10px; padding: 0 20px 20px 20px;">
+                                    <div style="width: 100%; height: 1.5px; background: repeating-linear-gradient(to right, #E2E8F0 0, #E2E8F0 6px, transparent 6px, transparent 12px); margin-bottom: 6px;"></div>
+                                    ${bankHtml}
                                     ${phoneHtml}
                                 </div>
                             </div>`;
@@ -1647,17 +1725,16 @@
 
                     if (deskCardsHtml !== '') {
                         deskEl.innerHTML = `
-                        <div style="font-size: 11px; font-weight: 900; color: var(--primary); text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; padding-left: 4px;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> EXECUTIVE DESK
-                        </div>
-                        <div style="display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 16px; margin-bottom: 8px; transform: translateZ(0); will-change: transform;">
-                            ${deskCardsHtml}
-                            <div class="no-select" style="flex: 0 0 auto; width: 140px; scroll-snap-align: start; background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); border-radius: 16px; padding: 16px; box-shadow: 0 10px 20px rgba(30, 58, 138, 0.3); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; cursor: pointer; transition: transform 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" onclick="openDirektori()">
-                                <div style="background: rgba(255,255,255,0.2); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
-                                </div>
-                                <div style="font-size: 11px; font-weight: 900; color: white; text-transform: uppercase; letter-spacing: 0.5px;">DIREKTORI<br>LENGKAP</div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-left: 4px; padding-right: 4px;">
+                            <div style="font-size: 11px; font-weight: 800; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> EXECUTIVE DESK
                             </div>
+                            <div class="no-select" style="font-size: 10px; font-weight: 800; color: #64748B; display: flex; align-items: center; gap: 4px; cursor: pointer; transition: 0.2s;" onclick="openDirektori()" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">
+                                LIHAT DIREKTORI <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 20px; margin-bottom: 8px; transform: translateZ(0); will-change: transform; align-items: flex-start;">
+                            ${deskCardsHtml}
                         </div>`;
                         deskEl.style.display = 'block';
                     } else {
@@ -1688,27 +1765,41 @@
                     let memHtml = '';
                     let targetMems = matchG ? g.members : mems;
                     targetMems.forEach(m => {
-                        let cleanWa = String(m.wa || '').replace(/\D/g,'');
-                        let btnWa = '';
-                        
                         // Validasi No WA Ketat (Minimal 9 digit) - Poisoned Link Shield
+                        let cleanWa = String(m.wa || '').replace(/\D/g,'');
+                        let contactRows = '';
+                        
+                        if (m.bank_nama && m.bank_rek) {
+                            let svgLogo = window.getBankLogoSVG(m.bank_nama);
+                            contactRows += `
+                            <div style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: transform 0.2s; padding: 6px 0;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" onclick="window.copyRekening('${esc(m.bank_rek)}', '${esc(m.bank_nama)}')">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div style="display: flex; align-items: center; justify-content: center; width: 40px; flex-shrink: 0;">${svgLogo}</div>
+                                    <span style="font-family: monospace; font-size: 13px; font-weight: 900; color: #1E293B; letter-spacing: 0.5px;">${esc(m.bank_rek)}</span>
+                                </div>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5" style="margin-left: 8px; flex-shrink: 0;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                            </div>`;
+                        }
+
                         if (cleanWa.length >= 9) {
                             let formatWa = cleanWa.startsWith('62') ? '0' + cleanWa.substring(2) : cleanWa;
-                            btnWa = `
-                            <a href="https://wa.me/${cleanWa}" target="_blank" style="display: flex; align-items: center; gap: 8px; text-decoration: none; background: #ECFDF5; padding: 6px 10px; border-radius: 20px; border: 1px solid #A7F3D0; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.1); transition: transform 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">
-                                <span style="font-family: monospace; font-size: 13px; font-weight: 900; color: #059669; letter-spacing: 0.5px;">${formatWa}</span>
-                                <div style="width: 28px; height: 28px; background: #25D366; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(37, 211, 102, 0.4); flex-shrink: 0;">
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                            contactRows += `
+                            <a href="https://wa.me/${cleanWa}" target="_blank" style="display: flex; align-items: center; gap: 8px; text-decoration: none; padding: 6px 0; transition: transform 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">
+                                <div style="display: flex; align-items: center; justify-content: center; width: 40px; flex-shrink: 0;">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                                 </div>
+                                <span style="font-family: monospace; font-size: 13px; font-weight: 900; color: #1E293B; letter-spacing: 0.5px;">${formatWa}</span>
                             </a>`;
-                        } else {
-                            btnWa = `<div style="font-size: 10px; font-weight: 800; color: #94A3B8; background: #F1F5F9; padding: 6px 12px; border-radius: 20px; border: 1px solid #E2E8F0;">Tak Ada Kontak</div>`;
+                        } else if (!contactRows) {
+                            contactRows = `<div style="font-size: 10px; font-weight: 800; color: #94A3B8; padding: 6px 0;">Tak Ada Kontak</div>`;
                         }
                         
                         memHtml += `
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:12px 16px;">
-                            <div style="font-size:14px; font-weight:800; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-right:12px;">${esc(m.nama)}</div>
-                            ${btnWa}
+                        <div style="display:flex; flex-direction:column; justify-content:center; margin-top:12px; background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:16px;">
+                            <div style="font-size:14px; font-weight:800; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; border-bottom: 1.5px dashed var(--border); padding-bottom: 12px; margin-bottom: 8px;">${esc(m.nama)}</div>
+                            <div style="display: flex; flex-direction: column; justify-content: flex-end;">
+                                ${contactRows}
+                            </div>
                         </div>`;
                     });
                     
@@ -1893,8 +1984,8 @@
             </div>
 
             <div class="seg-control no-select">
-                <button class="seg-btn active" id="flt-semua" onclick="switchTrxTab('semua')">Semua Mutasi</button>
-                <button class="seg-btn" id="flt-uang-muka" onclick="switchTrxTab('uang muka')">Mutasi Dana Talangan</button>
+                <button class="seg-btn active" id="flt-semua" onclick="switchTrxTab('semua')" style="display:flex; align-items:center; justify-content:center; gap:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Semua Mutasi</button>
+                <button class="seg-btn" id="flt-uang-muka" onclick="switchTrxTab('uang muka')" style="display:flex; align-items:center; justify-content:center; gap:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Mutasi Talangan</button>
             </div>
             
             <div id="trx-full-list"></div>
@@ -2181,26 +2272,133 @@
                 let tgl = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
                 let isMasuk = t.tipe === 'masuk' || t.tipe === 'iuran';
                 let isPending = t.status === 'pending' || t.status === 'talangan';
+                let amtView = formatPrivacy(isPending ? t.nom_awal : t.nom_final);
+                let exactTime = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0');
+
+                // --- 1. DETEKSI KARTU MERGED (TRANSFER INTERNAL / UANG MUKA / TALANGAN LUNAS) ---
+                let isPjAdvance = t.tipe === 'keluar' && t.kat === 'Uang Muka Kegiatan';
+                let isSetorSisa = t.tipe === 'keluar' && t.kat === 'Transfer Internal' && String(t.ket).includes('Setor Sisa LPJ');
+                let isReimburseNombok = t.tipe === 'keluar' && t.kat === 'Transfer Internal' && String(t.ket).includes('Reimburse Nombok LPJ');
+                let isBayarTalangan = t.tipe === 'keluar' && t.status === 'lunas' && String(t.ket).includes('Penyelesaian Talangan:');
+
+                let dAsal = state.dompet.find(x => x.id === (t.id_dompet || 'DP-UTAMA'));
+                let namaDompetAsal = dAsal ? esc(dAsal.nama) : 'Kas Utama';
+                let namaAg = state.anggota.find(a => a.id === t.id_anggota)?.nama || 'Panitia';
+
+                // ZONA RENDER KHUSUS: MERGED CARD
+                if (isPjAdvance || isSetorSisa || isReimburseNombok || isBayarTalangan) {
+                    let titleTrx = esc(t.ket);
+                    let badgeText = 'PINDAH KAS';
+                    let asalUang = namaDompetAsal;
+                    let tujuanUang = '';
+                    let warnaTema = '#2563EB'; // Biru (Distribusi Internal)
+                    let bgTema = '#EFF6FF';
+                    let borderTema = '#BFDBFE';
+
+                    if (isPjAdvance) {
+                        titleTrx = String(t.ket).replace('Transfer ke PJ: ', '').trim();
+                        badgeText = 'ALOKASI DANA';
+                        tujuanUang = `PJ: ${esc(namaAg)}`;
+                    } else if (isSetorSisa) {
+                        titleTrx = String(t.ket).replace('Setor Sisa LPJ: ', '').trim();
+                        badgeText = 'PENGEMBALIAN SISA DANA';
+                        tujuanUang = `Dompet Induk Kas`; 
+                        warnaTema = '#059669'; // Emerald
+                        bgTema = '#ECFDF5';
+                        borderTema = '#A7F3D0';
+                    } else if (isReimburseNombok) {
+                        titleTrx = String(t.ket).replace('Reimburse Nombok LPJ: ', '').trim();
+                        badgeText = 'REIMBURSE (GANTI RUGI)';
+                        tujuanUang = `PJ Anggota: ${esc(namaAg)}`;
+                        warnaTema = '#D97706'; // Emas
+                        bgTema = '#FFFBEB';
+                        borderTema = '#FDE68A';
+                    } else if (isBayarTalangan) {
+                        titleTrx = String(t.ket).replace('Penyelesaian Talangan: ', '').split('\n')[0].replace(/\[TALANGAN LUNAS.*?\]/i, '').trim();
+                        badgeText = 'BAYAR HUTANG TALANGAN';
+                        tujuanUang = `Anggota: ${esc(namaAg)}`;
+                        warnaTema = '#D97706'; // Emas
+                        bgTema = '#FFFBEB';
+                        borderTema = '#FDE68A';
+                    }
+
+                    let footerMerged = '';
+                    if (!isKiosk) {
+                         footerMerged = `
+                         <div class="trx-footer kiosk-hide" style="display:flex; justify-content:space-between; align-items:center; padding-top: 12px; border-top: 1px dashed var(--border); margin-top: 12px;">
+                             <div style="font-size: 9px; font-weight: 900; color: #94A3B8; display: flex; align-items: center; gap: 6px; letter-spacing: 0.5px;">
+                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> SISTEM GANDA
+                             </div>
+                             <div style="font-family: monospace; font-size: 9px; font-weight: 800; color: ${warnaTema}; background: ${bgTema}; padding: 4px 8px; border-radius: 6px; letter-spacing: 0.5px; border: 1px solid ${borderTema}; display: flex; align-items: center; gap: 4px;">
+                                 NO. TRX: ${t.id}
+                             </div>
+                         </div>`;
+                    } else {
+                         footerMerged = `
+                         <div class="trx-footer guest-only" style="display:flex; justify-content:space-between; align-items:center; padding-top: 12px; border-top: 1px dashed var(--border); margin-top: 12px;">
+                             <div style="font-family: monospace; font-size: 9px; font-weight: 800; color: ${warnaTema}; background: ${bgTema}; padding: 4px 8px; border-radius: 6px; letter-spacing: 0.5px; border: 1px solid ${borderTema}; display: flex; align-items: center; gap: 4px;">
+                                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                                 NO. TRX: ${t.id}
+                             </div>
+                             <div style="font-size: 10px; font-weight: 900; color: #059669; display: flex; align-items: center; gap: 4px; letter-spacing: 0.5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> SELESAI</div>
+                         </div>`;
+                    }
+
+                    return `
+                    <div class="trx-card no-select" style="border: 1.5px solid ${borderTema}; padding: 18px 20px; background: #FFFFFF; box-shadow: 0 4px 10px rgba(0,0,0,0.02);" onclick="pulseHaptic('light')">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                            <div style="flex: 1; padding-right: 12px;">
+                                <div style="font-size: 14px; font-weight: 900; color: var(--text-main); margin-bottom: 8px; line-height: 1.4;">${titleTrx}</div>
+                                <div style="display:inline-flex; align-items:center; gap:4px; background:${bgTema}; color:${warnaTema}; padding:4px 8px; border-radius:6px; font-size:9.5px; font-weight:900; letter-spacing:0.5px; border: 1px solid ${borderTema};">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg> ${badgeText}
+                                </div>
+                            </div>
+                            <div style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-align: right; flex-shrink: 0;">${tgl.split(' ')[0]}</div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 14px; position: relative;">
+                            <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                                <div style="width: 28px; height: 28px; border-radius: 8px; background: #F1F5F9; display: flex; align-items: center; justify-content: center; color: #64748B;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M22 10v4"/><circle cx="18" cy="12" r="1"/></svg></div>
+                                <div style="width: 2.5px; height: 16px; background-image: linear-gradient(to bottom, #CBD5E1 50%, transparent 50%); background-size: 100% 6px;"></div>
+                                <div style="width: 28px; height: 28px; border-radius: 8px; background: ${bgTema}; display: flex; align-items: center; justify-content: center; color: ${warnaTema};"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; min-height: 28px;">
+                                    <div>
+                                        <span style="font-size: 9.5px; font-weight: 800; color: #94A3B8; text-transform: uppercase;">Keluar dari:</span>
+                                        <div style="font-size: 12px; font-weight: 800; color: var(--text-main); margin-top: 2px;">${asalUang}</div>
+                                    </div>
+                                    <div style="font-size: 14px; font-weight: 900; color: var(--text-main); letter-spacing: -0.5px;">Rp ${amtView}</div>
+                                </div>
+                                <div style="height: 16px; display: flex; align-items: center;"><div style="width: 100%; height: 1.5px; background-image: linear-gradient(to right, #E2E8F0 50%, transparent 50%); background-size: 8px 100%;"></div></div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; min-height: 28px;">
+                                    <div>
+                                        <span style="font-size: 9.5px; font-weight: 800; color: #94A3B8; text-transform: uppercase;">Masuk ke:</span>
+                                        <div style="font-size: 12px; font-weight: 800; color: ${warnaTema}; margin-top: 2px;">${tujuanUang}</div>
+                                    </div>
+                                    <div style="font-size: 14px; font-weight: 900; color: ${warnaTema}; letter-spacing: -0.5px;">Rp ${amtView}</div>
+                                </div>
+                            </div>
+                        </div>
+                        ${footerMerged}
+                    </div>`;
+                }
+
+                // --- 2. ZONA RENDER: KARTU NORMAL (MASUK / KELUAR REGULER) ---
                 let cls = isPending ? 'pend' : (isMasuk ? 'in' : 'out');
                 
                 let svgIcon = isPending ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>` 
                                         : (isMasuk ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>` 
                                                    : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>`);
 
-                let amtView = formatPrivacy(isPending ? t.nom_awal : t.nom_final);
-                
-                let isKhusus = t.id && t.id.startsWith('KB');
-                let identitasTeks = esc(t.kat);
-                if (isKhusus) {
-                    let ag = state.anggota.find(a => a.id === t.id_anggota);
-                    let namaPJ = ag ? esc(ag.nama).toUpperCase() : 'ANONIM';
-                    if (t.status === 'lunas') {
-                        identitasTeks = String(t.ket || '').includes('[TALANGAN') ? `Penyelesaian Talangan: ${namaPJ}` : (String(t.ket || '').includes('Transfer ke PJ:') ? `Pencairan Dana PJ: ${namaPJ}` : `Uang Muka Selesai: ${namaPJ}`);
-                    } else if (t.status === 'talangan') {
-                        identitasTeks = `Ditalangi oleh: ${namaPJ}`;
-                    } else {
-                        identitasTeks = `PJ Uang Muka: ${namaPJ}`;
-                    }
+                let badgeHtml = '';
+                if (isPending) {
+                    let statusText = t.status === 'talangan' ? 'HUTANG KAS' : 'UANG MUKA AKTIF';
+                    badgeHtml = `<div style="display:inline-flex; align-items:center; gap:4px; background:#FEF3C7; color:#D97706; padding:4px 8px; border-radius:6px; font-size:9.5px; font-weight:900; letter-spacing:0.5px; border: 1px solid #FDE68A;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${statusText}</div>`;
+                } else if (isMasuk) {
+                    badgeHtml = `<div style="display:inline-flex; align-items:center; gap:4px; background:#D1FAE5; color:#059669; padding:4px 8px; border-radius:6px; font-size:9.5px; font-weight:900; letter-spacing:0.5px; border: 1px solid #A7F3D0;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> DANA MASUK</div>`;
+                } else {
+                    badgeHtml = `<div style="display:inline-flex; align-items:center; gap:4px; background:var(--danger-light); color:var(--danger); padding:4px 8px; border-radius:6px; font-size:9.5px; font-weight:900; letter-spacing:0.5px; border: 1px solid #FECACA;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg> DANA KELUAR</div>`;
                 }
 
                 let footerHtml = '';
@@ -2221,14 +2419,28 @@
                         </div>`;
                     }
                 } else {
-                    let exactTime = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0');
+                    let statusLabelGuest = isPending ? `<span style="color:#D97706; display:flex; align-items:center; gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> PROSES</span>` : `<span style="color:#059669; display:flex; align-items:center; gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> SELESAI</span>`;
                     footerHtml = `
-                    <div class="trx-footer guest-only" style="display:flex; border-top: 1px dashed var(--border);">
-                        <div style="font-family: monospace; font-size: 9.5px; font-weight: 800; color: #059669; background: #ECFDF5; padding: 6px 12px; border-radius: 6px; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid #A7F3D0;">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
-                            V-HASH: ${t.id} | ${exactTime}
+                    <div class="trx-footer guest-only" style="display:flex; justify-content:space-between; align-items:center; border-top: 1px dashed var(--border);">
+                        <div style="font-family: monospace; font-size: 9px; font-weight: 800; color: #059669; background: #ECFDF5; padding: 4px 8px; border-radius: 6px; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #A7F3D0;">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                            NO. TRX: ${t.id}
+                        </div>
+                        <div style="font-size: 10px; font-weight: 900; text-transform:uppercase; letter-spacing:0.5px; display:flex; align-items:center; gap:4px;">
+                            ${statusLabelGuest}
                         </div>
                     </div>`;
+                }
+
+                let dAsalCard = state.dompet.find(x => x.id === (t.id_dompet || 'DP-UTAMA'));
+                let namaDompetCard = dAsalCard ? esc(dAsalCard.nama) : 'Kas Utama';
+                let txtArahanDompet = isMasuk ? 'Masuk ke' : 'Keluar dari';
+                let warnaDompetCard = isMasuk ? '#059669' : '#1E3A8A';
+
+                let identitasTeks = esc(t.kat);
+                if (t.id && t.id.startsWith('KB')) {
+                    let ag = state.anggota.find(a => a.id === t.id_anggota);
+                    identitasTeks = `PJ: ${ag ? esc(ag.nama).toUpperCase() : 'ANONIM'}`;
                 }
 
                 return `
@@ -2237,15 +2449,22 @@
                         <div style="display: flex; gap: 14px; flex: 1; min-width: 0;">
                             <div class="trx-icon ${cls}">${svgIcon}</div>
                             <div style="flex: 1; min-width: 0;">
-                                <div class="trx-title line-clamp-2">${esc(t.ket)}</div>
+                                <div class="trx-title line-clamp-2" style="margin-bottom: 8px;">${esc(t.ket)}</div>
+                                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;">
+                                    ${badgeHtml}
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px; font-size: 10px; font-weight: 800; color: #64748B;">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="flex-shrink: 0;"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M22 10v4"/><circle cx="18" cy="12" r="1"/></svg>
+                                    <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${txtArahanDompet}: <span style="color: ${warnaDompetCard}; font-weight: 900;">${namaDompetCard}</span></span>
+                                </div>
                                 <div class="trx-sub">
-                                    <span style="color:var(--text-main);">${identitasTeks}</span>
+                                    <span style="color:var(--text-main); font-weight: 800;">${identitasTeks}</span>
                                     <span style="opacity: 0.5;">•</span>
                                     <span>${tgl.split(' ')[0]}</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="trx-amt ${cls}">Rp ${amtView}</div>
+                        <div class="trx-amt ${cls}" style="letter-spacing: -0.5px;">Rp ${amtView}</div>
                     </div>
                     ${footerHtml}
                 </div>`;
@@ -2265,6 +2484,15 @@
                     if (t.is_deleted) continue;
                     if (currentTrxFilter === 'uang muka' && t.status !== 'pending' && t.status !== 'talangan') continue;
                     
+                    // --- THE BLACK MAGIC: HIDE DOUBLE-ENTRY COUNTERPARTS FROM UI ---
+                    let isTerimaKasInduk = t.tipe === 'masuk' && t.kat === 'Transfer Internal' && String(t.ket).includes('Terima dari Kas Induk:');
+                    let isTerimaSisaLpj = t.tipe === 'masuk' && t.kat === 'Sisa Uang Muka' && String(t.ket).includes('Terima Sisa LPJ:');
+                    let isTerimaReimburse = t.tipe === 'masuk' && t.kat === 'Transfer Internal' && String(t.ket).includes('Terima Reimburse Nombok:');
+                    let isDialihkan = t.nom_final === 0 && String(t.ket).includes('[Dialihkan ke Nota Baru]');
+                    
+                    // Kami menyembunyikan kartu pasangan ini karena UI menggunakan Merged Card pada transaksi 'keluar'-nya untuk merepresentasikan kedua kejadian sekaligus dalam 1 kartu!
+                    if (isTerimaKasInduk || isTerimaSisaLpj || isTerimaReimburse || isDialihkan) continue;
+
                     if (searchVal) {
                         let match = (t.ket || '').toLowerCase().includes(searchVal) ||
                                     (t.kat || '').toLowerCase().includes(searchVal) ||
@@ -2286,7 +2514,7 @@
                 const pagedData = data.slice(startIndex, endIndex);
                 
                 if (currentTrxFilter === 'uang muka') {
-                    // ENGINE AGREGASI BATCH TALANGAN
+                    // ENGINE AGREGASI BATCH TALANGAN & PEMISAHAN ZONA VISUAL
                     let pendingHtml = '';
                     let talanganHtml = '';
                     let talanganMap = {};
@@ -2300,6 +2528,26 @@
                             talanganMap[t.id_anggota].total += t.nom_awal;
                         }
                     });
+
+                    // RENDER ZONA A: UANG MUKA (KAS DI PANITIA)
+                    let finalPendingZone = '';
+                    if (pendingHtml) {
+                        finalPendingZone = `
+                        <div style="margin-bottom: 32px;">
+                            <div style="font-size: 11.5px; font-weight: 900; color: #1D4ED8; text-transform: uppercase; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; letter-spacing: 0.5px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> UANG KAS DI TANGAN PANITIA (UANG MUKA)
+                            </div>
+                            ${pendingHtml}
+                        </div>`;
+                    } else {
+                        finalPendingZone = `
+                        <div style="margin-bottom: 32px;">
+                            <div style="font-size: 11.5px; font-weight: 900; color: #1D4ED8; text-transform: uppercase; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; letter-spacing: 0.5px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> UANG KAS DI TANGAN PANITIA (UANG MUKA)
+                            </div>
+                            <div class="no-select" style="background:var(--surface); border:1.5px dashed var(--border); border-radius:16px; padding:24px; text-align:center; color:var(--text-muted); font-size:12px; font-weight:700;">Tidak ada kas yang sedang dibawa/dipakai.</div>
+                        </div>`;
+                    }
                     
                     Object.keys(talanganMap).forEach(idAg => {
                         let ag = state.anggota.find(a => a.id === idAg);
@@ -2310,9 +2558,9 @@
                         dData.notas.forEach(n => {
                             let dt = new Date(n.ts);
                             listNotas += `
-                            <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px dashed var(--border);">
-                                <div style="font-size:11px; color:var(--text-main); font-weight:600; flex:1; line-height:1.4;">${esc(n.ket)}<br><span style="font-size:9.5px; color:var(--text-muted);">${dt.toLocaleDateString('id-ID')}</span></div>
-                                <div style="font-size:12.5px; font-weight:900; color:var(--danger); white-space:nowrap; margin-left:12px;">Rp ${fmtRp(n.nom_awal)}</div>
+                            <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px dashed var(--border);">
+                                <div style="font-size:11.5px; color:var(--text-main); font-weight:700; flex:1; line-height:1.5;">${esc(n.ket)}<br><span style="font-size:9.5px; color:var(--text-muted); display:flex; align-items:center; gap:4px; margin-top:4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> ${dt.toLocaleDateString('id-ID')}</span></div>
+                                <div style="font-size:13px; font-weight:900; color:var(--danger); white-space:nowrap; margin-left:12px;">Rp ${fmtRp(n.nom_awal)}</div>
                             </div>`;
                         });
                         
@@ -2325,23 +2573,43 @@
                                     </div>
                                     <div>
                                         <div style="font-size:14px; font-weight:900; color:var(--text-main); margin-bottom:4px;">${esc(namaAg)}</div>
-                                        <div style="font-size:9.5px; font-weight:900; color:var(--danger); letter-spacing:0.5px;"><span style="background:var(--danger-light); padding:3px 6px; border-radius:6px; border: 1px solid rgba(239, 68, 68, 0.2);">${dData.notas.length} NOTA AKTIF</span></div>
+                                        <div style="font-size:9.5px; font-weight:900; color:var(--danger); letter-spacing:0.5px;"><span style="background:var(--danger-light); padding:3px 6px; border-radius:6px; border: 1px solid rgba(239, 68, 68, 0.2);">${dData.notas.length} NOTA BELUM DIGANTI</span></div>
                                     </div>
                                 </div>
                                 <div style="font-size:16px; font-weight:900; color:var(--text-main); letter-spacing:-0.5px;">Rp ${fmtRp(dData.total)}</div>
                             </div>
                             <div id="acc-talangan-${idAg}" style="display:none; padding:16px; border-top:1px solid var(--border);">
-                                <div style="font-size:10px; font-weight:900; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px; letter-spacing:0.5px;">Rincian Nota Talangan Lapangan</div>
+                                <div style="font-size:10px; font-weight:900; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px; letter-spacing:0.5px;">Rincian Nota Talangan</div>
                                 ${listNotas}
-                                <button class="btn kiosk-hide" style="width:100%; margin-top:16px; background:var(--primary-grad); color:white; font-size:13px; font-weight:900; padding:14px; box-shadow:0 4px 15px rgba(30,58,138,0.25);" onclick="executeBatchSettle('${idAg}', ${dData.total})">LUNASI SEMUA NOTA(Rp ${fmtRp(dData.total)})</button>
+                                <button class="btn kiosk-hide" style="width:100%; margin-top:16px; background:var(--primary-grad); color:white; font-size:13px; font-weight:900; padding:14px; box-shadow:0 4px 15px rgba(30,58,138,0.25); display:flex; align-items:center; justify-content:center; gap:8px;" onclick="executeBatchSettle('${idAg}', ${dData.total})">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> LUNASI SEMUA (Rp ${fmtRp(dData.total)})
+                                </button>
                             </div>
                         </div>`;
                     });
+
+                    let finalTalanganZone = '';
+                    if (talanganHtml) {
+                        finalTalanganZone = `
+                        <div>
+                            <div style="font-size: 11.5px; font-weight: 900; color: #BE123C; text-transform: uppercase; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; letter-spacing: 0.5px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> HUTANG KAS KEPADA ANGGOTA (TALANGAN)
+                            </div>
+                            ${talanganHtml}
+                        </div>`;
+                    } else {
+                         finalTalanganZone = `
+                        <div>
+                            <div style="font-size: 11.5px; font-weight: 900; color: #BE123C; text-transform: uppercase; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; letter-spacing: 0.5px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> HUTANG KAS KEPADA ANGGOTA (TALANGAN)
+                            </div>
+                            <div class="no-select" style="background:var(--surface); border:1.5px dashed var(--border); border-radius:16px; padding:24px; text-align:center; color:var(--text-muted); font-size:12px; font-weight:700;">Tidak ada hutang kas pada anggota.</div>
+                        </div>`;
+                    }
                     
-                    html = pendingHtml + talanganHtml;
-                    if (!html) html = '<div class="no-select" style="color:var(--text-muted); font-size:13px; text-align:center; padding:40px 0;">Belum ada mutasi talangan.</div>';
+                    html = finalPendingZone + finalTalanganZone;
                     document.getElementById('btn-load-more').classList.add('hidden'); 
-                } else {
+                }else {
                     if(data.length === 0) {
                         html = '<div class="no-select" style="color:var(--text-muted); font-size:13px; text-align:center; padding:40px 0;">Riwayat Mutasi Kosong.</div>';
                         document.getElementById('btn-load-more').classList.add('hidden');
@@ -3091,6 +3359,27 @@
                 }
             }
 
+            function openBankSelect() {
+                let opts = [
+                    {label: 'Tidak Ada', value: ''},
+                    {label: 'BCA', value: 'BCA'},
+                    {label: 'Bank Mandiri', value: 'MANDIRI'},
+                    {label: 'BRI', value: 'BRI'},
+                    {label: 'BNI', value: 'BNI'},
+                    {label: 'DANA', value: 'DANA'},
+                    {label: 'GoPay', value: 'GOPAY'},
+                    {label: 'OVO', value: 'OVO'},
+                    {label: 'ShopeePay', value: 'SHOPEEPAY'}
+                ];
+                if(typeof openSelectModal === 'function') {
+                    openSelectModal('Pilih Bank / E-Wallet', opts, document.getElementById('ang-bank-val').value, (val) => {
+                        document.getElementById('ang-bank-val').value = val;
+                        let sel = opts.find(o => o.value === val);
+                        document.getElementById('ang-bank-btn').innerText = sel && val !== '' ? sel.label : 'Pilih Bank';
+                    });
+                }
+            }
+
         </script>
         <!-- ===================================== -->
         <!-- MENU: PROGRAM KERJA & KEPANITIAAN   -->
@@ -3451,6 +3740,15 @@
                                 <div style="position: relative; display: flex; align-items: center;">
                                     <span style="position: absolute; left: 14px; font-size: 14px; font-weight: 700; color: var(--text-muted);">+62</span>
                                     <input type="tel" id="ang-wa" placeholder="8123..." style="padding-left: 50px; border-radius: 10px; background: var(--bg);">
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 16px;">
+                                <label>Data Rekening / E-Wallet (Opsional)</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="hidden" id="ang-bank-val" value="">
+                                    <div id="ang-bank-btn" class="custom-select" style="flex: 0.4; padding: 14px 10px; font-size: 13px; border-radius: 10px; background: var(--bg);" onclick="openBankSelect()">Pilih Bank</div>
+                                    <input type="tel" id="ang-rek" placeholder="Nomor Rekening..." style="flex: 0.6; border-radius: 10px; background: var(--bg);">
                                 </div>
                             </div>
                             
@@ -4051,6 +4349,8 @@
                 let n = document.getElementById('ang-nama').value.trim();
                 let w = document.getElementById('ang-wa').value.replace(/\D/g, '');
                 let lbl = document.getElementById('ang-label-val').value.trim();
+                let bNm = document.getElementById('ang-bank-val').value;
+                let bRek = document.getElementById('ang-rek').value.replace(/\D/g, '');
                 
                 let tlTgl = document.getElementById('ang-tl-tgl').value.padStart(2, '0');
                 let tlBln = document.getElementById('ang-tl-bln-val').value.padStart(2, '0');
@@ -4089,6 +4389,8 @@
                     gol_darah: gDarah, 
                     join_bln: jBln, 
                     join_year: jThn, 
+                    bank_nama: bNm,
+                    bank_rek: bRek,
                     badges: oldAgData.badges || [] 
                 };
                 
@@ -4123,6 +4425,10 @@
                 if(phoneVal.startsWith('62')) phoneVal = phoneVal.substring(2);
                 document.getElementById('ang-wa').value = phoneVal;
                 
+                document.getElementById('ang-bank-val').value = ag.bank_nama || '';
+                document.getElementById('ang-bank-btn').innerText = ag.bank_nama || 'Pilih Bank';
+                document.getElementById('ang-rek').value = ag.bank_rek || '';
+
                 let currentLabel = ag.label ? ag.label.replace(/\s+/g, ' ').trim() : '';
                 let jArr = getSetting('jabatan_list', 'Ketum NAVASENA, Sekretaris Jenderal, Bendahara Umum, Koordinator Humas, Admin Medsos').split(',').map(s=>s.replace(/\s+/g, ' ').trim()).filter(s=>s!=='');
                 if (currentLabel && !jArr.find(j => j.toLowerCase() === currentLabel.toLowerCase())) {
@@ -4174,6 +4480,9 @@
                 document.getElementById('ang-id').value = '';
                 document.getElementById('ang-nama').value = '';
                 document.getElementById('ang-wa').value = '';
+                document.getElementById('ang-bank-val').value = '';
+                document.getElementById('ang-bank-btn').innerText = 'Pilih Bank';
+                document.getElementById('ang-rek').value = '';
                 document.getElementById('ang-label-val').value = '';
                 document.getElementById('ang-label-btn').innerText = '-- Pilih Jabatan --';
                 document.getElementById('ang-tl-tgl').value = '';
@@ -4464,17 +4773,16 @@
                             <div style="display: flex; gap: 12px; margin-bottom: 16px;">
                                 <div style="flex: 1; background: #F8FAFC; border: 1px solid #F1F5F9; border-radius: 14px; padding: 14px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; justify-content: space-between;" onmouseover="this.style.background='#F1F5F9'" onmouseout="this.style.background='#F8FAFC'" onclick="window.openDrillDown('${ev.id}', 'TERKUMPUL')">
                                     <div>
-                                        <div style="font-size: 10px; font-weight: 800; color: #64748B; margin-bottom: 6px; text-transform: uppercase; display: flex; align-items: center; gap: 4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> DANA MASUK</div>
+                                        <div style="font-size: 10px; font-weight: 800; color: #64748B; margin-bottom: 6px; text-transform: uppercase; display: flex; align-items: center; gap: 6px;"><div style="width: 20px; height: 20px; background: #D1FAE5; border-radius: 6px; display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div> DANA MASUK</div>
                                         <div style="font-size: 15px; font-weight: 900; color: #0F172A; letter-spacing: -0.5px; margin-bottom: 6px;">Rp ${fmtRp(inAmt)}</div>
                                     </div>
                                     <div style="font-size: 9px; font-weight: 800; color: #059669; background: #D1FAE5; padding: 4px 6px; border-radius: 6px; display: inline-block; align-self: flex-start; border: 1px solid #A7F3D0; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.05);">Total Donasi: Rp ${fmtRp(murniDonasiAmt)}</div>
                                 </div>
                                 <div style="flex: 1; background: #F8FAFC; border: 1px solid #F1F5F9; border-radius: 14px; padding: 14px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column;" onmouseover="this.style.background='#F1F5F9'" onmouseout="this.style.background='#F8FAFC'" onclick="window.openDrillDown('${ev.id}', 'TERPAKAI')">
-                                    <div style="font-size: 10px; font-weight: 800; color: #64748B; margin-bottom: 6px; text-transform: uppercase; display: flex; align-items: center; gap: 4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="3"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg> PENGELUARAN</div>
+                                    <div style="font-size: 10px; font-weight: 800; color: #64748B; margin-bottom: 6px; text-transform: uppercase; display: flex; align-items: center; gap: 6px;"><div style="width: 20px; height: 20px; background: #FEE2E2; border-radius: 6px; display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="3"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg></div> PENGELUARAN</div>
                                     <div style="font-size: 15px; font-weight: 900; color: #0F172A; letter-spacing: -0.5px;">Rp ${fmtRp(realOutAmt)}</div>
                                 </div>
                             </div>
-
 
                             <div style="background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); border: 1px solid #BFDBFE; border-radius: 14px; padding: 16px; margin-bottom: 20px; cursor: pointer; position: relative; overflow: hidden;" onclick="window.openDrillDown('${ev.id}', 'SISA')">
 
@@ -4639,6 +4947,9 @@
 
             async function executeDeleteEvent(id) {
                 try {
+                    let targetEvent = state.event.find(e => e.id === id);
+                    let orphanDompetId = (targetEvent && targetEvent.id_dompet_default && targetEvent.id_dompet_default !== 'DP-UTAMA') ? targetEvent.id_dompet_default : null;
+
                     await deleteStore('event', id);
                     state.event = state.event.filter(e => e.id !== id);
                     
@@ -4660,6 +4971,7 @@
                         const tx = idb.transaction('trx', 'readwrite');
                         const store = tx.objectStore('trx');
                         let dompetPjIds = state.dompet.filter(d => d.id_event === id && d.is_pj).map(d => d.id);
+                        if (orphanDompetId) dompetPjIds.push(orphanDompetId);
                         
                         fullTrxToDetach.forEach(dbTrx => {
                             let newDompet = dompetPjIds.includes(dbTrx.id_dompet) ? 'DP-UTAMA' : dbTrx.id_dompet;
@@ -4681,11 +4993,11 @@
                         }
                     });
                     
-                    let dompetToDelete = state.dompet.filter(d => d.id_event === id && d.is_pj);
+                    let dompetToDelete = state.dompet.filter(d => (d.id_event === id && d.is_pj) || d.id === orphanDompetId);
                     for (let d of dompetToDelete) {
                         await deleteStore('dompet', d.id);
                     }
-                    state.dompet = state.dompet.filter(d => !(d.id_event === id && d.is_pj));
+                    state.dompet = state.dompet.filter(d => !dompetToDelete.some(del => del.id === d.id));
 
                     localStorage.setItem('nav_unsynced', 'true');
 
@@ -5598,16 +5910,23 @@
                         state.event = state.event.filter(e => !evToDel.some(del => del.id === e.id));
                         
                         // SURGICAL FIX: Anihilasi Dompet PJ Yatim Piatu (Mencegah Phantom Wallet Leak)
-                        let dompetPjToDel = state.dompet.filter(d => d.is_pj && evToDel.some(e => e.id === d.id_event));
+                        let dompetPjToDel = state.dompet.filter(d => (d.is_pj && evToDel.some(e => e.id === d.id_event)) || evToDel.some(e => e.id_dompet_default === d.id && d.id !== 'DP-UTAMA'));
                         dompetPjToDel.forEach(d => tx.objectStore('dompet').delete(d.id));
                         state.dompet = state.dompet.filter(d => !dompetPjToDel.some(del => del.id === d.id));
 
                         oldTrxAll.forEach(t => storeTrx.delete(t.id));
 
-                        
+                        // SWEEP ORPHANED BALANCE KE KAS UTAMA SEBELUM CETAK SALDO AWAL
+                        let finalSaldoAwal = {};
                         Object.keys(saldoAwalDompet).forEach(d => {
-                            if(saldoAwalDompet[d] !== 0) {
-                                let amt = saldoAwalDompet[d];
+                            let targetD = dompetPjToDel.some(del => del.id === d) ? 'DP-UTAMA' : d;
+                            if(!finalSaldoAwal[targetD]) finalSaldoAwal[targetD] = 0;
+                            finalSaldoAwal[targetD] += saldoAwalDompet[d];
+                        });
+
+                        Object.keys(finalSaldoAwal).forEach(d => {
+                            if(finalSaldoAwal[d] !== 0) {
+                                let amt = finalSaldoAwal[d];
                                 storeTrx.put({
                                     id: genID('SA'), ts: Date.now(), tipe: amt > 0 ? 'masuk' : 'keluar',
                                     nom_awal: Math.abs(amt), nom_final: Math.abs(amt),
@@ -5617,6 +5936,7 @@
                                 });
                             }
                         });
+
                         tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
                     });
                     
@@ -5641,8 +5961,18 @@
                 document.body.style.opacity = '0';
                 
                 try {
-                    // 1. Eksekusi Nuke IndexedDB murni dari Root Browser API (Bypass proteksi logika internal)
-                    indexedDB.deleteDatabase('NavasenaFintechDB');
+                    // 0. The Annihilation Protocol: Putuskan koneksi IDB yang aktif agar tidak memblokir penghapusan
+                    if (typeof idb !== 'undefined' && idb) {
+                        try { idb.close(); } catch(e) {}
+                    }
+
+                    // 1. Eksekusi Nuke IndexedDB murni dari Root Browser API dengan sistem Promise mutlak
+                    await new Promise((resolve) => {
+                        let req = indexedDB.deleteDatabase('NavasenaFintechDB');
+                        req.onsuccess = resolve;
+                        req.onerror = resolve; // Terus melaju meski ada error partisi
+                        req.onblocked = resolve; // Paksa lolos jika diblokir thread lain
+                    });
                     
                     // 2. Anihilasi Storage Klien
                     localStorage.clear();
@@ -5665,7 +5995,6 @@
                     window.location.reload();
                 }
             }
-
         </script>
         <!-- ===================================== -->
         <!-- CORE MODALS: TRANSAKSI & AKUNTANSI    -->
@@ -5937,6 +6266,7 @@
                                         <ul style="padding-left: 16px; margin: 0;">
                                             <li style="margin-bottom: 8px;"><b>Executive Billing (Alarm Tagihan):</b> Perhatikan panel di bawah informasi Nama Anda di layar Profil. Jika panel ini berubah wujud menjadi kotak raksasa berwarna <b>MERAH TERANG</b>, itu adalah alarm darurat bahwa Anda menunggak kas (Terdapat rincian bulan apa saja yang belum dibayar dan nominal utangnya).</li>
                                             <li style="margin-bottom: 8px;"><b>NAVASENA Rewind:</b> Sentuh tombol raksasa <b>"Rekam Jejak Keuangan (REWIND)"</b>. Sistem akan membuka rekapitulasi kebanggaan Anda: Menghitung total jutaan rupiah iuran yang sudah Anda setor seumur hidup, total donasi sukarela Anda, dan tingkat persentase akurasi kepatuhan Anda.</li>
+                                            <li style="margin-bottom: 8px;"><b>Executive Desk (Direktori Pengurus):</b> Gulir ke bawah untuk menemukan panel <i>Executive Desk</i>. Panel ini adalah pusat kontak resmi pengurus. Sentuh kartu jabatan (misal: Bendahara) untuk membuka rincian kontak. Anda disediakan tombol cepat untuk langsung <b>Chat WhatsApp</b> atau <b>Menyalin Nomor Rekening Kas</b> (<i>Auto-Copy</i>). Tersedia juga opsi "LIHAT DIREKTORI" untuk pencarian spesifik.</li>
                                             <li><b>Kotak Suara (Aspirasi Anonim):</b> Temukan ikon pesan merah melayang di pojok kiri bawah layar. Fitur ini diciptakan agar Anda bisa mengirim kritik, saran, atau aduan kejanggalan uang. Dilengkapi <b>Sistem Enkripsi Anonim</b>, nama dan identitas Anda disembunyikan 100% sehingga Bendahara yang membaca tidak akan tahu siapa yang mengirimkannya.</li>
                                         </ul>
                                     </div>
@@ -5993,7 +6323,7 @@
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
                                         <ul style="padding-left: 16px; margin: 0;">
                                             <li style="margin-bottom: 8px;"><b>Lacak Arus Dana:</b> Menu Mutasi menyajikan seluruh riwayat nota masuk (hijau) dan keluar (hitam) dari dompet Karang Taruna secara kronologis dan tidak bisa ditutup-tutupi. Gunakan kotak <b>Pencarian</b> untuk melacak nama penyumbang atau nota spesifik dengan instan.</li>
-                                            <li><b>Sertifikasi V-HASH:</b> Jangan khawatir uang diselewengkan. Anda akan melihat label <b>V-HASH</b> kecil bertuliskan detik waktu persis di bawah setiap nota pengeluaran di menu ini. Cap Waktu Otentik <i>Blockchain-style</i> ini menjamin data direkam secara riil (di waktu nyata) dan terbukti bukan pengeluaran buatan atau manipulasi rekayasa.</li>
+                                            <li><b>Sertifikasi NO. TRX:</b> Jangan khawatir uang diselewengkan. Anda akan melihat label <b>NO. TRX</b> kecil bertuliskan detik waktu persis di bawah setiap nota pengeluaran di menu ini. Cap Waktu Otentik <i>Blockchain-style</i> ini menjamin data direkam secara riil (di waktu nyata) dan terbukti bukan pengeluaran buatan atau manipulasi rekayasa.</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -6050,7 +6380,8 @@
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
                                         <ul style="padding-left: 16px; margin: 0;">
                                             <li style="margin-bottom: 8px;"><b>Apresiasi Donatur Luar (Honorary):</b> Masuklah ke Menu Profil. Perhatikan tumpukan kartu Bank Holografik (Black Card / Sapphire Card). Kartu tersebut adalah monumen penghormatan khusus bagi donatur Pihak Luar (Warga RT Umum / Instansi / Individu Non-Anggota) yang telah memercayakan dan menyumbang dana terbesar pada tahun berjalan.</li>
-                                            <li style="margin-bottom: 8px;"><b>Direktori & Mading:</b> Anda bisa melihat statistik rekapitulasi data anggota (SDM) dan mengakses Direktori Pengurus (Executive Desk) untuk menyimpan nomor Kontak Divisi Kepanitiaan penting yang sedang bertugas.</li>
+                                            <li style="margin-bottom: 8px;"><b>Mading Transparansi (Statistik Kas):</b> Panel ini menyajikan metrik ringkasan makro secara transparan, mencakup total dana kas terkelola, jumlah program acara yang sukses, dan total anggota aktif yang menggerakkan organisasi.</li>
+                                            <li style="margin-bottom: 8px;"><b>Executive Desk (Pusat Kontak):</b> Akses langsung jalur komunikasi resmi organisasi. Geser kartu jabatan pengurus lalu ketuk untuk membuka rincian. Anda disediakan tombol interaktif untuk langsung <b>Chat WhatsApp</b> atau <b>Menyalin Nomor Rekening / E-Wallet</b> tanpa mencatat manual. Ketuk "LIHAT DIREKTORI" untuk pencarian data kepengurusan.</li>
                                             <li style="margin-bottom: 8px;"><b>Saluran Aspirasi Anonim:</b> Terdapat tombol merah melayang (Ikon Kotak Pesan) di pojok kiri bawah. Warga bisa leluasa mengirimkan kritik, saran, atau laporan kejanggalan kas tanpa takut diintimidasi. Sistem dijamin dengan <b>Enkripsi Anonim</b> mutlak sehingga nama/nomor warga disembunyikan secara total dari Bendahara yang membaca pesan.</li>
                                             <li><b>Portal Autentikasi:</b> Tekan tombol "Keluar" bergaris merah di bagian paling bawah untuk kembali ke halaman Otorisasi/Login jika Anda adalah salah satu anggota yang ingin memasukkan Nomor WA terdaftar dan membuka KTA Pribadi Anda.</li>
                                         </ul>
@@ -7898,8 +8229,8 @@
                         scrollTimeout = null;
                     }, 200);
                 }
-            }, true); // Gunakan 'true' (Capture Phase) agar tembus membaca pergerakan body
-
+            }, true);
+            
             ['touchstart', 'click'].forEach(evt => 
                 document.addEventListener(evt, () => { resetIdleTimer(); }, {passive: true})
             );
