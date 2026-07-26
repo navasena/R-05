@@ -125,7 +125,7 @@
         .header-btn:active { background: rgba(255,255,255,0.25); transform: scale(0.95);}
 
         /* SPA Layout */
-        .view-section { display: none; padding: 20px 24px 130px 24px; animation: fadeIn 0.3s ease; }
+        .view-section { display: none; padding: 20px 24px 80px 24px; animation: fadeIn 0.3s ease; }
         .view-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -173,9 +173,15 @@
         .fab { position: fixed; bottom: 100px; right: 24px; width: 60px; height: 60px; border-radius: 18px; background: var(--primary); color: var(--text-light); display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 25px rgba(30, 58, 138, 0.4); z-index: 900; cursor: pointer; border: none; transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s; transform: translateZ(0); will-change: transform; }
         .fab:active { transform: scale(0.92) translateZ(0); }
         
-        .fab-aspirasi { position: fixed; bottom: 100px; left: 24px; width: 50px; height: 50px; border-radius: 16px; background: #9D174D; color: white; display: none; justify-content: center; align-items: center; box-shadow: 0 10px 25px rgba(157, 23, 77, 0.4); z-index: 900; cursor: pointer; border: none; transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s; transform: translateZ(0); will-change: transform; }
-        .fab-aspirasi:active { transform: scale(0.92) translateZ(0); }
-        body.kiosk-mode .fab-aspirasi { display: flex !important; }
+        /* THE OMNI-COMMUNICATION HUB PROTOCOL (VERTICAL SPEED-DIAL) */
+        .omni-fab-container { position: fixed; bottom: 100px; left: 24px; z-index: 900; display: flex; flex-direction: column; align-items: center; }
+        .omni-fab-btn { width: 50px; height: 50px; border-radius: 16px; background: #1E3A8A; color: white; display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 25px rgba(30, 58, 138, 0.4); cursor: pointer; border: none; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: translateZ(0); position: relative; z-index: 2; }
+        .omni-fab-btn:active { transform: scale(0.92) translateZ(0); }
+        .omni-fab-btn.open { background: #0F172A; border-radius: 50%; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.5); transform: rotate(90deg); }
+        .omni-capsule { position: absolute; bottom: 55px; left: 0; width: 50px; background: transparent; border: none; padding: 0; border-radius: 0; display: flex; flex-direction: column-reverse; align-items: center; gap: 14px; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; opacity: 0; pointer-events: none; transform: translateY(30px) scale(0.5); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-origin: bottom center; z-index: 1; padding-bottom: 12px; }
+        .omni-capsule.open { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
+        .omni-item { display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 50%; cursor: pointer; transition: transform 0.2s; background: transparent; text-decoration: none; border: none; flex-shrink: 0; box-shadow: 0 6px 15px rgba(0,0,0,0.25); }
+        .omni-item:active { transform: scale(0.85); }
 
         /* BUTTONS */
         .btn { padding: 14px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; display: flex; justify-content: center; align-items: center; gap: 10px; width: 100%; transition: 0.2s; box-shadow: var(--shadow-sm); }
@@ -936,12 +942,13 @@
             if(bn.includes('BCA') || bn.includes('CENTRAL ASIA')) { url = 'https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg'; h = '18px'; }
             else if(bn.includes('MANDIRI')) { url = 'https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo_of_Bank_Mandiri.svg'; h = '15px'; }
             else if(bn.includes('BRI') || bn.includes('RAKYAT INDONESIA')) { url = 'https://upload.wikimedia.org/wikipedia/commons/2/2e/BRI_2020.svg'; h = '15px'; }
-            else if(bn.includes('BNI') || bn.includes('NEGARA INDONESIA')) { url = 'https://upload.wikimedia.org/wikipedia/id/5/55/BNI_logo.svg'; h = '14px'; }
+            else if(bn.includes('BNI') || bn.includes('NEGARA INDONESIA')) { url = 'https://upload.wikimedia.org/wikipedia/commons/1/1e/BNI_logo.svg'; h = '14px'; }
             else if(bn.includes('BSI') || bn.includes('SYARIAH INDONESIA')) { url = 'https://upload.wikimedia.org/wikipedia/commons/a/a4/Bank_Syariah_Indonesia.svg'; h = '16px'; }
-            else if(bn.includes('DANA')) { url = 'https://upload.wikimedia.org/wikipedia/commons/7/7f/Dana_logo.png'; h = '16px'; }
+            else if(bn.includes('DANA')) { url = 'https://upload.wikimedia.org/wikipedia/commons/7/72/Logo_dana_blue.svg'; h = '16px'; }
             else if(bn.includes('GOPAY')) { url = 'https://upload.wikimedia.org/wikipedia/commons/8/86/Gopay_logo.svg'; h = '18px'; }
             else if(bn.includes('OVO')) { url = 'https://upload.wikimedia.org/wikipedia/commons/e/eb/Logo_ovo_purple.svg'; h = '16px'; }
             else if(bn.includes('SHOPEEPAY')) { url = 'https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee_Pay_logo.svg'; h = '24px'; }
+
             
             let displayName = bn.length > 8 ? bn.substring(0, 8) + '...' : bn;
             
@@ -1286,13 +1293,15 @@
                     tickerEl.innerHTML = singleMsg.repeat(4); // Mengulang pesan 4x
                 } else {
                     // [AUTO-PILOT MODE] Nyalakan mesin pencari Donasi dan MVP
+
                     // 1. Ekstraksi Data Donasi (Top 10)
                     let donasiTrxTicker = state.trx.filter(t => !t.is_deleted && t.tipe === 'masuk' && (t.kat === 'Donasi' || (t.kat && String(t.kat).toLowerCase().includes('donasi')))).sort((a,b) => b.ts - a.ts).slice(0, 10);
                     let donasiArr = donasiTrxTicker.map(t => {
                         let namaDonatur = t.id_anggota ? (state.anggota.find(a => a.id === t.id_anggota)?.nama || 'Anonim') : (t.ket || 'Hamba Allah');
-                        namaDonatur = String(namaDonatur).replace(/^Donasi\s*(Umum)?\s*[:-]?\s*/i, '').split('-')[0].trim() || "Hamba Allah";
+                        namaDonatur = String(namaDonatur).replace(/^Donasi\s*(Umum|Dari)?\s*[:-]?\s*/i, '').split('-')[0].trim() || "Hamba Allah";
                         return `<span style="margin-right: 36px;"><span style="color: #94A3B8; font-weight: 900; margin-right: 8px;">DONASI DARI:</span><span style="color: #FDE68A; font-weight: 800; margin-right: 8px;">${esc(namaDonatur).toUpperCase()}</span><span style="color: #34D399; font-weight: 900;">+RP ${fmtRp(t.nom_final)}</span></span>`;
                     });
+
 
                     // 2. Ekstraksi Data MVP Teladan (Top 5 - Zero CPU Spiking)
                     let currY = new Date().getFullYear();
@@ -1322,6 +1331,9 @@
                 }
                 
                 // [SURGICAL FIX]: CONSTANT SPEED MATRIX (Ticker Auto-Pilot)
+                // Matikan mesin animasi sementara untuk mencegah glitch/lompatan saat update teks
+                tickerEl.style.animation = 'none';
+                
                 // Memberi jeda 1 frame agar browser selesai merender teks ke layar sebelum diukur
                 requestAnimationFrame(() => {
                     // Paksa reflow untuk mendapatkan ukuran piksel fisik mutlak
@@ -1334,8 +1346,8 @@
                     let speedPxPerSec = 55; 
                     let calculatedDuration = distance / speedPxPerSec;
                     
-                    // Hancurkan durasi CSS lama (20s) & Timpa dengan durasi presisi matematis
-                    tickerEl.style.animationDuration = calculatedDuration + 's';
+                    // Nyalakan kembali mesin animasi dari titik nol dengan durasi presisi matematis
+                    tickerEl.style.animation = `ticker ${calculatedDuration}s linear infinite`;
                 });
             }
 
@@ -1442,7 +1454,7 @@
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                         </div>
                         <div>
-                            <div style="font-size:10px; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:2px;">Pasukan Penggerak</div>
+                            <div style="font-size:10px; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:2px;">Pasukan NAVASENA</div>
                             <div style="font-size:16px; font-weight:900; color:var(--text-main);">${sdm} Anggota Terdaftar</div>
                         </div>
                     </div>
@@ -1466,11 +1478,13 @@
                 
                 state.trx.forEach(t => {
                     let tYear = t.year || new Date(t.ts).getFullYear();
+
                     // [SURGICAL FIX]: Whitelist Protocol (Murni Kategori Donasi) & Timestamp Capture
                     if (!t.is_deleted && t.tipe === 'masuk' && !t.id_anggota && tYear === currY && t.kat && String(t.kat).toLowerCase().includes('donasi')) {
-                        let nClean = (t.ket || '').replace(/^Donasi\s*(Umum)?\s*[:-]?\s*/i, '').split('-')[0].trim();
+                        let nClean = (t.ket || '').replace(/^Donasi\s*(Umum|Dari)?\s*[:-]?\s*/i, '').split('-')[0].trim();
                         // Sanitasi nama absolut
                         nClean = nClean.replace(/[^a-zA-Z0-9\s]/g, '').trim();
+
                         if (!nClean) nClean = "Warga Umum";
                         
                         if (blRegex.test(nClean)) {
@@ -1663,7 +1677,7 @@
                                 <div class="no-select" style="display: flex; align-items: center; justify-content: space-between; background: #F8FAFC; border: 1.5px solid #E2E8F0; padding: 12px 14px; border-radius: 14px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);" onmousedown="this.style.transform='scale(0.96)'; this.style.borderColor='#94A3B8';" onmouseup="this.style.transform='scale(1)'; this.style.borderColor='#E2E8F0';" onclick="window.copyRekening('${esc(ag.bank_rek)}', '${esc(ag.bank_nama)}')">
                                     <div style="display: flex; align-items: center; justify-content: center; width: 45px; height: 24px; flex-shrink: 0;">${svgLogo}</div>
                                     <div style="width: 1.5px; height: 18px; background: #E2E8F0; flex-shrink: 0; margin: 0 10px;"></div>
-                                    <span style="font-family: monospace; font-size: 15px; font-weight: 900; color: #0F172A; letter-spacing: 1px; flex: 1; text-align: left;">${esc(ag.bank_rek)}</span>
+                                    <span style="font-family: monospace; font-size: 15px; font-weight: 900; color: #475569; letter-spacing: 1px; flex: 1; text-align: left;">${esc(ag.bank_rek)}</span>
                                     <div style="background: #E2E8F0; width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: 8px;">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                                     </div>
@@ -1686,7 +1700,7 @@
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                                     </div>
                                     <div style="width: 1.5px; height: 18px; background: #BBF7D0; flex-shrink: 0; margin: 0 10px;"></div>
-                                    <span style="font-family: monospace; font-size: 15px; font-weight: 900; color: #166534; letter-spacing: 1px; flex: 1; text-align: left;">${formatWaDisplay}</span>
+                                    <span style="font-family: monospace; font-size: 15px; font-weight: 900; color: #475569; letter-spacing: 1px; flex: 1; text-align: left;">${formatWaDisplay}</span>
                                     <div style="background: rgba(34, 197, 94, 0.15); padding: 6px 10px; border-radius: 8px; display: flex; align-items: center; gap: 4px; flex-shrink: 0; margin-left: 8px;">
                                         <span style="font-size: 10px; font-weight: 900; color: #15803D; text-transform: uppercase; letter-spacing: 0.5px;">Chat</span>
                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -1773,9 +1787,9 @@
                             let svgLogo = window.getBankLogoSVG(m.bank_nama);
                             contactRows += `
                             <div style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: transform 0.2s; padding: 6px 0;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" onclick="window.copyRekening('${esc(m.bank_rek)}', '${esc(m.bank_nama)}')">
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <div style="display: flex; align-items: center; justify-content: center; width: 40px; flex-shrink: 0;">${svgLogo}</div>
-                                    <span style="font-family: monospace; font-size: 13px; font-weight: 900; color: #1E293B; letter-spacing: 0.5px;">${esc(m.bank_rek)}</span>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="display: flex; align-items: center; justify-content: center; width: 45px; flex-shrink: 0;">${svgLogo}</div>
+                                    <span style="font-family: monospace; font-size: 13px; font-weight: 900; color: #475569; letter-spacing: 0.5px;">${esc(m.bank_rek)}</span>
                                 </div>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5" style="margin-left: 8px; flex-shrink: 0;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                             </div>`;
@@ -1784,13 +1798,13 @@
                         if (cleanWa.length >= 9) {
                             let formatWa = cleanWa.startsWith('62') ? '0' + cleanWa.substring(2) : cleanWa;
                             contactRows += `
-                            <a href="https://wa.me/${cleanWa}" target="_blank" style="display: flex; align-items: center; gap: 8px; text-decoration: none; padding: 6px 0; transition: transform 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">
-                                <div style="display: flex; align-items: center; justify-content: center; width: 40px; flex-shrink: 0;">
+                            <a href="https://wa.me/${cleanWa}" target="_blank" style="display: flex; align-items: center; gap: 12px; text-decoration: none; padding: 6px 0; transition: transform 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">
+                                <div style="display: flex; align-items: center; justify-content: center; width: 45px; flex-shrink: 0;">
                                     <svg width="22" height="22" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                                 </div>
-                                <span style="font-family: monospace; font-size: 13px; font-weight: 900; color: #1E293B; letter-spacing: 0.5px;">${formatWa}</span>
+                                <span style="font-family: monospace; font-size: 13px; font-weight: 900; color: #475569; letter-spacing: 0.5px;">${formatWa}</span>
                             </a>`;
-                        } else if (!contactRows) {
+                        }else if (!contactRows) {
                             contactRows = `<div style="font-size: 10px; font-weight: 800; color: #94A3B8; padding: 6px 0;">Tak Ada Kontak</div>`;
                         }
                         
@@ -1846,10 +1860,11 @@
 
                 } else {
                     // Masuk Array Warga/Umum (Pemenggalan Cerdas Regex Mutlak)
-                    let namaClean = ketRaw.replace(/^Donasi\s*(Umum)?\s*[:-]?\s*/i, '').split('-')[0].trim();
+                    let namaClean = ketRaw.replace(/^Donasi\s*(Umum|Dari)?\s*[:-]?\s*/i, '').split('-')[0].trim();
                     if (!namaClean) namaClean = "Warga / Umum";
                     
                     if (!mapUmum[namaClean]) mapUmum[namaClean] = { total: 0, earliest_ts: t.ts };
+
                     mapUmum[namaClean].total += t.nom_final;
                     if (t.ts < mapUmum[namaClean].earliest_ts) mapUmum[namaClean].earliest_ts = t.ts;
                 }
@@ -2407,18 +2422,27 @@
                         let lblBtn = t.status === 'talangan' ? 'Lunasi Kas' : 'Selesaikan (Nota)';
                         footerHtml = `
                         <div class="trx-footer kiosk-hide">
-                            <button class="btn no-select" style="background:transparent; color:var(--danger); font-size:12px; font-weight:800; padding:10px; width:auto;" onclick="event.stopPropagation(); voidTrx('${t.id}')">Batal</button>
+                            <div style="display:flex; gap:6px; align-items:center;">
+                                <button class="btn no-select" style="background:transparent; color:var(--danger); padding:10px 4px; width:auto; display:flex; align-items:center; justify-content:center;" onclick="event.stopPropagation(); voidTrx('${t.id}')" title="Batal / Hapus">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                                </button>
+                                <button class="btn no-select" style="background:transparent; color:var(--primary); font-size:12px; font-weight:800; padding:10px 4px; width:auto;" onclick="event.stopPropagation(); editTrxText('${t.id}')">Edit</button>
+                            </div>
                             <button class="btn no-select" style="background: linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%); color: #92400E; font-size:13px; font-weight:900; padding:12px 24px; border-radius:10px; width:auto; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2);" onclick="event.stopPropagation(); openSettle('${t.id}')">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg> ${lblBtn}
                             </button>
                         </div>`;
                     } else if (t.tipe !== 'iuran') {
                         footerHtml = `
-                        <div class="trx-footer kiosk-hide" style="justify-content: flex-end;">
-                            <button class="btn no-select" style="background:transparent; color:var(--danger); font-size:11px; font-weight:800; padding:8px 0; width:auto; border-bottom: 1.5px solid transparent;" onclick="event.stopPropagation(); voidTrx('${t.id}')">Hapus Transaksi (Koreksi)</button>
+                        <div class="trx-footer kiosk-hide" style="justify-content: space-between; align-items: center;">
+                            <button class="btn no-select" style="background:transparent; color:var(--primary); font-size:11px; font-weight:800; padding:8px 0; width:auto; border-bottom: 1.5px solid transparent;" onclick="event.stopPropagation(); editTrxText('${t.id}')">Edit Rincian</button>
+                            <button class="btn no-select" style="background:transparent; color:var(--danger); padding:8px 0; width:auto; border-bottom: 1.5px solid transparent; display:flex; align-items:center; justify-content:center;" onclick="event.stopPropagation(); voidTrx('${t.id}')" title="Hapus Transaksi">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                            </button>
                         </div>`;
                     }
                 } else {
+
                     let statusLabelGuest = isPending ? `<span style="color:#D97706; display:flex; align-items:center; gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> PROSES</span>` : `<span style="color:#059669; display:flex; align-items:center; gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> SELESAI</span>`;
                     footerHtml = `
                     <div class="trx-footer guest-only" style="display:flex; justify-content:space-between; align-items:center; border-top: 1px dashed var(--border);">
@@ -2443,20 +2467,43 @@
                     identitasTeks = `PJ: ${ag ? esc(ag.nama).toUpperCase() : 'ANONIM'}`;
                 }
 
+                // --- INJEKSI TIPOGRAFI MULTI-BARIS (SMART PARSER) ---
+                let finalKet = esc(t.ket).replace(/\n/g, ' '); // Bersihkan baris bawaan database agar tidak double
+                
+                // Retroactive Formatting (Ubah teks lama di UI tanpa sentuh Database)
+                finalKet = finalKet.replace(/Donasi Umum:/gi, 'Donasi Dari:').replace(/^Donasi:/gi, 'Donasi Dari:');
+
+                // Format Talangan
+                finalKet = finalKet.replace(/\[TALANGAN LUNAS\]/gi, '<br><span style="color:#059669; font-size:10px; font-weight:900; letter-spacing:0.5px;">[TALANGAN LUNAS]</span><br><span style="font-size:11.5px; color:var(--text-muted); font-weight:700;">');
+                finalKet = finalKet.replace(/\[TALANGAN LUNAS MASAL\]/gi, '<br><span style="color:#059669; font-size:10px; font-weight:900; letter-spacing:0.5px;">[TALANGAN LUNAS MASAL]</span><br><span style="font-size:11.5px; color:var(--text-muted); font-weight:700;">');
+                
+                // Format Uang Muka
+                finalKet = finalKet.replace(/\[UANG MUKA SELESAI\]/gi, '<br><span style="color:#2563EB; font-size:10px; font-weight:900; letter-spacing:0.5px;">[UANG MUKA SELESAI]</span><br><span style="font-size:11.5px; color:var(--text-muted); font-weight:700;">');
+                
+                // Format Keterangan Tambahan Sistem
+                finalKet = finalKet.replace(/\[Dialihkan ke Nota Baru\]/gi, '<span style="color:#EF4444; font-style:italic;">[Dialihkan ke Nota Baru]</span>');
+                
+                // Tutup tag span jika terbuka
+                if (finalKet.includes('<span style="font-size:11.5px; color:var(--text-muted); font-weight:700;">')) {
+                    finalKet += '</span>';
+                }
+
                 return `
                 <div class="trx-card ${cls} no-select" onclick="pulseHaptic('light')">
                     <div class="trx-header-row">
                         <div style="display: flex; gap: 14px; flex: 1; min-width: 0;">
                             <div class="trx-icon ${cls}">${svgIcon}</div>
                             <div style="flex: 1; min-width: 0;">
-                                <div class="trx-title line-clamp-2" style="margin-bottom: 8px;">${esc(t.ket)}</div>
+                                <div class="trx-title" style="margin-bottom: 8px;">${finalKet}</div>
                                 <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;">
                                     ${badgeHtml}
                                 </div>
+
                                 <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px; font-size: 10px; font-weight: 800; color: #64748B;">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="flex-shrink: 0;"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M22 10v4"/><circle cx="18" cy="12" r="1"/></svg>
                                     <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${txtArahanDompet}: <span style="color: ${warnaDompetCard}; font-weight: 900;">${namaDompetCard}</span></span>
                                 </div>
+
                                 <div class="trx-sub">
                                     <span style="color:var(--text-main); font-weight: 800;">${identitasTeks}</span>
                                     <span style="opacity: 0.5;">•</span>
@@ -2535,7 +2582,7 @@
                         finalPendingZone = `
                         <div style="margin-bottom: 32px;">
                             <div style="font-size: 11.5px; font-weight: 900; color: #1D4ED8; text-transform: uppercase; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; letter-spacing: 0.5px;">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> UANG KAS DI TANGAN PANITIA (UANG MUKA)
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> UANG KAS DI TANGAN ANGGOTA (UANG MUKA)
                             </div>
                             ${pendingHtml}
                         </div>`;
@@ -2543,7 +2590,7 @@
                         finalPendingZone = `
                         <div style="margin-bottom: 32px;">
                             <div style="font-size: 11.5px; font-weight: 900; color: #1D4ED8; text-transform: uppercase; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; letter-spacing: 0.5px;">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> UANG KAS DI TANGAN PANITIA (UANG MUKA)
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> UANG KAS DI TANGAN ANGGOTA (UANG MUKA)
                             </div>
                             <div class="no-select" style="background:var(--surface); border:1.5px dashed var(--border); border-radius:16px; padding:24px; text-align:center; color:var(--text-muted); font-size:12px; font-weight:700;">Tidak ada kas yang sedang dibawa/dipakai.</div>
                         </div>`;
@@ -2593,7 +2640,7 @@
                         finalTalanganZone = `
                         <div>
                             <div style="font-size: 11.5px; font-weight: 900; color: #BE123C; text-transform: uppercase; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; letter-spacing: 0.5px;">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> HUTANG KAS KEPADA ANGGOTA (TALANGAN)
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> HUTANG KEPADA ANGGOTA (TALANGAN)
                             </div>
                             ${talanganHtml}
                         </div>`;
@@ -2695,6 +2742,7 @@
                                     if(currView === 'home') updateDashboard();
                                     if(typeof renderAcara === 'function') renderAcara();
                                     if(typeof calculateAllXP === 'function') calculateAllXP();
+
                                     if(currView === 'iuran' && typeof renderIuranGrid === 'function') renderIuranGrid();
                                 } catch(e) {
                                     showToast("Gagal membatalkan transaksi.");
@@ -2707,7 +2755,60 @@
                 }
             }
 
+            window.editTrxText = function(id) {
+                let r = localStorage.getItem('nav_role');
+                if (isKiosk || r === 'warga' || r === 'anggota') return showToast("DITOLAK: Akses ilegal. Otoritas Bendahara diperlukan.");
+                if(isProcessingTransaction) return;
+                
+                let tTarget = state.trx.find(t => t.id === id);
+                if (!tTarget) return;
+
+                // Proteksi 1: Limbo Loophole (Cegah edit di dompet yang sudah diarsipkan)
+                let dCek = state.dompet.find(d => d.id === (tTarget.id_dompet || 'DP-UTAMA'));
+                if (dCek && dCek.status === 'arsip') {
+                    return showToast("TOLAK: Dompet kas ini sudah ditutup/diarsipkan. Data tidak dapat diedit!");
+                }
+                
+                // Proteksi 2: System Generated Shield (Cegah modifikasi teks yang memiliki peran logika backend)
+                let isTerikat = (tTarget.kat === 'Transfer Internal' || tTarget.kat === 'Sisa Uang Muka' || tTarget.kat === 'Saldo Awal' || String(tTarget.ket).includes('Penyelesaian Talangan:'));
+                if (isTerikat) {
+                    return showToast("TOLAK: Teks mutasi sistem otomatis/terikat tidak boleh diubah manual!");
+                }
+
+                if (typeof openCustomPrompt === 'function') {
+                    openCustomPrompt("Edit Rincian Mutasi", "Perbaiki kesalahan ketik tanpa mengubah waktu riil dan nominal.", "Ketik rincian baru...", async (newVal) => {
+                        if (newVal === tTarget.ket) return; // Abaikan jika tidak ada perubahan
+                        
+                        try {
+                            isProcessingTransaction = true;
+                            let originalDbTrx = await new Promise(r => {
+                                const req = idb.transaction('trx', 'readonly').objectStore('trx').get(tTarget.id);
+                                req.onsuccess = e => r(e.target.result);
+                                req.onerror = () => r(null);
+                            });
+                            
+                            let t_update = {...(originalDbTrx || tTarget), ket: newVal};
+                            await saveStore('trx', t_update);
+                            
+                            // Sinkronisasi RAM
+                            let idx = state.trx.findIndex(t => t.id === id);
+                            if(idx > -1) state.trx[idx] = t_update;
+
+                            showToast("✔️ Uraian transaksi berhasil diperbarui.");
+                            renderTrxList(false);
+                            if(currView === 'home') updateDashboard();
+                            if(typeof renderAcara === 'function') renderAcara();
+                        } catch(e) {
+                            showToast("❌ Gagal memperbarui transaksi.");
+                        } finally {
+                            isProcessingTransaction = false;
+                        }
+                    }, tTarget.ket); // <-- Value default dipasang di sini
+                }
+            };
+
             // (Fungsi openSettle, calcSettle, executeSettle, executeBatchSettle ditaruh di Modal Part 4)
+
             // Namun karena dipanggil dari card HTML, kita buat jembatannya jika Modal Part 4 belum me-load-nya.
             window.openSettle = function(id) {
                 let t = state.trx.find(x => x.id === id);
@@ -3607,31 +3708,6 @@
                     </h3>
                     <p style="font-size: 11px; font-weight: 800; color: #64748B; margin-bottom: 28px; text-transform: uppercase; letter-spacing: 1px;">Full-Stack Architect</p>
                     <div style="font-size: 10px; font-weight: 700; color: #CBD5E1; opacity: 0.7;">Hak Cipta © 2026 - Dilindungi</div>
-                    
-                    <!-- SVG SOSIAL MEDIA MINIMALIS MONOKROM -->
-                    <div class="guest-only" style="display: flex; justify-content: center; align-items: center; gap: 32px; margin-top: 36px; opacity: 0.85;">
-                        <a href="https://www.tiktok.com/@pemudapemudikestalan05" target="_blank" rel="noopener noreferrer" style="transition: transform 0.2s; display: flex; padding: 8px;" onmousedown="this.style.transform='scale(0.8)'" onmouseup="this.style.transform='scale(1)'" title="TikTok">
-                            <svg width="20" height="20" viewBox="0 0 448 512" fill="#94A3B8" xmlns="http://www.w3.org/2000/svg"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg>
-                        </a>
-                        <a href="mailto:navasena.05@gmail.com" target="_blank" rel="noopener noreferrer" style="transition: transform 0.2s; display: flex; padding: 8px;" onmousedown="this.style.transform='scale(0.8)'" onmouseup="this.style.transform='scale(1)'" title="Gmail">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.728L12 16.636l-6.545-4.908v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L12 8.402l8.073-4.909c1.618-1.214 3.927-.059 3.927 1.964z" fill="#94A3B8"/>
-                                <path d="M18.545 21.002h3.819a1.636 1.636 0 0 0 1.636-1.636V5.457c0-2.023-2.309-3.178-3.927-1.964v17.51z" fill="#94A3B8"/>
-                                <path d="M0 5.457v13.909a1.636 1.636 0 0 0 1.636 1.636h3.819V3.493C3.837 2.279 1.528 3.434 0 5.457z" fill="#94A3B8"/>
-                                <path d="M12 16.636 5.455 11.728V3.493L12 8.402l6.545-4.909v8.235L12 16.636z" fill="#94A3B8"/>
-                            </svg>
-                        </a>
-                        <a href="https://www.instagram.com/pemudapemudikestalan05?igsh=NmVnNjhzY3o2b3Zn" target="_blank" rel="noopener noreferrer" style="transition: transform 0.2s; display: flex; padding: 8px;" onmousedown="this.style.transform='scale(0.8)'" onmouseup="this.style.transform='scale(1)'" title="Instagram">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                            </svg>
-                        </a>
-                        <a href="https://wa.me/6285111412908" target="_blank" rel="noopener noreferrer" style="transition: transform 0.2s; display: flex; padding: 8px;" onmousedown="this.style.transform='scale(0.8)'" onmouseup="this.style.transform='scale(1)'" title="WhatsApp">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="#94A3B8"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                        </a>
-                    </div>
                 </div>
             </div>
 
@@ -4022,9 +4098,83 @@
             </div>
         </div>
 
-        <button class="fab-aspirasi no-select" onclick="openModal('mod-aspirasi')">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        </button>
+        <!-- THE OMNI-COMMUNICATION HUB -->
+        <div class="omni-fab-container guest-only no-select" id="omni-hub">
+            <button class="omni-fab-btn" id="omni-trigger" onclick="toggleOmniHub(event)" title="Pusat Komunikasi">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition: 0.3s;"><line x1="4" y1="12" x2="20" y2="12" stroke-linecap="round"/><line x1="4" y1="6" x2="20" y2="6" stroke-linecap="round"/><line x1="4" y1="18" x2="20" y2="18" stroke-linecap="round"/></svg>
+            </button>
+            
+            <div class="omni-capsule" id="omni-capsule">
+                <!-- 1. Kotak Suara (Aspirasi) -->
+                <button class="omni-item" style="background: #9D174D;" onclick="openModal('mod-aspirasi'); closeOmniHub();" title="Kotak Suara">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                </button>
+                
+                <!-- 2. WhatsApp (Hijau Resmi) -->
+                <a class="omni-item" href="https://wa.me/6285111412908" target="_blank" rel="noopener noreferrer" style="background: #25D366;" title="WhatsApp" onclick="closeOmniHub()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                </a>
+                
+                <!-- 3. Gmail (Google 4-Color Resmi) -->
+                <a class="omni-item" href="mailto:navasena.05@gmail.com" target="_blank" rel="noopener noreferrer" style="background: #FFFFFF; border: 1px solid #E5E7EB;" title="Gmail" onclick="closeOmniHub()">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.728L12 16.636l-6.545-4.908v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L12 8.402l8.073-4.909c1.618-1.214 3.927-.059 3.927 1.964z" fill="#34A853"/>
+                        <path d="M18.545 21.002h3.819a1.636 1.636 0 0 0 1.636-1.636V5.457c0-2.023-2.309-3.178-3.927-1.964v17.51z" fill="#FBBC04"/>
+                        <path d="M0 5.457v13.909a1.636 1.636 0 0 0 1.636 1.636h3.819V3.493C3.837 2.279 1.528 3.434 0 5.457z" fill="#4285F4"/>
+                        <path d="M12 16.636 5.455 11.728V3.493L12 8.402l6.545-4.909v8.235L12 16.636z" fill="#EA4335"/>
+                    </svg>
+                </a>
+                
+                <!-- 4. Instagram (IG Gradient Resmi) -->
+                <a class="omni-item" href="https://www.instagram.com/pemudapemudikestalan05?igsh=NmVnNjhzY3o2b3Zn" target="_blank" rel="noopener noreferrer" style="background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); border: none;" title="Instagram" onclick="closeOmniHub()">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                </a>
+                
+                <!-- 5. TikTok (Hitam Solid + Efek Cyan & Red Glitch) -->
+                <a class="omni-item" href="https://www.tiktok.com/@pemudapemudikestalan05" target="_blank" rel="noopener noreferrer" style="background: #000000; border: none;" title="TikTok" onclick="closeOmniHub()">
+                    <svg width="18" height="18" viewBox="0 0 448 512" style="filter: drop-shadow(2px 2px 0 #FE004E) drop-shadow(-2px -2px 0 #00F2FE);"><path d="M448 209.91a210.06 210.06 0 0 1-122.77-39.25V349.38A162.55 162.55 0 1 1 185 188.31V278.2a74.62 74.62 0 1 0 52.23 71.18V0l88 0a121.18 121.18 0 0 0 1.86 22.17h0A122.18 122.18 0 0 0 381 102.39a121.43 121.43 0 0 0 67 20.14Z" fill="#FFFFFF"/></svg>
+                </a>
+            </div>
+        </div>
+
+        <script>
+            // LOGIKA PENGGERAK ANIMASI & PENGAMAN "GHOST CLICK"
+            function toggleOmniHub(e) {
+                e.stopPropagation();
+                let btn = document.getElementById('omni-trigger');
+                let cap = document.getElementById('omni-capsule');
+                let icon = btn.querySelector('svg');
+                
+                btn.classList.toggle('open');
+                cap.classList.toggle('open');
+                
+                if (btn.classList.contains('open')) {
+                    // Berubah jadi tanda Silang (X)
+                    icon.innerHTML = '<line x1="18" y1="6" x2="6" y2="18" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke-linecap="round"/>';
+                } else {
+                    // Kembali jadi logo Menu (Hamburger)
+                    icon.innerHTML = '<line x1="4" y1="12" x2="20" y2="12" stroke-linecap="round"/><line x1="4" y1="6" x2="20" y2="6" stroke-linecap="round"/><line x1="4" y1="18" x2="20" y2="18" stroke-linecap="round"/>';
+                }
+            }
+
+            function closeOmniHub() {
+                let btn = document.getElementById('omni-trigger');
+                let cap = document.getElementById('omni-capsule');
+                if (btn && cap && btn.classList.contains('open')) {
+                    btn.classList.remove('open');
+                    cap.classList.remove('open');
+                    btn.querySelector('svg').innerHTML = '<line x1="4" y1="12" x2="20" y2="12" stroke-linecap="round"/><line x1="4" y1="6" x2="20" y2="6" stroke-linecap="round"/><line x1="4" y1="18" x2="20" y2="18" stroke-linecap="round"/>';
+                }
+            }
+
+            // Sensor Sentuhan Layar: Jika klik ruang kosong, lipat menu dengan mulus!
+            document.addEventListener('click', function(e) {
+                let hub = document.getElementById('omni-hub');
+                if (hub && !hub.contains(e.target)) {
+                    closeOmniHub();
+                }
+            });
+        </script>
 
         <!-- SECURITY & IDENTITY MODALS (BENTO UI) -->
         <div id="mod-identity" class="modal" style="background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 99999;">
@@ -4227,13 +4377,13 @@
                 closeModal('mod-confirm');
             }
 
-            function openCustomPrompt(title, desc, placeholder, onConfirm) {
+            function openCustomPrompt(title, desc, placeholder, onConfirm, defaultValue = '') {
                 document.getElementById('prompt-title').innerText = title;
                 document.getElementById('prompt-desc').innerText = desc;
                 
                 let inp = document.getElementById('prompt-input-val');
                 inp.placeholder = placeholder;
-                inp.value = ''; // Bersihkan sisa input sebelumnya
+                inp.value = defaultValue; // Isi dengan teks sebelumnya untuk mode Edit Typo
                 
                 let btnSave = document.getElementById('prompt-btn-save');
                 btnSave.onclick = function() {
@@ -4326,7 +4476,7 @@
                         if(tutorialTitle) tutorialTitle.innerText = 'Panduan Bendahara';
                     } else if (role === 'anggota') {
                         if(sopAnggota) sopAnggota.style.display = 'block';
-                        if(tutorialTitle) tutorialTitle.innerText = 'Panduan Anggota Khusus';
+                        if(tutorialTitle) tutorialTitle.innerText = 'Panduan Anggota';
                     } else {
                         if(sopWarga) sopWarga.style.display = 'block';
                         if(tutorialTitle) tutorialTitle.innerText = 'Panduan Warga';
@@ -4771,13 +4921,15 @@
                             </div>` : '<div style="margin-bottom: 20px; border-bottom: 1.5px dashed #E2E8F0;"></div>'}
 
                             <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+
                                 <div style="flex: 1; background: #F8FAFC; border: 1px solid #F1F5F9; border-radius: 14px; padding: 14px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; justify-content: space-between;" onmouseover="this.style.background='#F1F5F9'" onmouseout="this.style.background='#F8FAFC'" onclick="window.openDrillDown('${ev.id}', 'TERKUMPUL')">
                                     <div>
                                         <div style="font-size: 10px; font-weight: 800; color: #64748B; margin-bottom: 6px; text-transform: uppercase; display: flex; align-items: center; gap: 6px;"><div style="width: 20px; height: 20px; background: #D1FAE5; border-radius: 6px; display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div> DANA MASUK</div>
                                         <div style="font-size: 15px; font-weight: 900; color: #0F172A; letter-spacing: -0.5px; margin-bottom: 6px;">Rp ${fmtRp(inAmt)}</div>
                                     </div>
-                                    <div style="font-size: 9px; font-weight: 800; color: #059669; background: #D1FAE5; padding: 4px 6px; border-radius: 6px; display: inline-block; align-self: flex-start; border: 1px solid #A7F3D0; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.05);">Total Donasi: Rp ${fmtRp(murniDonasiAmt)}</div>
+                                    <div style="font-size: 9px; font-weight: 800; color: #059669; background: #D1FAE5; padding: 4px 6px; border-radius: 6px; display: inline-block; align-self: flex-start; border: 1px solid #A7F3D0; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.05);">Total Donasi: <span style="white-space: nowrap;">Rp ${fmtRp(murniDonasiAmt)}</span></div>
                                 </div>
+
                                 <div style="flex: 1; background: #F8FAFC; border: 1px solid #F1F5F9; border-radius: 14px; padding: 14px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column;" onmouseover="this.style.background='#F1F5F9'" onmouseout="this.style.background='#F8FAFC'" onclick="window.openDrillDown('${ev.id}', 'TERPAKAI')">
                                     <div style="font-size: 10px; font-weight: 800; color: #64748B; margin-bottom: 6px; text-transform: uppercase; display: flex; align-items: center; gap: 6px;"><div style="width: 20px; height: 20px; background: #FEE2E2; border-radius: 6px; display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="3"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg></div> PENGELUARAN</div>
                                     <div style="font-size: 15px; font-weight: 900; color: #0F172A; letter-spacing: -0.5px;">Rp ${fmtRp(realOutAmt)}</div>
@@ -6025,8 +6177,8 @@
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
                             </div>
                             <div>
-                                <b style="color: #991B1B; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Hukum Mutlak "Offline-First"</b>
-                                <p style="font-size: 12px; color: #7F1D1D; line-height: 1.5; margin-top: 4px; font-weight: 500;">Aplikasi ini dirancang berkecepatan tinggi karena menyimpan data langsung di dalam memori HP Anda. <b>Aturan Wajib:</b> Setiap kali Anda selesai mencatat transaksi atau mengubah data apa pun, Anda <b>WAJIB menekan tombol UPLOAD (Ikon Awan di pojok kanan atas)</b> <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; transform:translateY(-1.5px);"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg> agar data tersebut dikirim dan disimpan permanen di Server Pusat. Tanpa menekan tombol ini, layar Warga dan Anggota lain tidak akan menampilkan <i>update</i> terbaru.</p>
+                                <b style="color: #991B1B; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Hukum "Offline-First"</b>
+                                <p style="font-size: 12px; color: #7F1D1D; line-height: 1.5; margin-top: 4px; font-weight: 500;">Aplikasi ini dirancang berkecepatan tinggi karena menyimpan data langsung di dalam memori HP Anda. <b>Aturan Wajib:</b> Setiap kali Anda selesai mencatat transaksi atau mengubah data apa pun, Anda <b>WAJIB menekan tombol UPLOAD (Awan) <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="display:inline-block; vertical-align:-2px; margin: 0 2px;"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg></b> di pojok kanan atas agar data tersebut dikirim dan disimpan permanen di Server Pusat. Tanpa menekan tombol ini, layar Warga dan Anggota lain tidak akan menampilkan <i>update</i> terbaru.</p>
                             </div>
                         </div>
 
@@ -6044,9 +6196,9 @@
                                 <div id="tut-adm-1" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
                                         <ul style="padding-left: 16px; margin: 0;">
-                                            <li style="margin-bottom: 8px;"><b>Total Saldo Global:</b> Menampilkan keseluruhan uang organisasi.</li>
+                                            <li style="margin-bottom: 8px;"><b>Total Saldo Global:</b> Menampilkan keseluruhan uang organisasi yang bersih.</li>
                                             <li style="margin-bottom: 8px;"><b>Distribusi Kas:</b> Deretan kotak dompet di bawah saldo utama. <b>Geser (Swipe) layar ke kiri/kanan</b> pada area ini untuk melihat rincian lokasi fisik uang (Misal: Kas Utama, Kas Rekening BCA, dll).</li>
-                                            <li><b>Kirim Laporan Otomatis:</b> Tekan tombol hijau berlogo WhatsApp di bagian bawah untuk langsung mengirimkan ringkasan masuk/keluar kas bulan ini ke Grup secara otomatis tanpa mengetik manual.</li>
+                                            <li><b>Kirim Laporan Otomatis:</b> Tekan tombol hijau berlogo <b>WhatsApp <svg width="14" height="14" viewBox="0 0 24 24" fill="#25D366" style="display:inline-block; vertical-align:-2px; margin: 0 2px;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></b> di bagian bawah untuk langsung mengirimkan ringkasan masuk/keluar kas ke Grup secara otomatis tanpa mengetik manual.</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -6064,20 +6216,15 @@
                                 <div id="tut-adm-2" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
                                         <ul style="padding-left: 16px; margin: 0;">
-                                            <li style="margin-bottom: 8px;"><b>Cara Input Data (Tombol +):</b> Tekan tombol bundar <b>(+)</b> di pojok kanan bawah.
+                                            <li style="margin-bottom: 8px;"><b>Cara Input Data:</b> Tekan tombol bundar <span style="display:inline-flex; align-items:center; justify-content:center; background:#1E3A8A; width:22px; height:22px; border-radius:50%; margin:0 4px; vertical-align:middle; box-shadow:0 2px 4px rgba(30,58,138,0.3);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span> di pojok kanan bawah.
                                                 <ul style="margin-top: 4px; padding-left: 16px;">
                                                     <li><b>Contoh 1 (Pemasukan):</b> Pilih tab <i>Dana Masuk</i>. Ketik nominal: "Rp 150.000". Rincian: "Donasi Hamba Allah". Kategori: "Donasi". Dompet Tujuan: "Kas Utama". Klik Simpan.</li>
                                                     <li><b>Contoh 2 (Pengeluaran Langsung):</b> Pilih tab <i>Dana Keluar</i>. Status pengeluaran: "Selesai (Lunas)". Ketik nominal "Rp 50.000", rincian "Beli Kopi Gotong Royong", kategori "Konsumsi". Klik Simpan.</li>
-                                                    <li><b>Contoh 3 (Memberi Uang Muka ke Panitia):</b> Pilih tab <i>Dana Keluar</i>. Ubah status menjadi <b>Modal Belanja (Kasih Dana Ke PJ)</b>. Pilih Nama Anggota pembawa uang (Misal: Budi). Nominal "Rp 500.000", rincian "Belanja Dekorasi HUT RI". Transaksi ini akan berstatus <b>[Pending / Nota Oranye]</b> sampai Budi menyerahkan nota asli ke Bendahara.</li>
+                                                    <li><b>Contoh 3 (Memberi Uang Muka ke Panitia):</b> Pilih tab <i>Dana Keluar</i>. Ubah status menjadi <b>Modal Belanja (Kasih Dana Ke PJ)</b>. Pilih Nama Anggota pembawa uang. Nominal "Rp 500.000". Transaksi ini akan berstatus <b>[Pending / Nota Oranye]</b> sampai anggota menyerahkan nota asli.</li>
                                                 </ul>
                                             </li>
-                                            <li style="margin-bottom: 8px;"><b>Penyelesaian Uang Muka (Settle):</b> Cari transaksi Uang Muka Budi yang masih <i>Pending</i> (oranye). Klik <b>Selesaikan (Nota)</b>. Ketik total belanja asli Budi.
-                                                <ul style="margin-top: 4px; padding-left: 16px;">
-                                                    <li><i>Jika Budi hanya habis Rp 400.000:</i> Sistem otomatis menghitung sisa Rp 100.000 dan memasukannya kembali ke kas.</li>
-                                                    <li><i>Jika Budi habis Rp 550.000 (Nombok):</i> Sistem mencatat kas berutang Rp 50.000 pada Budi dan otomatis memotong kas untuk mengganti uang tersebut.</li>
-                                                </ul>
-                                            </li>
-                                            <li><b>Fitur Rollback (Hapus/Koreksi):</b> Salah ketik? Cari transaksinya, lalu tekan <b>Hapus Transaksi (Koreksi)</b>. Uang otomatis dikembalikan 100% ke dompet asal tanpa merusak pembukuan (Masuk ke Keranjang Sampah).</li>
+                                            <li style="margin-bottom: 8px;"><b>Penyelesaian Uang Muka (Settle):</b> Cari transaksi Uang Muka yang masih <i>Pending</i> (oranye). Klik <b>Selesaikan (Nota) <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="3" style="display:inline-block; vertical-align:-2px; margin: 0 2px;"><polyline points="20 6 9 17 4 12"/></svg></b>. Ketik total belanja asli. Sistem otomatis menghitung sisa kembalian atau uang nombok dan memasukannya kembali ke kas.</li>
+                                            <li><b>Fitur Rollback (Koreksi):</b> Salah ketik? Cari transaksinya, lalu tekan <b>Hapus Transaksi (Koreksi) <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="3" style="display:inline-block; vertical-align:-2px; margin: 0 2px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></b>. Uang otomatis dikembalikan 100% ke dompet asal (Masuk ke Keranjang Sampah).</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -6096,7 +6243,7 @@
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
                                         <ul style="padding-left: 16px; margin: 0;">
                                             <li style="margin-bottom: 8px;"><b>Mencatat Pembayaran Iuran:</b> Layar ini menampilkan tabel bulan per-anggota. Untuk mencatat pelunasan, <b>klik/sentuh kotak bulan</b> (misal: Jan). Muncul pop-up konfirmasi, klik Setuju. Kotak akan berubah hijau (Lunas). <i>Tips: Ubah 'Tahun Buku' di kiri atas jika anggota membayar lunas untuk tahun depan.</i></li>
-                                            <li style="margin-bottom: 8px;"><b>Fitur Omni-Button (Tagih Massal):</b> Jika sistem mendeteksi ada anggota menunggak, tombol raksasa biru akan muncul di atas. Klik <b>"Penagihan Tunggakan Massal"</b>. Sistem akan merangkum utang setiap anggota dan membuatkan draf pesan tagihan WA siap kirim.</li>
+                                            <li style="margin-bottom: 8px;"><b>Fitur Penagihan Massal:</b> Jika sistem mendeteksi ada anggota menunggak, tombol raksasa biru akan muncul di atas. Klik <b>Penagihan Tunggakan Massal <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="3" style="display:inline-block; vertical-align:-2px; margin: 0 2px;"><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></b>. Sistem akan merangkum utang setiap anggota dan membuatkan draf pesan tagihan WA siap kirim.</li>
                                             <li><b>Kelola Data Anggota:</b> Gunakan tombol atas untuk mendaftarkan orang baru, mengubah Nomor WA, Jabatan Resmi, dan Tanggal Lahir (sistem butuh tanggal lahir untuk memicu fitur pengingat ulang tahun otomatis).</li>
                                         </ul>
                                     </div>
@@ -6117,7 +6264,7 @@
                                         <ul style="padding-left: 16px; margin: 0;">
                                             <li style="margin-bottom: 8px;"><b>Membuat Acara Baru:</b> Klik "Program Baru". Ketik nama (Misal: "Tirakatan 17 Agustus"). Anda bisa memilih agar donasi acara masuk ke "Kas Utama", atau membuat <b>"Dompet Khusus Baru"</b> agar uang acara tidak tercampur dengan kas rutin.</li>
                                             <li style="margin-bottom: 8px;"><b>Donasi Cepat & Pencairan PJ:</b> Di dalam kartu acara, gunakan tombol <b>(+ DONASI PROGRAM)</b> untuk mencatat masuknya dana sponsor, atau <b>(CAIRKAN DANA PJ)</b> untuk mentransfer modal belanja langsung ke Panitia Acara.</li>
-                                            <li><b>Smart LPJ (Tutup Acara):</b> Pantau bagian <i>"Dana Di Bawa PJ"</i>. Jika panitia sudah selesai belanja, klik tombol <b>TUTUP LPJ</b>. Masukkan nominal laporan akhir, dan sistem akan menutup pembukuan acara dengan presisi.</li>
+                                            <li><b>Smart LPJ (Tutup Acara):</b> Pantau bagian <i>"Dana Di Bawa PJ"</i>. Jika panitia sudah selesai belanja, klik tombol <b>TUTUP LPJ <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="3" style="display:inline-block; vertical-align:-2px; margin: 0 2px;"><polyline points="20 6 9 17 4 12"/></svg></b>. Masukkan nominal laporan akhir, dan sistem akan menutup pembukuan acara dengan presisi.</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -6192,9 +6339,9 @@
                                 <div id="tut-ang-2" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
                                         <ul style="padding-left: 16px; margin: 0;">
-                                            <li style="margin-bottom: 8px;"><b>Buku Besar Organisasi:</b> Anda diberikan peran sebagai Pengawas Tertinggi (<i>Read-Only</i>). Lacak jejak nota masuk (hijau) dan keluar (hitam) layaknya mutasi perbankan.</li>
+                                            <li style="margin-bottom: 8px;"><b>Buku Besar Organisasi:</b> Anda diberikan peran sebagai Pengawas Tertinggi (<i>Read-Only</i>). Lacak jejak nota <span style="display:inline-flex; align-items:center; gap:4px; background:#D1FAE5; color:#059669; padding:2px 6px; border-radius:6px; font-size:10px; font-weight:900; letter-spacing:0.5px; border:1px solid #A7F3D0; vertical-align:middle; margin:0 4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> DANA MASUK</span> dan <span style="display:inline-flex; align-items:center; gap:4px; background:#FEE2E2; color:#EF4444; padding:2px 6px; border-radius:6px; font-size:10px; font-weight:900; letter-spacing:0.5px; border:1px solid #FECACA; vertical-align:middle; margin:0 4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg> PENGELUARAN</span> layaknya mutasi perbankan profesional.</li>
                                             <li style="margin-bottom: 8px;"><b>Pelacakan Nota Pribadi:</b> Ketik Nama Anda di kotak pencarian. Sistem akan memfilter transaksi yang memuat nama Anda (Sangat berguna untuk mencari bukti jika Anda pernah memberikan uang kas/donasi).</li>
-                                            <li><b>Audit Uang Talangan:</b> Buka tab <b>"Mutasi Dana Talangan"</b>. Jika Anda pernah menalangi uang acara Karang Taruna dari dompet pribadi Anda, pantau di sini apakah Bendahara sudah mengganti uang Anda atau statusnya masih digantung (<i>Pending</i>).</li>
+                                            <li><b>Audit Uang Talangan:</b> Buka tab <b>Mutasi Talangan</b>. Jika Anda pernah menalangi uang acara Karang Taruna dari kantong pribadi, pantau di sini apakah Bendahara sudah mengganti uang Anda atau statusnya masih <span style="display:inline-flex; align-items:center; gap:4px; background:#FFFBEB; color:#D97706; padding:2px 6px; border-radius:6px; font-size:10px; font-weight:900; letter-spacing:0.5px; border:1px solid #FDE68A; vertical-align:middle; margin:0 4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> PENDING</span>.</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -6212,17 +6359,21 @@
                                 <div id="tut-ang-3" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
                                         <ul style="padding-left: 16px; margin: 0;">
-                                            <li style="margin-bottom: 8px;"><b>Peta Kepatuhan (Warna Kotak):</b> Pada daftar nama anggota, lihat kotak bulannya. <b>Hijau</b> (Lunas), <b>Merah</b> (Nunggak/Utang), <b>Emas</b> (Lunas di muka untuk bulan-bulan depan).</li>
+                                            <li style="margin-bottom: 8px;"><b>Peta Kepatuhan (Warna Kotak):</b> Pada daftar nama anggota, perhatikan warna kotak bulannya.<br>
+                                                <span style="display:inline-block; width:12px; height:12px; background:linear-gradient(180deg, #F87171 0%, #EF4444 100%); border-radius:3px; vertical-align:-1px; box-shadow:inset 0 1px 2px rgba(255,255,255,0.3); margin:0 4px;"></span> <b>Merah:</b> Artinya belum lunas/utang.<br>
+                                                <span style="display:inline-block; width:12px; height:12px; background:linear-gradient(180deg, #34D399 0%, #10B981 100%); border-radius:3px; vertical-align:-1px; box-shadow:inset 0 1px 2px rgba(255,255,255,0.4); margin:0 4px;"></span> <b>Hijau:</b> Lunas tepat waktu.<br>
+                                                <span style="display:inline-block; width:12px; height:12px; background:linear-gradient(180deg, #FBBF24 0%, #F59E0B 100%); border-radius:3px; vertical-align:-1px; box-shadow:inset 0 1px 2px rgba(255,255,255,0.5); margin:0 4px;"></span> <b>Emas Terang:</b> Lunas bayar di muka untuk bulan depan (<i>Advance Payer</i>).
+                                            </li>
                                             <li style="margin-bottom: 8px;"><b>Rincian Sistem Poin (XP):</b> Kedisiplinan adalah segalanya. Sistem menghitung poin Anda secara presisi:
                                                 <ul style="margin-top: 4px; padding-left: 16px; margin-bottom: 8px;">
-                                                    <li><b>[+75 XP] Lunas Lebih Awal (Advance):</b> Anda membayar kas untuk bulan-bulan depan yang belum terjadi.</li>
-                                                    <li><b>[+50 XP] Tepat Waktu:</b> Anda membayar kas lunas di bulan berjalan.</li>
-                                                    <li><b>[+25 XP] Telat 1 Bulan:</b> Hukuman keterlambatan ringan.</li>
-                                                    <li><b>[+15 XP] Telat 2 Bulan:</b> Poin pemulihan mulai menyusut.</li>
-                                                    <li><b>[+5 XP] Telat 3 Bulan:</b> Peringatan kedisiplinan.</li>
-                                                    <li><b>[+1 XP] Telat 4 Bulan atau Lebih:</b> Sanksi berat. Susah menaikkan pangkat.</li>
-                                                    <li><b style="color:var(--danger);">[-75 XP] Nunggak / Belum Bayar:</b> Mengurangi total poin Anda secara drastis setiap bulannya.</li>
-                                                    <li><b>[+100 XP] Pahlawan Finansial (Talangan):</b> Anda meminjamkan uang pribadi untuk menalangi kegiatan organisasi (Maksimal bonus ini 5x per tahun).</li>
+                                                    <li><b style="color:#F59E0B;">[+75 XP] Lunas Lebih Awal (Advance):</b> Anda membayar kas untuk bulan depan yang belum terjadi.</li>
+                                                    <li><b style="color:#10B981;">[+50 XP] Tepat Waktu:</b> Anda membayar kas lunas pada bulan berjalan.</li>
+                                                    <li><b style="color:#EA580C;">[+25 XP] Telat 1 Bulan:</b> Hukuman keterlambatan ringan.</li>
+                                                    <li><b style="color:#EA580C;">[+15 XP] Telat 2 Bulan:</b> Poin pemulihan mulai menyusut.</li>
+                                                    <li><b style="color:#EA580C;">[+5 XP] Telat 3 Bulan:</b> Peringatan kedisiplinan.</li>
+                                                    <li><b style="color:#EA580C;">[+1 XP] Telat 4 Bulan atau Lebih:</b> Sanksi berat. Anda akan sulit menaikkan pangkat.</li>
+                                                    <li><b style="color:#EF4444;">[-75 XP] Nunggak / Belum Bayar:</b> Mengurangi total poin Anda secara drastis setiap bulannya.</li>
+                                                    <li><b style="color:#38BDF8;">[+100 XP] Pahlawan Finansial (Talangan):</b> Anda meminjamkan uang pribadi untuk menalangi kegiatan organisasi (Maksimal bonus 5x per tahun).</li>
                                                     <li><b>[Bonus Donasi]:</b> Setiap donasi Rp 10.000 = +10 XP (Maksimal +500 XP/tahun). <b>HATI-HATI:</b> Seluruh bonus Donasi Anda akan <b>HANGUS/DIHAPUS</b> jika Anda terdeteksi memiliki tunggakan Iuran Kas!</li>
                                                 </ul>
                                             </li>
@@ -6245,7 +6396,7 @@
                                 <div id="tut-ang-4" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
                                         <ul style="padding-left: 16px; margin: 0;">
-                                            <li style="margin-bottom: 8px;"><b>Bedah Anggaran Acara:</b> Saat acara berjalan (Misal: Tirakatan 17 Agustus), buka kartu acaranya. Sentuh blok hijau <b>DANA MASUK</b> atau blok merah <b>PENGELUARAN</b>. Sebuah layar rincian akan muncul, membongkar tuntas daftar nama penyumbang acara dan ke toko mana saja uangnya dibelanjakan (Audit Nota).</li>
+                                            <li style="margin-bottom: 8px;"><b>Bedah Anggaran Acara:</b> Saat acara berjalan, buka kartu acaranya. Sentuh blok <span style="display:inline-flex; align-items:center; gap:4px; background:#D1FAE5; color:#059669; padding:2px 6px; border-radius:6px; font-size:10px; font-weight:900; letter-spacing:0.5px; border:1px solid #A7F3D0; vertical-align:middle; margin:0 4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> DANA MASUK</span> atau blok <span style="display:inline-flex; align-items:center; gap:4px; background:#FEE2E2; color:#EF4444; padding:2px 6px; border-radius:6px; font-size:10px; font-weight:900; letter-spacing:0.5px; border:1px solid #FECACA; vertical-align:middle; margin:0 4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg> PENGELUARAN</span>. Sebuah layar rincian akan muncul, membongkar tuntas daftar nama penyumbang dan ke toko mana saja uangnya dibelanjakan secara mendalam.</li>
                                             <li><b>Pantau Dana Panitia:</b> Periksa kolom <b>"Dana Di Bawa PJ"</b>. Jika ada Panitia/Anggota yang memegang uang dan angkanya belum Rp 0, itu artinya mereka belum menyerahkan LPJ / Nota Belanja kepada Bendahara.</li>
                                         </ul>
                                     </div>
@@ -6265,9 +6416,9 @@
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
                                         <ul style="padding-left: 16px; margin: 0;">
                                             <li style="margin-bottom: 8px;"><b>Executive Billing (Alarm Tagihan):</b> Perhatikan panel di bawah informasi Nama Anda di layar Profil. Jika panel ini berubah wujud menjadi kotak raksasa berwarna <b>MERAH TERANG</b>, itu adalah alarm darurat bahwa Anda menunggak kas (Terdapat rincian bulan apa saja yang belum dibayar dan nominal utangnya).</li>
-                                            <li style="margin-bottom: 8px;"><b>NAVASENA Rewind:</b> Sentuh tombol raksasa <b>"Rekam Jejak Keuangan (REWIND)"</b>. Sistem akan membuka rekapitulasi kebanggaan Anda: Menghitung total jutaan rupiah iuran yang sudah Anda setor seumur hidup, total donasi sukarela Anda, dan tingkat persentase akurasi kepatuhan Anda.</li>
-                                            <li style="margin-bottom: 8px;"><b>Executive Desk (Direktori Pengurus):</b> Gulir ke bawah untuk menemukan panel <i>Executive Desk</i>. Panel ini adalah pusat kontak resmi pengurus. Sentuh kartu jabatan (misal: Bendahara) untuk membuka rincian kontak. Anda disediakan tombol cepat untuk langsung <b>Chat WhatsApp</b> atau <b>Menyalin Nomor Rekening Kas</b> (<i>Auto-Copy</i>). Tersedia juga opsi "LIHAT DIREKTORI" untuk pencarian spesifik.</li>
-                                            <li><b>Kotak Suara (Aspirasi Anonim):</b> Temukan ikon pesan merah melayang di pojok kiri bawah layar. Fitur ini diciptakan agar Anda bisa mengirim kritik, saran, atau aduan kejanggalan uang. Dilengkapi <b>Sistem Enkripsi Anonim</b>, nama dan identitas Anda disembunyikan 100% sehingga Bendahara yang membaca tidak akan tahu siapa yang mengirimkannya.</li>
+                                            <li style="margin-bottom: 8px;"><b>NAVASENA Rewind:</b> Sentuh tombol <b>Rekam Jejak Keuangan <span style="display:inline-flex; align-items:center; gap:4px; color:#38BDF8; font-size:11px; font-weight:900; vertical-align:middle; margin:0 4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polygon points="11 19 2 12 11 5 11 19"/><polygon points="22 19 13 12 22 5 22 19"/></svg> REWIND</span></b>. Sistem akan membuka rekapitulasi kebanggaan Anda: Menghitung total jutaan rupiah iuran yang sudah Anda setor seumur hidup, total donasi sukarela Anda, dan tingkat persentase akurasi kepatuhan Anda.</li>
+                                            <li style="margin-bottom: 8px;"><b>Executive Desk (Direktori Pengurus):</b> Gulir ke bawah untuk menemukan panel <i>Executive Desk</i>. Panel ini adalah pusat kontak resmi pengurus. Sentuh kartu jabatan untuk membuka rincian kontak. Tersedia tombol untuk langsung <b>Chat WhatsApp</b> atau <b>Menyalin Nomor Rekening Kas</b> (<i>Auto-Copy</i>).</li>
+                                            <li><b>Pusat Komunikasi (sosmed):</b> Tekan tombol <b>Menu (Tiga Garis) Biru</b> <span style="display:inline-flex; align-items:center; justify-content:center; background:#1E3A8A; width:22px; height:22px; border-radius:6px; margin:0 4px; vertical-align:middle; box-shadow:0 2px 4px rgba(30,58,138,0.3);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="18" x2="20" y2="18"/></svg></span> yang melayang di pojok kiri bawah. Fitur ini membuka pintasan ke media sosial NAVASENA dan <b>Kotak Suara</b>. Kotak Suara diciptakan agar Anda bisa mengirim kritik/saran secara tertutup dengan <b>Sistem Enkripsi Anonim</b>.</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -6284,7 +6435,7 @@
                             </div>
                             <div>
                                 <b style="color: #1E3A8A; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">WAJIB: TARIK DATA TERBARU</b>
-                                <p style="font-size: 12px; color: #1E40AF; line-height: 1.5; margin-top: 4px; font-weight: 500;">Selamat datang di Portal Transparansi Publik. Jika Anda membuka aplikasi ini dari Perangkat Pribadi / HP Sendiri, Anda <b>WAJIB menyentuh tombol LOAD (Awan)</b> <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; transform:translateY(-1.5px);"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg> di pojok kanan atas layar. Langkah krusial ini memastikan HP Anda menarik nota dan saldo paling mutakhir langsung dari brankas Server Pusat sebelum Anda melakukan pengawasan.</p>
+                                <p style="font-size: 12px; color: #1E40AF; line-height: 1.5; margin-top: 4px; font-weight: 500;">Selamat datang di Portal Transparansi Publik. Jika Anda membuka aplikasi ini dari Perangkat Pribadi / HP Sendiri, Anda <b>WAJIB menyentuh tombol LOAD (Awan) <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="display:inline-block; vertical-align:-2px; margin: 0 2px;"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg></b> di pojok kanan atas layar. Langkah krusial ini memastikan HP Anda menarik nota dan saldo paling mutakhir langsung dari brankas Server Pusat sebelum Anda melakukan pengawasan.</p>
                             </div>
                         </div>
 
@@ -6322,8 +6473,8 @@
                                 <div id="tut-wrg-2" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
                                         <ul style="padding-left: 16px; margin: 0;">
-                                            <li style="margin-bottom: 8px;"><b>Lacak Arus Dana:</b> Menu Mutasi menyajikan seluruh riwayat nota masuk (hijau) dan keluar (hitam) dari dompet Karang Taruna secara kronologis dan tidak bisa ditutup-tutupi. Gunakan kotak <b>Pencarian</b> untuk melacak nama penyumbang atau nota spesifik dengan instan.</li>
-                                            <li><b>Sertifikasi NO. TRX:</b> Jangan khawatir uang diselewengkan. Anda akan melihat label <b>NO. TRX</b> kecil bertuliskan detik waktu persis di bawah setiap nota pengeluaran di menu ini. Cap Waktu Otentik <i>Blockchain-style</i> ini menjamin data direkam secara riil (di waktu nyata) dan terbukti bukan pengeluaran buatan atau manipulasi rekayasa.</li>
+                                            <li style="margin-bottom: 8px;"><b>Lacak Arus Dana:</b> Menu Mutasi menyajikan seluruh riwayat nota masuk <span style="display:inline-flex; align-items:center; gap:4px; background:#D1FAE5; color:#059669; padding:2px 6px; border-radius:6px; font-size:10px; font-weight:900; letter-spacing:0.5px; border:1px solid #A7F3D0; vertical-align:middle; margin:0 4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> (hijau)</span> dan keluar <span style="display:inline-flex; align-items:center; gap:4px; background:#FEE2E2; color:#EF4444; padding:2px 6px; border-radius:6px; font-size:10px; font-weight:900; letter-spacing:0.5px; border:1px solid #FECACA; vertical-align:middle; margin:0 4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg> (merah)</span> dari dompet Karang Taruna secara transparan. Gunakan kotak <b>Pencarian</b> untuk melacak penyumbang atau nota spesifik dengan instan.</li>
+                                            <li><b>Sertifikasi NO. TRX:</b> Jangan khawatir uang direkayasa. Anda akan melihat label <b>NO. TRX</b> kecil bertuliskan waktu presisi di bawah setiap nota pengeluaran. Cap Waktu Otentik ini menjamin data direkam murni secara <i>real-time</i>.</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -6341,8 +6492,12 @@
                                 <div id="tut-wrg-3" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
                                         <ul style="padding-left: 16px; margin: 0;">
-                                            <li style="margin-bottom: 8px;"><b>Heatmap Kedisiplinan:</b> Di menu Iuran, Warga dipersilakan mengawasi kedisiplinan dan kekompakan finansial pemuda. Lihat baris bulan di nama anggota. <b style="color:var(--danger);">Merah:</b> Artinya ia menunggak / utang. <b style="color:var(--success);">Hijau:</b> Lunas tepat waktu. <b style="color:#F59E0B;">Emas Terang:</b> Lunas bayar di muka untuk bulan depan (<i>Advance Payer</i>).</li>
-                                            <li><b>Apresiasi E-Sports:</b> Sebagai bentuk penghargaan publik, setiap anggota dikategorikan dengan label pangkat RPG Gamifikasi (<i>Warrior</i> hingga <i>Mythical Glory</i>) berdasarkan besarnya nilai kontribusi dan kedisiplinan pelunasan kas mereka.</li>
+                                            <li style="margin-bottom: 8px;"><b>Heatmap Kedisiplinan:</b> Di menu Iuran, Warga dipersilakan mengawasi kedisiplinan dan kekompakan pemuda. Lihat baris bulan di nama anggota.<br>
+                                                <span style="display:inline-block; width:12px; height:12px; background:linear-gradient(180deg, #F87171 0%, #EF4444 100%); border-radius:3px; vertical-align:-1px; box-shadow:inset 0 1px 2px rgba(255,255,255,0.3); margin:0 4px;"></span> <b>Merah:</b> Artinya belum lunas / utang.<br>
+                                                <span style="display:inline-block; width:12px; height:12px; background:linear-gradient(180deg, #34D399 0%, #10B981 100%); border-radius:3px; vertical-align:-1px; box-shadow:inset 0 1px 2px rgba(255,255,255,0.4); margin:0 4px;"></span> <b>Hijau:</b> Lunas tepat waktu.<br>
+                                                <span style="display:inline-block; width:12px; height:12px; background:linear-gradient(180deg, #FBBF24 0%, #F59E0B 100%); border-radius:3px; vertical-align:-1px; box-shadow:inset 0 1px 2px rgba(255,255,255,0.5); margin:0 4px;"></span> <b>Emas Terang:</b> Lunas bayar di muka untuk bulan-bulan depan.
+                                            </li>
+                                            <li><b>Apresiasi E-Sports:</b> Sebagai bentuk penghargaan publik, setiap anggota dikategorikan dengan label pangkat RPG (<i>Warrior</i> hingga <i>Mythical Glory</i>) berdasarkan besarnya nilai kontribusi dan kedisiplinan mereka.</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -6360,8 +6515,8 @@
                                 <div id="tut-wrg-4" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
                                         <ul style="padding-left: 16px; margin: 0;">
-                                            <li style="margin-bottom: 8px;"><b>Bongkar Detail Nota Acara:</b> Saat Karang Taruna menggelar hajatan besar (contoh: 17 Agustus atau Tirakatan), warga bisa memantau pergerakan anggaran acara di Menu Program. Sentuh blok indikator <b style="color:#10B981;">DANA MASUK</b> atau <b style="color:#EF4444;">PENGELUARAN</b>. Sistem akan membuka lembar pop-up rincian dari mana donatur acara tersebut berasal dan ke toko mana saja uangnya dibelanjakan (Detail Pembelian Konsumsi, Sewa Tenda, dll) hingga ke uang terkecil secara mendalam.</li>
-                                            <li><b>Audit Dompet Panitia:</b> Warga diizinkan memeriksa bagian <i>"Dana Di Bawa PJ"</i>. Jika masih ada saldo, artinya Panitia pelaksana acara belum tuntas melaporkan/mengembalikan sisa uang operasional kembali ke dompet Bendahara Pusat.</li>
+                                            <li style="margin-bottom: 8px;"><b>Bedah Anggaran Acara:</b> Saat Karang Taruna menggelar acara (contoh: 17 Agustus), buka Menu Program. Sentuh blok indikator <span style="display:inline-flex; align-items:center; gap:4px; background:#D1FAE5; color:#059669; padding:2px 6px; border-radius:6px; font-size:10px; font-weight:900; letter-spacing:0.5px; border:1px solid #A7F3D0; vertical-align:middle; margin:0 4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> DANA MASUK</span> atau <span style="display:inline-flex; align-items:center; gap:4px; background:#FEE2E2; color:#EF4444; padding:2px 6px; border-radius:6px; font-size:10px; font-weight:900; letter-spacing:0.5px; border:1px solid #FECACA; vertical-align:middle; margin:0 4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg> PENGELUARAN</span>. Sebuah layar rincian akan muncul, membongkar tuntas daftar penyumbang dan rincian belanja secara mendalam.</li>
+                                            <li><b>Audit Dompet Panitia:</b> Warga diizinkan memeriksa bagian <i>"Dana Di Bawa PJ"</i>. Jika masih ada saldo, artinya Panitia pelaksana belum tuntas melaporkan/mengembalikan sisa uang operasional ke Bendahara Pusat.</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -6379,11 +6534,11 @@
                                 <div id="tut-wrg-5" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="font-size: 12.5px; color: var(--text-main); line-height: 1.6;">
                                         <ul style="padding-left: 16px; margin: 0;">
-                                            <li style="margin-bottom: 8px;"><b>Apresiasi Donatur Luar (Honorary):</b> Masuklah ke Menu Profil. Perhatikan tumpukan kartu Bank Holografik (Black Card / Sapphire Card). Kartu tersebut adalah monumen penghormatan khusus bagi donatur Pihak Luar (Warga RT Umum / Instansi / Individu Non-Anggota) yang telah memercayakan dan menyumbang dana terbesar pada tahun berjalan.</li>
+                                            <li style="margin-bottom: 8px;"><b>Apresiasi Donatur Luar (Honorary):</b> Masuklah ke Menu Profil. Perhatikan tumpukan kartu Bank Holografik. Kartu tersebut adalah monumen penghormatan khusus bagi donatur Pihak Luar (Warga / Instansi / Non-Anggota) yang menyumbang dana terbesar pada tahun ini.</li>
                                             <li style="margin-bottom: 8px;"><b>Mading Transparansi (Statistik Kas):</b> Panel ini menyajikan metrik ringkasan makro secara transparan, mencakup total dana kas terkelola, jumlah program acara yang sukses, dan total anggota aktif yang menggerakkan organisasi.</li>
-                                            <li style="margin-bottom: 8px;"><b>Executive Desk (Pusat Kontak):</b> Akses langsung jalur komunikasi resmi organisasi. Geser kartu jabatan pengurus lalu ketuk untuk membuka rincian. Anda disediakan tombol interaktif untuk langsung <b>Chat WhatsApp</b> atau <b>Menyalin Nomor Rekening / E-Wallet</b> tanpa mencatat manual. Ketuk "LIHAT DIREKTORI" untuk pencarian data kepengurusan.</li>
-                                            <li style="margin-bottom: 8px;"><b>Saluran Aspirasi Anonim:</b> Terdapat tombol merah melayang (Ikon Kotak Pesan) di pojok kiri bawah. Warga bisa leluasa mengirimkan kritik, saran, atau laporan kejanggalan kas tanpa takut diintimidasi. Sistem dijamin dengan <b>Enkripsi Anonim</b> mutlak sehingga nama/nomor warga disembunyikan secara total dari Bendahara yang membaca pesan.</li>
-                                            <li><b>Portal Autentikasi:</b> Tekan tombol "Keluar" bergaris merah di bagian paling bawah untuk kembali ke halaman Otorisasi/Login jika Anda adalah salah satu anggota yang ingin memasukkan Nomor WA terdaftar dan membuka KTA Pribadi Anda.</li>
+                                            <li style="margin-bottom: 8px;"><b>Executive Desk (Pusat Kontak):</b> Akses langsung jalur komunikasi resmi organisasi. Geser kartu jabatan pengurus lalu ketuk untuk membuka rincian. Anda disediakan tombol interaktif untuk langsung <b>Chat WhatsApp</b> atau <b>Menyalin Nomor Rekening / E-Wallet</b> tanpa mencatat manual.</li>
+                                            <li style="margin-bottom: 8px;"><b>Pusat Komunikasi (sosmed):</b> Terdapat tombol <b>Menu (Tiga Garis) Biru</b> <span style="display:inline-flex; align-items:center; justify-content:center; background:#1E3A8A; width:22px; height:22px; border-radius:6px; margin:0 4px; vertical-align:middle; box-shadow:0 2px 4px rgba(30,58,138,0.3);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="18" x2="20" y2="18"/></svg></span> melayang di pojok kiri bawah. Sentuh untuk membuka pintasan sosial media dan <b>Kotak Suara (Aspirasi)</b>. Warga bisa leluasa mengirimkan usulan/kritik tanpa takut. Sistem dijamin <b>Enkripsi Anonim</b> mutlak sehingga identitas disembunyikan total dari Bendahara.</li>
+                                            <li><b>Portal Autentikasi:</b> Tekan tombol <b>Keluar</b> <span style="display:inline-flex; align-items:center; gap:4px; color:#DC2626; font-size:11px; font-weight:900; vertical-align:middle; margin:0 4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> bergaris merah di bagian paling bawah untuk kembali ke halaman Login (Jika Anda anggota terdaftar yang ingin membuka KTA Pribadi Anda).</li>
                                         </ul>
                                   </div>
                                </div>
@@ -7097,8 +7252,8 @@
                             }
                         }
                         
-                        // Urutkan transaksi baru secara descending berdasarkan timestamp mutlak untuk keamanan Ledger
-                        batchResult.added.sort((a,b) => b.ts - a.ts).forEach(tBaru => {
+                        // Urutkan transaksi baru secara ASCENDING sebelum di-unshift agar hasil akhir di state.trx menjadi DESCENDING mutlak
+                        batchResult.added.sort((a,b) => a.ts - b.ts).forEach(tBaru => {
                             state.trx.unshift(tBaru);
                         });
                         
@@ -7385,10 +7540,11 @@
                 try {
                     let evData = state.event.find(e => e.id === evId);
                     let targetDompet = (evData && evData.id_dompet_default) ? evData.id_dompet_default : 'DP-UTAMA';
-                    let ket = isWarga ? `Donasi: ${state.anggota.find(a=>a.id===idAg)?.nama || 'Anggota'}` : `Donasi Umum: ${namaLuar}`;
+                    let ket = isWarga ? `Donasi Dari: ${state.anggota.find(a=>a.id===idAg)?.nama || 'Anggota'}` : `Donasi Dari: ${namaLuar}`;
                     let trx = {
                         id: genID('TX'), 
                         ts: Date.now(), tipe: 'masuk', nom_awal: nom, nom_final: nom,
+
                         ket: ket, kat: 'Donasi Acara', status: 'lunas',
                         id_event: evId, id_anggota: isWarga ? idAg : '', id_dompet: targetDompet, is_deleted: false, year: new Date().getFullYear()
                     };
