@@ -656,14 +656,16 @@
         async function bootNavasenaSystem() {
             if(typeof updateHeaderDate === 'function') updateHeaderDate();
 
-            document.getElementById('iuran-year-val').value = uiSelectedYear.toString();
-            document.getElementById('iuran-year-btn').innerText = uiSelectedYear.toString();
+            let yrVal = document.getElementById('iuran-year-val');
+            let yrBtn = document.getElementById('iuran-year-btn');
+            if(yrVal) yrVal.value = uiSelectedYear.toString();
+            if(yrBtn) yrBtn.innerText = uiSelectedYear.toString();
 
             // Sesi Kiosk/Admin Check
             try {
                 let activeToken = sessionStorage.getItem('_nx_auth_tk');
                 let rawPin = getSetting('kiosk_pin', 'MTcwODIz'); // Default "170823" in base64
-                if (!rawPin || rawPin.trim() === '') rawPin = 'MTcwODIz';
+                if (!rawPin || String(rawPin).trim() === '') rawPin = 'MTcwODIz';
                 let decodedPin = '170823';
                 try { decodedPin = atob(rawPin); } catch(err) { console.warn("Reset format PIN."); }
                 
@@ -4115,13 +4117,14 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                 </a>
                 
-                <!-- 3. Gmail (Google 4-Color Resmi) -->
+                <!-- 3. Gmail (Official 2020 Flat Geometry) -->
                 <a class="omni-item" href="mailto:navasena.05@gmail.com" target="_blank" rel="noopener noreferrer" style="background: #FFFFFF; border: 1px solid #E5E7EB;" title="Gmail" onclick="closeOmniHub()">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.728L12 16.636l-6.545-4.908v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L12 8.402l8.073-4.909c1.618-1.214 3.927-.059 3.927 1.964z" fill="#34A853"/>
-                        <path d="M18.545 21.002h3.819a1.636 1.636 0 0 0 1.636-1.636V5.457c0-2.023-2.309-3.178-3.927-1.964v17.51z" fill="#FBBC04"/>
-                        <path d="M0 5.457v13.909a1.636 1.636 0 0 0 1.636 1.636h3.819V3.493C3.837 2.279 1.528 3.434 0 5.457z" fill="#4285F4"/>
-                        <path d="M12 16.636 5.455 11.728V3.493L12 8.402l6.545-4.909v8.235L12 16.636z" fill="#EA4335"/>
+                    <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15.75 20.5H19.5a1.5 1.5 0 0 0 1.5-1.5V7.125l-5.25 3.938V20.5Z" fill="#34A853"/>
+                        <path d="M4.5 20.5h3.75V11.063L3 7.125V19a1.5 1.5 0 0 0 1.5 1.5Z" fill="#4285F4"/>
+                        <path d="M15.75 11.063 12 13.875l-3.75-2.812V5.062l3.75 2.813 3.75-2.813v6.001Z" fill="#EA4335"/>
+                        <path d="M21 7.125V4.75c0-1.631-1.89-2.545-3.15-1.503L15.75 5.063v6L21 7.125Z" fill="#FBBC04"/>
+                        <path d="M3 7.125V4.75C3 3.119 4.89 2.205 6.15 3.247L8.25 5.063v6L3 7.125Z" fill="#C5221F"/>
                     </svg>
                 </a>
                 
@@ -4130,9 +4133,11 @@
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
                 </a>
                 
-                <!-- 5. TikTok (Hitam Solid + Efek Cyan & Red Glitch) -->
+                <!-- 5. TikTok (Authentic Rendering Protocol) -->
                 <a class="omni-item" href="https://www.tiktok.com/@pemudapemudikestalan05" target="_blank" rel="noopener noreferrer" style="background: #000000; border: none;" title="TikTok" onclick="closeOmniHub()">
-                    <svg width="18" height="18" viewBox="0 0 448 512" style="filter: drop-shadow(2px 2px 0 #FE004E) drop-shadow(-2px -2px 0 #00F2FE);"><path d="M448 209.91a210.06 210.06 0 0 1-122.77-39.25V349.38A162.55 162.55 0 1 1 185 188.31V278.2a74.62 74.62 0 1 0 52.23 71.18V0l88 0a121.18 121.18 0 0 0 1.86 22.17h0A122.18 122.18 0 0 0 381 102.39a121.43 121.43 0 0 0 67 20.14Z" fill="#FFFFFF"/></svg>
+                    <svg width="18" height="18" viewBox="0 0 448 512" style="filter: drop-shadow(-1.5px -1.5px 0 #25F4EE) drop-shadow(1.5px 1.5px 0 #FE2C55); overflow: visible;">
+                        <path d="M448 209.91a210.06 210.06 0 0 1-122.77-39.25V349.38A162.55 162.55 0 1 1 185 188.31V278.2a74.62 74.62 0 1 0 52.23 71.18V0l88 0a121.18 121.18 0 0 0 1.86 22.17h0A122.18 122.18 0 0 0 381 102.39a121.43 121.43 0 0 0 67 20.14Z" fill="#FFFFFF"/>
+                    </svg>
                 </a>
             </div>
         </div>
@@ -4225,24 +4230,25 @@
                 </button>
             </div>
         </div>
-        <div id="mod-auth-phone" class="modal" style="background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 99999;">
-            <div class="modal-box no-select" style="text-align: center; padding: 48px 28px 40px 28px; background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%); border-radius: 36px; box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.05); max-width: 360px;">
+
+        <div id="mod-auth-phone" class="modal" style="background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 99999; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
+            <div class="modal-box no-select" style="text-align: center; padding: 32px 24px 24px 24px; background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%); border-radius: 36px; box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.05); max-width: 360px; width: 100%; margin: auto;">
                 
                 <!-- Close Button Gelap Elegan -->
-                <button class="close-modal" style="background: rgba(255,255,255,0.05); color: #94A3B8; top: 24px; right: 24px; transition: 0.2s; border: 1px solid rgba(255,255,255,0.1);" onmousedown="this.style.transform='scale(0.85)'" onmouseup="this.style.transform='scale(1)'" onclick="closeAuthPhone()">
+                <button class="close-modal" style="background: rgba(255,255,255,0.05); color: #94A3B8; top: 20px; right: 20px; transition: 0.2s; border: 1px solid rgba(255,255,255,0.1);" onmousedown="this.style.transform='scale(0.85)'" onmouseup="this.style.transform='scale(1)'" onclick="closeAuthPhone()">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
 
                 <!-- Holographic WA Icon -->
-                <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 32px auto;">
-                    <div style="position: absolute; inset: -10px; background: #25D366; filter: blur(25px); opacity: 0.25; border-radius: 50%;"></div>
+                <div style="position: relative; width: 64px; height: 64px; margin: 0 auto 20px auto;">
+                    <div style="position: absolute; inset: -8px; background: #25D366; filter: blur(20px); opacity: 0.25; border-radius: 50%;"></div>
                     <div style="position: relative; width: 100%; height: 100%; background: linear-gradient(135deg, #064E3B 0%, #059669 100%); color: #FFFFFF; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(37, 211, 102, 0.4); box-shadow: inset 0 4px 10px rgba(255,255,255,0.2), 0 10px 20px rgba(0,0,0,0.5);">
-                        <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                     </div>
                 </div>
 
-                <h3 style="margin-bottom: 8px; font-size: 22px; font-weight: 900; color: #FFFFFF; letter-spacing: 1.5px; text-transform: uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Akses Anggota</h3>
-                <div style="font-size: 12px; color: #94A3B8; line-height: 1.6; margin-bottom: 36px; font-weight: 600; letter-spacing: 0.5px;">Masukkan Nomor WhatsApp yang<br>TERDAFTAR.</div>
+                <h3 style="margin-bottom: 6px; font-size: 20px; font-weight: 900; color: #FFFFFF; letter-spacing: 1.5px; text-transform: uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Akses Anggota</h3>
+                <div style="font-size: 11px; color: #94A3B8; line-height: 1.6; margin-bottom: 24px; font-weight: 600; letter-spacing: 0.5px;">Masukkan Nomor WhatsApp yang<br>TERDAFTAR.</div>
 
                    <!-- Recessed Digital Pad WA -->
                <style>
@@ -4255,33 +4261,33 @@
                         transition: background-color 5000s ease-in-out 0s;
                     }
                 </style>
-                <div style="background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 4px; margin-bottom: 32px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; box-shadow: inset 0 8px 16px rgba(0,0,0,0.6);" id="wa-wrap">
-                    <input type="tel" id="auth-phone-input" placeholder="....." autocomplete="off" style="text-align: center; font-size: 28px; font-weight: 900; letter-spacing: 6px; padding: 16px 0; background: transparent !important; color: #10B981 !important; border: none !important; box-shadow: none !important; outline: none !important; width: 100%; font-family: monospace; display: block; caret-color: #10B981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.6); -webkit-text-fill-color: #10B981 !important;" onkeyup="if(event.key === 'Enter') verifyPhoneAuth()" onfocus="document.getElementById('wa-wrap').style.borderColor='#10B981'; document.getElementById('wa-wrap').style.background='rgba(0,0,0,0.8)'; document.getElementById('wa-wrap').style.boxShadow='0 0 0 4px rgba(16, 185, 129, 0.2), inset 0 8px 16px rgba(0,0,0,0.9)';" onblur="document.getElementById('wa-wrap').style.borderColor='rgba(255,255,255,0.05)'; document.getElementById('wa-wrap').style.background='rgba(0,0,0,0.4)'; document.getElementById('wa-wrap').style.boxShadow='inset 0 8px 16px rgba(0,0,0,0.6)';">
+                <div style="background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 4px; margin-bottom: 24px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; box-shadow: inset 0 8px 16px rgba(0,0,0,0.6);" id="wa-wrap">
+                    <input type="tel" id="auth-phone-input" placeholder="....." autocomplete="off" style="text-align: center; font-size: 24px; font-weight: 900; letter-spacing: 4px; padding: 12px 0; background: transparent !important; color: #10B981 !important; border: none !important; box-shadow: none !important; outline: none !important; width: 100%; font-family: monospace; display: block; caret-color: #10B981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.6); -webkit-text-fill-color: #10B981 !important;" onkeyup="if(event.key === 'Enter') verifyPhoneAuth()" onfocus="document.getElementById('wa-wrap').style.borderColor='#10B981'; document.getElementById('wa-wrap').style.background='rgba(0,0,0,0.8)'; document.getElementById('wa-wrap').style.boxShadow='0 0 0 4px rgba(16, 185, 129, 0.2), inset 0 8px 16px rgba(0,0,0,0.9)';" onblur="document.getElementById('wa-wrap').style.borderColor='rgba(255,255,255,0.05)'; document.getElementById('wa-wrap').style.background='rgba(0,0,0,0.4)'; document.getElementById('wa-wrap').style.boxShadow='inset 0 8px 16px rgba(0,0,0,0.6)';">
                 </div>
                 <!-- Tombol Action Neon Gradient WA -->
-                <button class="btn no-select" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; padding: 18px; font-size: 14px; font-weight: 900; width: 100%; border-radius: 16px; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); border: 1px solid rgba(52, 211, 153, 0.3); transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 1.5px;" onclick="verifyPhoneAuth()" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.96)'" ontouchend="this.style.transform='scale(1)'">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                <button class="btn no-select" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; padding: 14px; font-size: 13px; font-weight: 900; width: 100%; border-radius: 14px; box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3); border: 1px solid rgba(52, 211, 153, 0.3); transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 1px;" onclick="verifyPhoneAuth()" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.96)'" ontouchend="this.style.transform='scale(1)'">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
                     <span>Login</span>
                 </button>
             </div>
         </div>
 
-        <div id="mod-pin" class="modal" style="z-index: 99999; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); background: rgba(2, 6, 23, 0.9);">
-            <div class="modal-box no-select" style="text-align: center; padding: 48px 28px 40px 28px; background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%); border-radius: 36px; box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.05); max-width: 360px;">
+        <div id="mod-pin" class="modal" style="z-index: 99999; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); background: rgba(2, 6, 23, 0.9); align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
+            <div class="modal-box no-select" style="text-align: center; padding: 32px 24px 24px 24px; background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%); border-radius: 36px; box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.05); max-width: 360px; width: 100%; margin: auto;">
                 
-                <button class="close-modal" style="background: rgba(255,255,255,0.05); color: #94A3B8; top: 24px; right: 24px; transition: 0.2s; border: 1px solid rgba(255,255,255,0.1);" onmousedown="this.style.transform='scale(0.85)'" onmouseup="this.style.transform='scale(1)'" onclick="closeModal('mod-pin'); if(!localStorage.getItem('nav_role')){ document.getElementById('mod-identity').style.display='flex'; }">
+                <button class="close-modal" style="background: rgba(255,255,255,0.05); color: #94A3B8; top: 20px; right: 20px; transition: 0.2s; border: 1px solid rgba(255,255,255,0.1);" onmousedown="this.style.transform='scale(0.85)'" onmouseup="this.style.transform='scale(1)'" onclick="closeModal('mod-pin'); if(!localStorage.getItem('nav_role')){ document.getElementById('mod-identity').style.display='flex'; }">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
 
-                <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 32px auto;">
-                    <div style="position: absolute; inset: -10px; background: #38BDF8; filter: blur(25px); opacity: 0.3; border-radius: 50%;"></div>
+                <div style="position: relative; width: 64px; height: 64px; margin: 0 auto 20px auto;">
+                    <div style="position: absolute; inset: -8px; background: #38BDF8; filter: blur(20px); opacity: 0.3; border-radius: 50%;"></div>
                     <div style="position: relative; width: 100%; height: 100%; background: linear-gradient(135deg, #1E3A8A 0%, #0369A1 100%); color: #FFFFFF; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(56, 189, 248, 0.5); box-shadow: inset 0 4px 10px rgba(255,255,255,0.2), 0 10px 20px rgba(0,0,0,0.5);">
-                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                     </div>
                 </div>
 
-                <h3 style="margin-bottom: 8px; font-size: 22px; font-weight: 900; color: #FFFFFF; letter-spacing: 1.5px; text-transform: uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Akses Admin</h3>
-                <div style="font-size: 12px; color: #94A3B8; line-height: 1.6; margin-bottom: 36px; font-weight: 600; letter-spacing: 0.5px;">Masukkan PIN</div>
+                <h3 style="margin-bottom: 6px; font-size: 20px; font-weight: 900; color: #FFFFFF; letter-spacing: 1.5px; text-transform: uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Akses Admin</h3>
+                <div style="font-size: 11px; color: #94A3B8; line-height: 1.6; margin-bottom: 24px; font-weight: 600; letter-spacing: 0.5px;">Masukkan PIN</div>
 
                 <style>
                     #kiosk-pin:-webkit-autofill,
@@ -4293,11 +4299,11 @@
                         transition: background-color 5000s ease-in-out 0s;
                     }
                 </style>
-                <div style="background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 4px; margin-bottom: 32px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; box-shadow: inset 0 8px 16px rgba(0,0,0,0.6);" id="pin-wrap">
-                    <input type="password" id="kiosk-pin" inputmode="numeric" placeholder="••••••" maxlength="6" autocomplete="off" style="text-align: center; font-size: 40px; font-weight: 900; letter-spacing: 12px; padding: 16px 0 16px 12px; background: transparent !important; color: #38BDF8 !important; border: none !important; box-shadow: none !important; outline: none !important; width: 100%; font-family: monospace; display: block; caret-color: transparent; text-shadow: 0 0 12px rgba(56, 189, 248, 0.6); -webkit-text-fill-color: #38BDF8 !important;" onkeyup="if(event.key === 'Enter') verifyPIN()" onfocus="document.getElementById('pin-wrap').style.borderColor='#38BDF8'; document.getElementById('pin-wrap').style.background='rgba(0,0,0,0.8)'; document.getElementById('pin-wrap').style.boxShadow='0 0 0 4px rgba(56, 189, 248, 0.2), inset 0 8px 16px rgba(0,0,0,0.9)';" onblur="document.getElementById('pin-wrap').style.borderColor='rgba(255,255,255,0.05)'; document.getElementById('pin-wrap').style.background='rgba(0,0,0,0.4)'; document.getElementById('pin-wrap').style.boxShadow='inset 0 8px 16px rgba(0,0,0,0.6)';">
+                <div style="background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 4px; margin-bottom: 24px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; box-shadow: inset 0 8px 16px rgba(0,0,0,0.6);" id="pin-wrap">
+                    <input type="password" id="kiosk-pin" inputmode="numeric" placeholder="••••••" maxlength="6" autocomplete="off" style="text-align: center; font-size: 24px; font-weight: 900; letter-spacing: 8px; padding: 12px 0 12px 8px; background: transparent !important; color: #38BDF8 !important; border: none !important; box-shadow: none !important; outline: none !important; width: 100%; font-family: monospace; display: block; caret-color: transparent; text-shadow: 0 0 12px rgba(56, 189, 248, 0.6); -webkit-text-fill-color: #38BDF8 !important;" onkeyup="if(event.key === 'Enter') verifyPIN()" onfocus="document.getElementById('pin-wrap').style.borderColor='#38BDF8'; document.getElementById('pin-wrap').style.background='rgba(0,0,0,0.8)'; document.getElementById('pin-wrap').style.boxShadow='0 0 0 4px rgba(56, 189, 248, 0.2), inset 0 8px 16px rgba(0,0,0,0.9)';" onblur="document.getElementById('pin-wrap').style.borderColor='rgba(255,255,255,0.05)'; document.getElementById('pin-wrap').style.background='rgba(0,0,0,0.4)'; document.getElementById('pin-wrap').style.boxShadow='inset 0 8px 16px rgba(0,0,0,0.6)';">
                 </div>
 
-                <button id="btn-verify-pin" class="btn no-select" style="background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%); color: white; padding: 18px; font-size: 14px; font-weight: 900; width: 100%; border-radius: 16px; box-shadow: 0 10px 20px rgba(2, 132, 199, 0.4); border: 1px solid rgba(56, 189, 248, 0.3); transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 1.5px;" onclick="verifyPIN()" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.96)'" ontouchend="this.style.transform='scale(1)'">
+                <button id="btn-verify-pin" class="btn no-select" style="background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%); color: white; padding: 14px; font-size: 13px; font-weight: 900; width: 100%; border-radius: 14px; box-shadow: 0 8px 16px rgba(2, 132, 199, 0.4); border: 1px solid rgba(56, 189, 248, 0.3); transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 1px;" onclick="verifyPIN()" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.96)'" ontouchend="this.style.transform='scale(1)'">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
                     <span>Otorisasi</span>
                 </button>
@@ -5694,12 +5700,7 @@
                     if(hUpload) hUpload.style.display = 'none';
                     if(hLoad) hLoad.style.display = 'flex';
                     if(lblPanduan) lblPanduan.innerText = "Buku Panduan Warga";
-                    if(btn) {
-                        btn.style.background = 'rgba(15, 23, 42, 0.8)'; btn.style.color = '#FBBF24'; btn.style.border = '1px solid #D97706';
-                        btn.style.backdropFilter = 'blur(10px)'; btn.style.webkitBackdropFilter = 'blur(10px)';
-                        btn.style.boxShadow = '0 10px 25px -5px rgba(217, 119, 6, 0.3)';
-                        btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:4px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> AKSES LOGIN BENDAHARA`;
-                    }
+                    // Tombol AKSES LOGIN BENDAHARA dihapus sesuai Konsep Arsitektur Wajib Logout
                 } else { 
                     document.body.classList.remove('kiosk-mode');
                     if(typeof updateHeaderDate === 'function') updateHeaderDate();
@@ -7137,7 +7138,6 @@
                         req.onerror = () => r(null);
                     });
                     
-// KODE BARU (Wajib utuh, lolos simulasi, bebas error, TIDAK ADA PEMOTONGAN KODE):
                     if (state.trx[idx].status === 'talangan') {
                         // THE ARCHITECT BULLETPROOF SETTLEMENT (CROSS-MONTH SAFE)
                         let tsNow = Date.now();
@@ -7164,10 +7164,41 @@
                         state.trx[idx] = t_update;
                         state.trx.unshift(t_baru);
                     } else {
-                        // Alur Uang Muka Normal (Pending)
-                        let t_update = { ...(originalDbTrx || state.trx[idx]), nom_final: final, status: 'lunas', ket: state.trx[idx].ket + addKet };
-                        await saveStore('trx', t_update);
+                        // THE ARCHITECT BULLETPROOF SETTLEMENT (PENDING / UANG MUKA)
+                        let tsNow = Date.now();
+                        let yrNow = new Date().getFullYear();
+                        let sisa = state.trx[idx].nom_awal - final;
+                        
+                        // SURGICAL FIX: Set nom_final menjadi pengeluaran aktual untuk akurasi Analitik Dashboard
+                        let t_update = { ...(originalDbTrx || state.trx[idx]), nom_final: final, status: 'lunas', ket: state.trx[idx].ket + addKet + " [Telah Di-Settle]" };
+                        let trxToSave = [t_update];
+                        
+                        if (sisa < 0) {
+                            // Kembalikan ke nom_awal khusus untuk kasus nombok agar logic penjumlahan ganda sempurna
+                            t_update.nom_final = state.trx[idx].nom_awal;
+                            let nombok = Math.abs(sisa);
+                            trxToSave.push({
+                                id: genID('TX'), ts: tsNow, tipe: 'keluar',
+                                nom_awal: nombok, nom_final: nombok, 
+                                ket: `Reimburse Nombok Uang Muka: ${state.trx[idx].ket}`, kat: state.trx[idx].kat, status: 'lunas',
+                                id_event: state.trx[idx].id_event, id_anggota: state.trx[idx].id_anggota, id_dompet: state.trx[idx].id_dompet, is_deleted: false, year: yrNow
+                            });
+                        }
+                        // Jika sisa > 0 (Kembalian), TIDAK PERLU buat transaksi 'masuk' karena nom_final yang mengecil 
+                        // secara otomatis "mengembalikan" saldo ke kas dan memperbaiki Analitik Pengeluaran tanpa double-entry palsu.
+
+                        await new Promise((resolve, reject) => {
+                            let tx = idb.transaction('trx', 'readwrite');
+                            trxToSave.forEach(t => tx.objectStore('trx').put(t));
+                            tx.oncomplete = resolve;
+                            tx.onerror = () => reject(tx.error);
+                        });
+
+                        localStorage.setItem('nav_unsynced', 'true');
                         state.trx[idx] = t_update;
+                        if (trxToSave.length > 1) {
+                            state.trx.unshift(trxToSave[1]);
+                        }
                     }
 
                     closeModal('mod-settle'); showToast("Selesai. Siklus ditutup.");
