@@ -353,7 +353,7 @@
             document.head.appendChild(curtain);
         }
 
-        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbz_CJwqylpZ3rB4QPjLAszAFAcjoLoRUJNjjwbF8_BZXedglfxnWsWks6N6NeZ4q0bs/exec";
+        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycby6Imehq8UJLOtCUL_nUoFjzc716EkTiOF67vyNab_QkEzOhBJdlM15m1su8MP4PNrt/exec";
         const CLOUD_API_TOKEN = "Navasena29082026";
 
         // --- KONFIGURASI INDEXEDDB LOKAL ---
@@ -609,8 +609,8 @@
             }
 
             // In-Memory Sorting
-            state.trx.sort((a,b) => b.ts - a.ts); 
-            state.anggota.sort((a,b) => a.nama.localeCompare(b.nama));
+            state.trx.sort((a,b) => (b.ts || 0) - (a.ts || 0)); 
+            state.anggota.sort((a,b) => (a.nama || '').localeCompare(b.nama || ''));
             
             // Kalkulasi XP Pre-render (DILINDUNGI FAILSAFE ISOLATION)
             try {
@@ -724,12 +724,16 @@
                 // PENEGAKAN ATURAN RBAC & ORPHAN SESSION SWEEPER
                 if (role === 'anggota') {
                     let uid = localStorage.getItem('nav_user_id');
-                    let validUser = state.anggota.some(a => a.id === uid);
-                    if (uid && !validUser) {
-                        // Sesi Hantu Terdeteksi (Anggota telah dihapus dari DB pusat)
-                        localStorage.removeItem('nav_role');
-                        localStorage.removeItem('nav_user_id');
-                        role = null;
+                    // SURGICAL FIX: Hanya eksekusi sweeper jika DB lokal dipastikan terisi data.
+                    // Mencegah logout paksa saat IndexedDB di-clear paksa oleh OS / browser cache.
+                    if (uid && state.anggota.length > 0) {
+                        let validUser = state.anggota.some(a => a.id === uid);
+                        if (!validUser) {
+                            // Sesi Hantu Terdeteksi (Anggota telah dihapus dari DB pusat)
+                            localStorage.removeItem('nav_role');
+                            localStorage.removeItem('nav_user_id');
+                            role = null;
+                        }
                     }
                 }
                 
@@ -2691,11 +2695,10 @@
                     }
                     
                    // Proteksi 2: Accounting Deadlock (Double-Entry & Saldo Awal Shield Mutlak)
-                    let isTerikat = (tCek.kat === 'Transfer Internal' || tCek.kat === 'Uang Muka Kegiatan' || tCek.kat === 'Sisa Uang Muka' || tCek.kat === 'Saldo Awal' || String(tCek.ket).includes('Penyelesaian Talangan:'));
+                    let isTerikat = (tCek.kat === 'Transfer Internal' || tCek.kat === 'Uang Muka Kegiatan' || tCek.kat === 'Sisa Uang Muka' || tCek.kat === 'Saldo Awal' || String(tCek.ket).includes('Penyelesaian Talangan:') || String(tCek.ket).includes('Reimburse Nombok Uang Muka:'));
                     if (isTerikat) {
                         return showToast("TOLAK: Mutasi ini adalah sistem Terikat (Double-Entry / Talangan / Saldo Awal). Dilarang dihapus manual agar integritas kas tidak hancur!");
                     }
-
                     
                     // SURGICAL FIX: IMMUTABLE ARCHIVE SHIELD (Proteksi Sejarah LPJ)
                     if (tCek.id_event) {
@@ -2772,7 +2775,7 @@
                 }
                 
                 // Proteksi 2: System Generated Shield (Cegah modifikasi teks yang memiliki peran logika backend)
-                let isTerikat = (tTarget.kat === 'Transfer Internal' || tTarget.kat === 'Sisa Uang Muka' || tTarget.kat === 'Saldo Awal' || String(tTarget.ket).includes('Penyelesaian Talangan:'));
+                let isTerikat = (tTarget.kat === 'Transfer Internal' || tTarget.kat === 'Sisa Uang Muka' || tTarget.kat === 'Saldo Awal' || String(tTarget.ket).includes('Penyelesaian Talangan:') || String(tTarget.ket).includes('Reimburse Nombok Uang Muka:'));
                 if (isTerikat) {
                     return showToast("TOLAK: Teks mutasi sistem otomatis/terikat tidak boleh diubah manual!");
                 }
@@ -5111,14 +5114,17 @@
                     await deleteStore('event', id);
                     state.event = state.event.filter(e => e.id !== id);
                     
-                    let trxToDetach = state.trx.filter(t => t.id_event === id);
+                    let dompetPjIds = state.dompet.filter(d => d.id_event === id && d.is_pj).map(d => d.id);
+                    if (orphanDompetId) dompetPjIds.push(orphanDompetId);
+
+                    let trxToDetach = state.trx.filter(t => t.id_event === id || dompetPjIds.includes(t.id_dompet));
                     let fullTrxToDetach = await new Promise(r => {
                         let res = [];
                         const req = idb.transaction('trx', 'readonly').objectStore('trx').openCursor();
                         req.onsuccess = e => {
                             let cursor = e.target.result;
                             if(cursor) {
-                                if(cursor.value.id_event === id) res.push(cursor.value);
+                                if(cursor.value.id_event === id || dompetPjIds.includes(cursor.value.id_dompet)) res.push(cursor.value);
                                 cursor.continue();
                             } else r(res);
                         };
@@ -5128,12 +5134,11 @@
                     await new Promise((resolve, reject) => {
                         const tx = idb.transaction('trx', 'readwrite');
                         const store = tx.objectStore('trx');
-                        let dompetPjIds = state.dompet.filter(d => d.id_event === id && d.is_pj).map(d => d.id);
-                        if (orphanDompetId) dompetPjIds.push(orphanDompetId);
                         
                         fullTrxToDetach.forEach(dbTrx => {
                             let newDompet = dompetPjIds.includes(dbTrx.id_dompet) ? 'DP-UTAMA' : dbTrx.id_dompet;
-                            let t_update = {...dbTrx, id_event: '', id_dompet: newDompet, ket: dbTrx.ket + ' [Program Dimusnahkan]'};
+                            let newEvent = dbTrx.id_event === id ? '' : dbTrx.id_event;
+                            let t_update = {...dbTrx, id_event: newEvent, id_dompet: newDompet, ket: dbTrx.ket + ' [Program Dimusnahkan]'};
                             store.put(t_update);
                             successDetachedTrx.push(t_update);
                         });
@@ -7370,23 +7375,26 @@
                     let yr = new Date().getFullYear();
                     let trxToSave = [];
                     
+                    let dPj = state.dompet.find(d => d.id === idDompet);
+                    let idAgPj = dPj ? dPj.id_anggota : '';
+                    
                     if (tipe === 'sisa' || tipe === 'pas') {
                         let sisa = tipe === 'sisa' ? nomInput : 0;
                         let spentAmt = nomAwal - sisa;
                         if (sisa > 0) {
-                            let trxOut = { id: genID('TX'), ts: tsNow, tipe: 'keluar', nom_awal: sisa, nom_final: sisa, ket: `Setor Sisa LPJ: ${evData ? evData.nama : ''}`, kat: 'Transfer Internal', status: 'lunas', id_event: idEvent, id_anggota: '', id_dompet: idDompet, is_deleted: false, year: yr };
-                            let trxIn = { id: genID('TX'), ts: tsNow + 1, tipe: 'masuk', nom_awal: sisa, nom_final: sisa, ket: `Terima Sisa LPJ: ${evData ? evData.nama : ''}`, kat: 'Sisa Uang Muka', status: 'lunas', id_event: idEvent, id_anggota: '', id_dompet: targetDompet, is_deleted: false, year: yr };
+                            let trxOut = { id: genID('TX'), ts: tsNow, tipe: 'keluar', nom_awal: sisa, nom_final: sisa, ket: `Setor Sisa LPJ: ${evData ? evData.nama : ''}`, kat: 'Transfer Internal', status: 'lunas', id_event: idEvent, id_anggota: idAgPj, id_dompet: idDompet, is_deleted: false, year: yr };
+                            let trxIn = { id: genID('TX'), ts: tsNow + 1, tipe: 'masuk', nom_awal: sisa, nom_final: sisa, ket: `Terima Sisa LPJ: ${evData ? evData.nama : ''}`, kat: 'Sisa Uang Muka', status: 'lunas', id_event: idEvent, id_anggota: idAgPj, id_dompet: targetDompet, is_deleted: false, year: yr };
                             trxToSave.push(trxOut, trxIn);
                         }
                         if (spentAmt > 0) {
-                            let trxSpent = { id: genID('TX'), ts: tsNow + 2, tipe: 'keluar', nom_awal: spentAmt, nom_final: spentAmt, ket: `Pengeluaran Aktual LPJ: ${evData ? evData.nama : ''}`, kat: 'Operasional', status: 'lunas', id_event: idEvent, id_anggota: '', id_dompet: idDompet, is_deleted: false, year: yr };
+                            let trxSpent = { id: genID('TX'), ts: tsNow + 2, tipe: 'keluar', nom_awal: spentAmt, nom_final: spentAmt, ket: `Pengeluaran Aktual LPJ: ${evData ? evData.nama : ''}`, kat: 'Operasional', status: 'lunas', id_event: idEvent, id_anggota: idAgPj, id_dompet: idDompet, is_deleted: false, year: yr };
                             trxToSave.push(trxSpent);
                         }
                     } else if (tipe === 'nombok') {
-                        let trxOut = { id: genID('TX'), ts: tsNow, tipe: 'keluar', nom_awal: nomInput, nom_final: nomInput, ket: `Reimburse Nombok LPJ: ${evData ? evData.nama : ''}`, kat: 'Transfer Internal', status: 'lunas', id_event: idEvent, id_anggota: '', id_dompet: targetDompet, is_deleted: false, year: yr };
-                        let trxIn = { id: genID('TX'), ts: tsNow + 1, tipe: 'masuk', nom_awal: nomInput, nom_final: nomInput, ket: `Terima Reimburse Nombok: ${evData ? evData.nama : ''}`, kat: 'Transfer Internal', status: 'lunas', id_event: idEvent, id_anggota: '', id_dompet: idDompet, is_deleted: false, year: yr };
+                        let trxOut = { id: genID('TX'), ts: tsNow, tipe: 'keluar', nom_awal: nomInput, nom_final: nomInput, ket: `Reimburse Nombok LPJ: ${evData ? evData.nama : ''}`, kat: 'Transfer Internal', status: 'lunas', id_event: idEvent, id_anggota: idAgPj, id_dompet: targetDompet, is_deleted: false, year: yr };
+                        let trxIn = { id: genID('TX'), ts: tsNow + 1, tipe: 'masuk', nom_awal: nomInput, nom_final: nomInput, ket: `Terima Reimburse Nombok: ${evData ? evData.nama : ''}`, kat: 'Transfer Internal', status: 'lunas', id_event: idEvent, id_anggota: idAgPj, id_dompet: idDompet, is_deleted: false, year: yr };
                         let totalSpent = nomAwal + nomInput;
-                        let trxSpent = { id: genID('TX'), ts: tsNow + 2, tipe: 'keluar', nom_awal: totalSpent, nom_final: totalSpent, ket: `Pengeluaran Aktual LPJ (Termasuk Nombok): ${evData ? evData.nama : ''}`, kat: 'Operasional', status: 'lunas', id_event: idEvent, id_anggota: '', id_dompet: idDompet, is_deleted: false, year: yr };
+                        let trxSpent = { id: genID('TX'), ts: tsNow + 2, tipe: 'keluar', nom_awal: totalSpent, nom_final: totalSpent, ket: `Pengeluaran Aktual LPJ (Termasuk Nombok): ${evData ? evData.nama : ''}`, kat: 'Operasional', status: 'lunas', id_event: idEvent, id_anggota: idAgPj, id_dompet: idDompet, is_deleted: false, year: yr };
                         trxToSave.push(trxOut, trxIn, trxSpent);
                     }
                     
@@ -7894,7 +7902,7 @@
 
                         if (data.settings || data.set) {
                             let ds = data.settings || data.set;
-                            Object.keys(ds).forEach(k => { if (k !== 'kiosk_pin' && ds[k] !== undefined) setSetting(k, ds[k]); });
+                            Object.keys(ds).forEach(k => { if (ds[k] !== undefined) setSetting(k, ds[k]); });
                         }
 
                         if (!isSilent) {
