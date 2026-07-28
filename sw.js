@@ -4,7 +4,7 @@
  * Protection: Opaque Quota Shield, Thread Lockdown GC, Fault-Tolerant Pre-Caching
  */
 
-const APP_VERSION = '2.9';
+const APP_VERSION = '3.0';
 const CACHE_PREFIX = 'portal-navasena-';
 const CACHE_STATIC = CACHE_PREFIX + 'static-v' + APP_VERSION;
 const CACHE_DYNAMIC = CACHE_PREFIX + 'dynamic-v' + APP_VERSION;
@@ -135,23 +135,25 @@ self.addEventListener('fetch', event => {
   }
 
   // KANONIKALISASI HTML: Membunuh bug Double-Index dengan memusatkan URL '/' ke './index.html'
-  let targetReq = req;
-  if (req.mode === 'navigate' || reqUrl.pathname.endsWith('/')) {
-    targetReq = new Request('./index.html');
+  let cacheKey = req;
+  const isNavigate = req.mode === 'navigate' || reqUrl.pathname.endsWith('/');
+  if (isNavigate) {
+    cacheKey = './index.html'; // Manipulasi Kunci Cache sebagai String Murni (Bebas Konsumsi)
   }
 
-  const isHtmlRequest = targetReq.url.includes('index.html') || (req.headers.get('accept') && req.headers.get('accept').includes('text/html'));
+  const isHtmlRequest = isNavigate || reqUrl.pathname.endsWith('index.html') || (req.headers.get('accept') && req.headers.get('accept').includes('text/html'));
   
   // STRATEGI 2: THE APEX HYBRID SWR (Stale-While-Revalidate untuk File Utama)
   if (isHtmlRequest) {
     let bgHtmlTask;
-    const fetchPromise = fetch(targetReq).then(networkRes => {
+    // PENTING: Fetch jaringan wajib memakan req Asli (Bukan cacheKey) untuk melindungi Headers & Mode!
+    const fetchPromise = fetch(req).then(networkRes => {
       if (networkRes && networkRes.ok) {
         const clone = networkRes.clone();
         bgHtmlTask = (async () => {
           try {
             const cache = await caches.open(CACHE_STATIC);
-            await cache.put(targetReq, clone);
+            await cache.put(cacheKey, clone); // Menyimpan berdasarkan String Kunci, bukan Objek
           } catch (err) {
             console.warn('[SW] Disk I/O Caching HTML gagal:', err);
           }
@@ -163,8 +165,7 @@ self.addEventListener('fetch', event => {
     // Thread Lockdown Mutlak
     event.waitUntil((async () => { await fetchPromise; if (bgHtmlTask) await bgHtmlTask; })());
     event.respondWith((async () => {
-      const shouldIgnoreQuery = targetReq.url.includes('index.html');
-      const cachedRes = await caches.match(targetReq, { ignoreSearch: shouldIgnoreQuery });
+      const cachedRes = await caches.match(cacheKey, { ignoreSearch: true });
       return cachedRes || fetchPromise.then(res => res || Response.error());
     })());
     return;
@@ -185,7 +186,7 @@ self.addEventListener('fetch', event => {
           backgroundTask = (async () => {
             try {
               const cache = await caches.open(CACHE_STATIC);
-              await cache.put(req, clone); 
+              await cache.put(req.url, clone); // BEDAH PRESISI: Gunakan URL String agar tahan dari efek stream locked
             } catch (err) { console.warn('[SW] Font Cache Write Error:', err); }
           })();
         }
@@ -221,7 +222,7 @@ self.addEventListener('fetch', event => {
             const cacheName = isCoreAsset ? CACHE_STATIC : CACHE_DYNAMIC;
             
             const cache = await caches.open(cacheName);
-            await cache.put(req, clone);
+            await cache.put(req.url, clone); // BEDAH PRESISI: Gunakan URL String untuk menghindari TypeError
 
             if (cacheName === CACHE_DYNAMIC) {
                await limitCacheSize(CACHE_DYNAMIC, 60); 
