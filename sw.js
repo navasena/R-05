@@ -4,7 +4,7 @@
  * Protection: Opaque Quota Shield, Thread Lockdown GC, Fault-Tolerant Pre-Caching
  */
 
-const APP_VERSION = '3.0';
+const APP_VERSION = '3.1';
 const CACHE_PREFIX = 'portal-navasena-';
 const CACHE_STATIC = CACHE_PREFIX + 'static-v' + APP_VERSION;
 const CACHE_DYNAMIC = CACHE_PREFIX + 'dynamic-v' + APP_VERSION;
@@ -145,28 +145,25 @@ self.addEventListener('fetch', event => {
   
   // STRATEGI 2: THE APEX HYBRID SWR (Stale-While-Revalidate untuk File Utama)
   if (isHtmlRequest) {
-    let bgHtmlTask;
-    // PENTING: Fetch jaringan wajib memakan req Asli (Bukan cacheKey) untuk melindungi Headers & Mode!
-    const fetchPromise = fetch(req).then(networkRes => {
+    // Bedah Presisi: Pisahkan Fetch Jaringan dari Return UI untuk menghindari Stream Locked Error
+    const fetchAndCachePromise = fetch(req).then(async (networkRes) => {
       if (networkRes && networkRes.ok) {
-        const clone = networkRes.clone();
-        bgHtmlTask = (async () => {
-          try {
-            const cache = await caches.open(CACHE_STATIC);
-            await cache.put(cacheKey, clone); // Menyimpan berdasarkan String Kunci, bukan Objek
-          } catch (err) {
-            console.warn('[SW] Disk I/O Caching HTML gagal:', err);
-          }
-        })();
+        const cache = await caches.open(CACHE_STATIC);
+        await cache.put(cacheKey, networkRes.clone()); // Simpan kloningan ke Cache
       }
       return networkRes;
-    }).catch(() => null); 
+    }).catch(() => null);
 
-    // Thread Lockdown Mutlak
-    event.waitUntil((async () => { await fetchPromise; if (bgHtmlTask) await bgHtmlTask; })());
+    event.waitUntil(fetchAndCachePromise); // Biarkan worker berjalan di latar belakang
+
     event.respondWith((async () => {
       const cachedRes = await caches.match(cacheKey, { ignoreSearch: true });
-      return cachedRes || fetchPromise.then(res => res || Response.error());
+      // THE APEX HYBRID: Jika ada di cache, gunakan itu (Cepat). Jika tidak, tunggu hasil dari Fetch Jaringan
+      if (cachedRes) {
+        return cachedRes;
+      }
+      const networkRes = await fetchAndCachePromise;
+      return networkRes || Response.error();
     })());
     return;
   }
@@ -181,7 +178,8 @@ self.addEventListener('fetch', event => {
       try {
         const networkRes = await fetch(req);
         
-        if (networkRes && (networkRes.ok || networkRes.type === 'opaque')) {
+        // PROTEKSI KUOTA MUTLAK: Haramkan tipe Opaque untuk mencegah 7MB Phantom Padding Bug!
+        if (networkRes && networkRes.ok) {
           const clone = networkRes.clone();
           backgroundTask = (async () => {
             try {
