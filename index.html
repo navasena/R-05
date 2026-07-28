@@ -346,10 +346,11 @@
          * - Zero-Memory Leak Event Listeners
          */
 
-        if (sessionStorage.getItem('_nx_logout_fx') === 'true') {
+        // PHOENIX SHIELD: Mengunci layar di millisecond 0 untuk mencegah Flash UI Beranda
+        if (sessionStorage.getItem('_nx_logout_fx') === 'true' || !localStorage.getItem('nav_role')) {
             let curtain = document.createElement('style');
             curtain.id = 'fx-curtain';
-            curtain.innerHTML = 'body { opacity: 0 !important; background: #0F172A !important; }';
+            curtain.innerHTML = 'body { opacity: 0 !important; background: #0F172A !important; transition: none !important; }';
             document.head.appendChild(curtain);
         }
 
@@ -694,28 +695,6 @@
                     }
                 });
 
-                // ANGKAT TIRAI CINEMATIC DENGAN MULUS (FAIL-SAFE GLOBAL DIPINDAH KE ATAS SEBELUM DB LOAD)
-
-                if (sessionStorage.getItem('_nx_logout_fx') === 'true') {
-                    setTimeout(() => {
-                        let fx = document.getElementById('fx-curtain');
-                        if(fx) fx.remove();
-                        sessionStorage.removeItem('_nx_logout_fx');
-                        
-                        // SURGICAL FIX: Transisi Opacity Murni (Anti-Containing Block Bug)
-                        document.body.style.opacity = '0';
-                        document.body.style.transform = 'none';
-                        document.body.style.filter = 'none';
-                        void document.body.offsetWidth; // Paksa DOM Reflow Mutlak
-                        
-                        document.body.style.transition = 'opacity 0.6s ease';
-                        document.body.style.opacity = '1';
-                        
-                        // Sapu bersih sisa atribut transisi setelah selesai agar DOM Body steril
-                        setTimeout(() => { document.body.style.transition = ''; }, 600);
-                    }, 50);
-                }
-
                 await initDB();
                 if(typeof loadLogoFromDB === 'function') loadLogoFromDB();
 
@@ -752,8 +731,31 @@
                     if(modPin) modPin.style.background = '#020617';
                     
                     if(modIdentity) modIdentity.style.display = 'flex';
+                }
 
-                    return; // Gembok eksekusi hingga profil dipilih
+                // ANGKAT TIRAI CINEMATIC DENGAN MULUS (Diaktifkan SETELAH struktur DOM Modal PORTAL siap)
+                let fxCurtain = document.getElementById('fx-curtain');
+                if (fxCurtain) {
+                    setTimeout(() => {
+                        fxCurtain.remove();
+                        sessionStorage.removeItem('_nx_logout_fx');
+                        
+                        // SURGICAL FIX: Transisi Opacity Murni (Anti-Containing Block Bug)
+                        document.body.style.opacity = '0';
+                        document.body.style.transform = 'none';
+                        document.body.style.filter = 'none';
+                        void document.body.offsetWidth; // Paksa DOM Reflow Mutlak
+                        
+                        document.body.style.transition = 'opacity 0.6s ease';
+                        document.body.style.opacity = '1';
+                        
+                        // Sapu bersih sisa atribut transisi setelah selesai agar DOM Body steril
+                        setTimeout(() => { document.body.style.transition = ''; }, 600);
+                    }, 50);
+                }
+
+                if(!role && isKiosk) {
+                    return; // Gembok eksekusi background hingga profil dipilih
                 }
 
                 if(typeof updateDashboard === 'function') updateDashboard();
@@ -2894,7 +2896,9 @@
                 let nom = parseInt(getSetting('iuran_nom', 10000), 10) || 0;
 
                 if(idTrx) {
-                    openConfirm("Batalkan Iuran?", `Hapus status lunas untuk <b>${esc(ag.nama)}</b> bulan <b>${namaBulan} ${thn}</b>?<br><br>Dana sebesar Rp ${fmtRp(nom)} akan dikurangi dari saldo.`, "danger", 
+                    let actualTrx = state.trx.find(t => t.id === idTrx);
+                    let displayNom = actualTrx ? actualTrx.nom_final : nom;
+                    openConfirm("Batalkan Iuran?", `Hapus status lunas untuk <b>${esc(ag.nama)}</b> bulan <b>${namaBulan} ${thn}</b>?<br><br>Dana sebesar Rp ${fmtRp(displayNom)} akan dikurangi dari saldo.`, "danger", 
                         async () => {
                             let idx = state.trx.findIndex(t => t.id === idTrx);
                             if(idx > -1) { 
