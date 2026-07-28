@@ -353,7 +353,7 @@
             document.head.appendChild(curtain);
         }
 
-        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycby6Imehq8UJLOtCUL_nUoFjzc716EkTiOF67vyNab_QkEzOhBJdlM15m1su8MP4PNrt/exec";
+        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbxQSuyYE3Oc5vJBq1xMwiXQPm5gPJsfwojfb-icCd0RC9BMym4vCzfvVhz2PiEkw2ZE/exec";
         const CLOUD_API_TOKEN = "Navasena29082026";
 
         // --- KONFIGURASI INDEXEDDB LOKAL ---
@@ -4664,7 +4664,8 @@
             function delAnggota(id) {
                 if(isKiosk) return showToast("DITOLAK: Sistem Terkunci dalam Mode Audit.");
                 let hasPendingUangMuka = state.trx.some(t => t.id_anggota === id && (t.status === 'pending' || t.status === 'talangan') && !t.is_deleted);
-                if(hasPendingUangMuka) return showToast("TOLAK: Anggota ini masih membawa Uang Muka yang belum lunas!");
+                let isPjAktif = state.dompet.some(d => d.id_anggota === id && d.is_pj && d.status === 'aktif');
+                if(hasPendingUangMuka || isPjAktif) return showToast("TOLAK: Anggota ini masih membawa Uang Muka / Dana Kepanitiaan yang belum di-LPJ-kan!");
 
                 openConfirm("Hapus Anggota?", "Data anggota ini akan dihapus dari sistem. Transaksi keuangannya di masa lalu akan tetap aman tersimpan.", "danger", async () => {
                     try {
@@ -5542,6 +5543,7 @@
                 }
 
                 showToast(`Hi, ${esc(member.nama).split(' ')[0]}!`);
+                if(typeof activateKiosk === 'function') activateKiosk(true); // Sinkronisasi UI Teks Panduan
                 if(typeof updateDashboard === 'function') updateDashboard();
                 if(currView === 'iuran') { if(typeof renderIuranGrid === 'function') renderIuranGrid(); }
             }
@@ -5697,6 +5699,7 @@
                 const hUpload = document.getElementById('btn-hdr-upload');
                 const hLoad = document.getElementById('btn-hdr-load');
                 let lblPanduan = document.getElementById('lbl-btn-panduan');
+                let role = localStorage.getItem('nav_role');
                 
                 if(isActive) { 
                     document.body.classList.add('kiosk-mode');
@@ -5704,7 +5707,7 @@
                     document.getElementById('theme-color-meta').setAttribute("content", "#0F172A"); 
                     if(hUpload) hUpload.style.display = 'none';
                     if(hLoad) hLoad.style.display = 'flex';
-                    if(lblPanduan) lblPanduan.innerText = "Buku Panduan Warga";
+                    if(lblPanduan) lblPanduan.innerText = role === 'anggota' ? "Panduan Anggota" : "Buku Panduan Warga";
                     // Tombol AKSES LOGIN BENDAHARA dihapus sesuai Konsep Arsitektur Wajib Logout
                 } else { 
                     document.body.classList.remove('kiosk-mode');
