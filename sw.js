@@ -4,7 +4,7 @@
  * Protection: Opaque Quota Shield, Thread Lockdown GC, Fault-Tolerant Pre-Caching
  */
 
-const APP_VERSION = '3.4';
+const APP_VERSION = '3.5';
 const CACHE_PREFIX = 'portal-navasena-';
 const CACHE_STATIC = CACHE_PREFIX + 'static-v' + APP_VERSION;
 const CACHE_DYNAMIC = CACHE_PREFIX + 'dynamic-v' + APP_VERSION;
@@ -139,30 +139,34 @@ self.addEventListener('fetch', event => {
 
   const isHtmlRequest = isNavigate || reqUrl.pathname.endsWith('index.html') || (req.headers.get('accept') && req.headers.get('accept').includes('text/html'));
   
-  // STRATEGI 2: THE APEX HYBRID SWR (Stale-While-Revalidate untuk File Utama)
-  if (isHtmlRequest) {
-    // Bedah Presisi: Pisahkan Fetch Jaringan dari Return UI untuk menghindari Stream Locked Error
-    const fetchAndCachePromise = fetch(req).then(async (networkRes) => {
-      if (networkRes && networkRes.ok) {
-        const cache = await caches.open(CACHE_STATIC);
-        await cache.put(cacheKey, networkRes.clone()); // Simpan kloningan ke Cache
-      }
-      return networkRes;
-    }).catch(() => null);
+      // STRATEGI 2: THE APEX HYBRID SWR (Stale-While-Revalidate untuk File Utama)
+      if (isHtmlRequest) {
+        // Bedah Presisi: Pisahkan Fetch Jaringan dari Return UI untuk menghindari Stream Locked Error
+        const fetchAndCachePromise = fetch(req).then(async (networkRes) => {
+          if (networkRes && networkRes.ok) {
+            try {
+              const cache = await caches.open(CACHE_STATIC);
+              await cache.put(cacheKey, networkRes.clone()); // Simpan kloningan ke Cache
+            } catch (err) {
+              console.warn('[SW] Core Cache Write Error (Storage Limit Bypass):', err);
+            }
+          }
+          return networkRes;
+        }).catch(() => null);
 
-    event.waitUntil(fetchAndCachePromise); // Biarkan worker berjalan di latar belakang
+        event.waitUntil(fetchAndCachePromise); // Biarkan worker berjalan di latar belakang
 
-    event.respondWith((async () => {
-      const cachedRes = await caches.match(cacheKey, { ignoreSearch: true });
-      // THE APEX HYBRID: Jika ada di cache, gunakan itu (Cepat). Jika tidak, tunggu hasil dari Fetch Jaringan
-      if (cachedRes) {
-        return cachedRes;
+        event.respondWith((async () => {
+          const cachedRes = await caches.match(cacheKey, { ignoreSearch: true });
+          // THE APEX HYBRID: Jika ada di cache, gunakan itu (Cepat). Jika tidak, tunggu hasil dari Fetch Jaringan
+          if (cachedRes) {
+            return cachedRes;
+          }
+          const networkRes = await fetchAndCachePromise;
+          return networkRes || Response.error();
+        })());
+        return;
       }
-      const networkRes = await fetchAndCachePromise;
-      return networkRes || Response.error();
-    })());
-    return;
-  }
 
   // STRATEGI 3: GOOGLE FONTS & EKSTERNAL ASSETS (Opaque Protection & Cache-First)
   if (reqUrl.hostname === 'fonts.googleapis.com' || reqUrl.hostname === 'fonts.gstatic.com') {
