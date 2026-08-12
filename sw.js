@@ -4,7 +4,7 @@
  * Protection: Opaque Quota Shield, Thread Lockdown GC, Fault-Tolerant Pre-Caching
  */
 
-const APP_VERSION = '3.1';
+const APP_VERSION = '3.2';
 const CACHE_PREFIX = 'portal-navasena-';
 const CACHE_STATIC = CACHE_PREFIX + 'static-v' + APP_VERSION;
 const CACHE_DYNAMIC = CACHE_PREFIX + 'dynamic-v' + APP_VERSION;
@@ -29,12 +29,10 @@ const staticAssets = [
 ];
 
 // =========================================================
-// 1. MANAJEMEN MEMORI (GARBAGE COLLECTOR) DENGAN THREAD LOCKDOWN
+// 1. MANAJEMEN MEMORI (GARBAGE COLLECTOR) DENGAN ATOMIC DELETION
 // =========================================================
-let isGCRunning = false;
 const limitCacheSize = async (name, size) => {
-  if (isGCRunning) return;
-  isGCRunning = true;
+  // SURGICAL FIX: Mutex Lock dihilangkan. Cache API secara native mendukung Atomic Concurrent Deletion.
   try {
     const cache = await caches.open(name);
     const keys = await cache.keys();
@@ -44,8 +42,6 @@ const limitCacheSize = async (name, size) => {
     }
   } catch (err) {
     console.warn('[SW] Pembersihan Memori Gagal:', err);
-  } finally {
-    isGCRunning = false;
   }
 };
 
@@ -135,7 +131,7 @@ self.addEventListener('fetch', event => {
   }
 
   // KANONIKALISASI HTML: Membunuh bug Double-Index dengan memusatkan URL '/' ke './index.html'
-  let cacheKey = req;
+  let cacheKey = req.url; // SURGICAL FIX: Ekstraksi String Mutlak untuk mencegah TypeError "Consumed Request"
   const isNavigate = req.mode === 'navigate' || reqUrl.pathname.endsWith('/');
   if (isNavigate) {
     cacheKey = './index.html'; // Manipulasi Kunci Cache sebagai String Murni (Bebas Konsumsi)
@@ -176,7 +172,10 @@ self.addEventListener('fetch', event => {
       if (cachedRes) return cachedRes; 
 
       try {
-        const networkRes = await fetch(req);
+        // [SURGICAL FIX]: Manipulasi Mode Request menjadi 'cors' untuk mem-bypass Opaque Response.
+        // Memastikan status `ok` menjadi TRUE tanpa melanggar perlindungan Phantom Padding.
+        const fetchReq = new Request(req.url, { mode: 'cors', credentials: 'omit' });
+        const networkRes = await fetch(fetchReq);
         
         // PROTEKSI KUOTA MUTLAK: Haramkan tipe Opaque untuk mencegah 7MB Phantom Padding Bug!
         if (networkRes && networkRes.ok) {
@@ -202,7 +201,8 @@ self.addEventListener('fetch', event => {
   // STRATEGI 4: STATIC & DYNAMIC ASSETS LAINNYA (Cache-First, Fallback Network)
   let bgDynamicTask;
   const mainRespondPromise = (async () => {
-    const cachedRes = await caches.match(req, { ignoreSearch: true });
+    // SURGICAL FIX: ignoreSearch dihapus untuk mengembalikan kapabilitas Cache-Busting via Query Params
+    const cachedRes = await caches.match(req);
     if (cachedRes) return cachedRes; 
 
     try {
