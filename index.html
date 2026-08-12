@@ -5820,7 +5820,7 @@
                     if(typeof updateHeaderDate === 'function') updateHeaderDate();
                     document.getElementById('theme-color-meta').setAttribute("content", "#1E3A8A"); 
                     if(hUpload) hUpload.style.display = 'flex';
-                    if(hLoad) hLoad.style.display = 'none';
+                    if(hLoad) hLoad.style.display = 'none'; // KEMBALIKAN KE NONE: Hindari misclick, fungsi Load sudah aman di Profil
                     if(lblPanduan) lblPanduan.innerText = "PANDUAN BENDAHARA";
                     if(btn) {
                         btn.style.background = 'transparent'; btn.style.color = '#DC2626'; btn.style.border = '1.5px solid #DC2626'; btn.style.boxShadow = 'none';
