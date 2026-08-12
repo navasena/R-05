@@ -354,7 +354,7 @@
             document.head.appendChild(curtain);
         }
 
-        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbxQSuyYE3Oc5vJBq1xMwiXQPm5gPJsfwojfb-icCd0RC9BMym4vCzfvVhz2PiEkw2ZE/exec";
+        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbydTfB5lzSpiqZRFTMPicsdS7JVUe-BsrzfDZi3HF54EliSrphA-teBsnubAtOY_lD2/exec";
         const CLOUD_API_TOKEN = "Navasena29082026";
 
         // --- KONFIGURASI INDEXEDDB LOKAL ---
@@ -871,7 +871,7 @@
             <div id="fomo-widget-container" class="no-select"></div>
 
             <!-- ANALITIK ARUS KAS BULANAN -->
-            <div class="section-title no-select" style="margin-bottom: 12px;">Analitik Arus Kas</div>
+            <div class="section-title no-select" id="lbl-analitik-title" style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">Analitik Arus Kas</div>
             <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 20px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 32px;" class="no-select">
                 <div style="display: flex;">
                     <div style="flex: 1; padding: 20px; cursor: pointer; position: relative; min-width: 0;" onclick="navTo('trx', 'semua')" class="bento-hover">
@@ -880,7 +880,7 @@
                             <div style="width: 24px; height: 24px; border-radius: 6px; background: var(--success-light); color: var(--success); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
                             </div>
-                            <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Pemasukan</span>
+                            <span id="lbl-dash-in" style="font-size: 10px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Pemasukan</span>
                         </div>
                         <div id="dash-in-sum" style="font-size: 18px; font-weight: 900; color: var(--success); letter-spacing: -0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Rp 0</div>
                     </div>
@@ -890,7 +890,7 @@
                             <div style="width: 24px; height: 24px; border-radius: 6px; background: var(--danger-light); color: var(--danger); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
                             </div>
-                            <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Pengeluaran</span>
+                            <span id="lbl-dash-out" style="font-size: 10px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Pengeluaran</span>
                         </div>
                         <div id="dash-out-sum" style="font-size: 18px; font-weight: 900; color: var(--text-main); letter-spacing: -0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Rp 0</div>
                     </div>
@@ -1272,7 +1272,20 @@
             if(document.getElementById('dash-in-sum')) document.getElementById('dash-in-sum').innerText = 'Rp ' + formatPrivacy(tInAnalitik);
             if(document.getElementById('dash-out-sum')) document.getElementById('dash-out-sum').innerText = 'Rp ' + formatPrivacy(tOutAnalitik);
             
+            // [SURGICAL FIX] Dynamic Month Injector untuk Analitik Arus Kas
+            const _namaBulanArr = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+            let namaBulanIni = _namaBulanArr[currM];
+            
+            let lblTitle = document.getElementById('lbl-analitik-title');
+            let lblIn = document.getElementById('lbl-dash-in');
+            let lblOut = document.getElementById('lbl-dash-out');
+            
+            if(lblTitle) lblTitle.innerHTML = `<span>Analitik Arus Kas</span> <span style="font-size: 9px; font-weight: 900; color: var(--primary); background: var(--primary-light); padding: 4px 8px; border-radius: 6px; letter-spacing: 0.5px; border: 1px solid rgba(59,130,246,0.2); box-shadow: 0 2px 4px rgba(59,130,246,0.05);">${namaBulanIni.toUpperCase()} ${currY}</span>`;
+            if(lblIn) lblIn.innerText = `PEMASUKAN`;
+            if(lblOut) lblOut.innerText = `PENGELUARAN`;
+
             // SURGICAL FIX: Injeksi Rendering Dompet Interaktif
+
             let dompetHtml = '';
             state.dompet.filter(d => d.status !== 'arsip' && !d.is_pj).forEach(d => {
                 let saldoDompet = dompetMap[d.id].in - dompetMap[d.id].out - dompetMap[d.id].pend;
@@ -2157,7 +2170,8 @@
                     } else if ((t.tipe === 'keluar' && t.status === 'talangan') || (t.tipe === 'keluar' && t.status === 'lunas' && t.ket && t.ket.includes('[TALANGAN'))) {
                         let key = `${t.id_anggota}-${tYear}`;
                         talanganMap[key] = (talanganMap[key] || 0) + 1;
-                    } else if (t.tipe === 'masuk' && t.id_anggota && t.kat !== 'Transfer Internal' && t.kat !== 'Saldo Awal' && !(t.kat||'').includes('Koreksi Saldo')) {
+
+                    } else if (t.tipe === 'masuk' && t.id_anggota && t.kat !== 'Transfer Internal' && t.kat !== 'Saldo Awal' && t.kat !== 'Sisa Uang Muka' && !(t.kat||'').includes('Koreksi Saldo')) {
                         let keyD = `${t.id_anggota}-${tYear}-${tMonth}`;
                         donasiMap[keyD] = (donasiMap[keyD] || 0) + t.nom_final;
                     }
@@ -2696,8 +2710,8 @@
                         return showToast("TOLAK (LIMBO PROTECTION): Dompet kas dari mutasi ini sudah ditutup/diarsipkan. Data tidak dapat dimanipulasi!");
                     }
                     
-                   // Proteksi 2: Accounting Deadlock (Double-Entry & Saldo Awal Shield Mutlak)
-                    let isTerikat = (tCek.kat === 'Transfer Internal' || tCek.kat === 'Uang Muka Kegiatan' || tCek.kat === 'Sisa Uang Muka' || tCek.kat === 'Saldo Awal' || String(tCek.ket).includes('Penyelesaian Talangan:') || String(tCek.ket).includes('Reimburse Nombok Uang Muka:'));
+                    // Proteksi 2: Accounting Deadlock (Double-Entry & Saldo Awal Shield Mutlak)
+                    let isTerikat = (tCek.kat === 'Transfer Internal' || tCek.kat === 'Uang Muka Kegiatan' || tCek.kat === 'Sisa Uang Muka' || tCek.kat === 'Saldo Awal' || String(tCek.ket).includes('Penyelesaian Talangan:') || String(tCek.ket).includes('Reimburse Nombok Uang Muka:') || String(tCek.ket).includes('[UANG MUKA SELESAI]') || String(tCek.ket).includes('[Dialihkan ke Nota Baru]'));
                     if (isTerikat) {
                         return showToast("TOLAK: Mutasi ini adalah sistem Terikat (Double-Entry / Talangan / Saldo Awal). Dilarang dihapus manual agar integritas kas tidak hancur!");
                     }
@@ -2734,6 +2748,8 @@
 
                                 try {
                                     isProcessingTransaction = true;
+                                    // SURGICAL FIX: JIT DB Connection Healer
+                                    try { idb.transaction('trx', 'readonly'); } catch(err) { await initDB(); }
                                     let originalDbTrx = await new Promise(r => {
                                         const req = idb.transaction('trx', 'readonly').objectStore('trx').get(tTarget.id);
                                         req.onsuccess = e => r(e.target.result);
@@ -2776,25 +2792,55 @@
                     return showToast("TOLAK: Dompet kas ini sudah ditutup/diarsipkan. Data tidak dapat diedit!");
                 }
                 
-                // Proteksi 2: System Generated Shield (Cegah modifikasi teks yang memiliki peran logika backend)
-                let isTerikat = (tTarget.kat === 'Transfer Internal' || tTarget.kat === 'Sisa Uang Muka' || tTarget.kat === 'Saldo Awal' || String(tTarget.ket).includes('Penyelesaian Talangan:') || String(tTarget.ket).includes('Reimburse Nombok Uang Muka:'));
+                // Proteksi 2: System Generated Shield
+                // HANYA mutasi sistem murni (Transisi Mesin) yang dikunci mutlak.
+                // Uang Muka / Talangan yang sudah lunas TETAP BISA diedit Teks Dasarnya agar typo bisa diperbaiki.
+                let strKet = String(tTarget.ket);
+                let isTerikat = (tTarget.kat === 'Transfer Internal' || tTarget.kat === 'Sisa Uang Muka' || tTarget.kat === 'Saldo Awal' || strKet.startsWith('Penyelesaian Talangan:') || strKet.startsWith('Reimburse Nombok Uang Muka:'));
                 if (isTerikat) {
                     return showToast("TOLAK: Teks mutasi sistem otomatis/terikat tidak boleh diubah manual!");
                 }
 
+                // [SURGICAL FIX]: DUAL-LOCK EXTRACTOR (PREFIX & SUFFIX ANTI-CORRUPTION)
+                let prefixKunci = "";
+                let suffixKunci = "";
+                let teksBisaDiedit = strKet;
+                
+                // 1. Potong Suffix (Ekor Catatan Sistem Settle/Lunas di bagian bawah)
+                let splitIdx = teksBisaDiedit.indexOf('\n[');
+                if (splitIdx !== -1) {
+                    suffixKunci = teksBisaDiedit.substring(splitIdx); // Kunci: \n[TALANGAN LUNAS]... dst
+                    teksBisaDiedit = teksBisaDiedit.substring(0, splitIdx).trim(); // Ambil sisanya
+                }
+
+                // 2. Potong Prefix (Kepala Catatan Donasi di bagian depan)
+                let lowerKet = teksBisaDiedit.toLowerCase();
+                if (lowerKet.startsWith("donasi dari: ")) {
+                    prefixKunci = "Donasi Dari: ";
+                    teksBisaDiedit = teksBisaDiedit.substring(13).trim();
+                } else if (lowerKet.startsWith("donasi umum: ")) {
+                    prefixKunci = "Donasi Dari: ";
+                    teksBisaDiedit = teksBisaDiedit.substring(13).trim(); 
+                }
+
                 if (typeof openCustomPrompt === 'function') {
                     openCustomPrompt("Edit Rincian Mutasi", "Perbaiki kesalahan ketik tanpa mengubah waktu riil dan nominal.", "Ketik rincian baru...", async (newVal) => {
-                        if (newVal === tTarget.ket) return; // Abaikan jika tidak ada perubahan
+                        
+                        // Rakit kembali secara atomik: [Kepala] + [Isi Edit] + [Ekor]
+                        let finalKet = prefixKunci + newVal.trim() + suffixKunci; 
+                        if (finalKet === tTarget.ket) return; // Abaikan jika tidak ada perubahan
                         
                         try {
                             isProcessingTransaction = true;
+                            // SURGICAL FIX: JIT DB Connection Healer
+                            try { idb.transaction('trx', 'readonly'); } catch(err) { await initDB(); }
                             let originalDbTrx = await new Promise(r => {
                                 const req = idb.transaction('trx', 'readonly').objectStore('trx').get(tTarget.id);
                                 req.onsuccess = e => r(e.target.result);
                                 req.onerror = () => r(null);
                             });
                             
-                            let t_update = {...(originalDbTrx || tTarget), ket: newVal};
+                            let t_update = {...(originalDbTrx || tTarget), ket: finalKet};
                             await saveStore('trx', t_update);
                             
                             // Sinkronisasi RAM
@@ -2810,11 +2856,9 @@
                         } finally {
                             isProcessingTransaction = false;
                         }
-                    }, tTarget.ket); // <-- Value default dipasang di sini
+                    }, teksBisaDiedit); // <-- HANYA masukkan Teks Murni (Base Description)
                 }
             };
-
-            // (Fungsi openSettle, calcSettle, executeSettle, executeBatchSettle ditaruh di Modal Part 4)
 
             // Namun karena dipanggil dari card HTML, kita buat jembatannya jika Modal Part 4 belum me-load-nya.
             window.openSettle = function(id) {
@@ -2915,6 +2959,9 @@
                                 
                                 try {
                                     isProcessingTransaction = true;
+                                    
+                                    // SURGICAL FIX: JIT DB Connection Healer
+                                    try { idb.transaction('trx', 'readonly'); } catch(err) { await initDB(); }
                                     
                                     // SURGICAL FIX: Tarik objek utuh dari IndexedDB sebelum diubah untuk mengamankan BLOB Base64
                                     let originalDbTrx = await new Promise(r => {
@@ -4101,7 +4148,7 @@
             <div class="modal-box">
                 <button class="close-modal" onclick="closeModal('mod-aspirasi')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
                 <h3 style="font-size: 18px; font-weight: 900; color: #9D174D; margin-bottom: 4px;">Kotak Suara</h3>
-                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 20px;">Pesan/usulan Anda dienkripsi dan hanya bisa dibaca oleh Bendahara.</p>
+                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 20px;">Pesan/usulan Anda dienkripsi dan hanya bisa dibaca oleh Pengurus.</p>
                 <textarea id="inp-aspirasi" rows="4" placeholder="Berikan saran & kritik, atau usulan-usulan yang membangun." style="border-radius: 12px; border-color: #FBCFE8; padding: 16px; font-size: 13px; margin-bottom: 16px;"></textarea>
                 <button id="btn-kirim-aspirasi" class="btn no-select" style="background: #9D174D; color: white;" onclick="submitAspirasiTrojan()">Kirim Pesan</button>
             </div>
@@ -4877,15 +4924,18 @@
                         
                         if (allPjDompets.length > 0) {
                             allPjDompets.forEach(pjDompet => {
+
                                 let dIn = 0, dOut = 0;
-                                let purposeText = 'Pencairan Dana Program';
+                                let purposeItems = []; // SURGICAL FIX: Menggunakan Array untuk menampung banyak rincian
                                 
                                 let pjTrx = dompetTrxMap[pjDompet.id] || [];
                                 pjTrx.forEach(t => {
                                     if (t.tipe === 'masuk') {
                                         dIn += t.nom_final;
                                         if (t.kat === 'Transfer Internal' && String(t.ket || '').includes('Terima dari Kas Induk:')) {
-                                            purposeText = String(t.ket || '').replace('Terima dari Kas Induk: ', '').trim();
+                                            let pText = String(t.ket || '').replace('Terima dari Kas Induk: ', '').trim();
+                                            // Format Rincian: Nama Plot (Rp Nominal) + Tombol Edit Keterangan
+                                            purposeItems.push(`<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;"><div style="display: flex; gap: 4px; flex: 1; min-width: 0;"><span style="flex-shrink: 0;">•</span><span style="flex: 1; word-break: break-word;">${esc(pText)}</span></div><div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;"><span style="color:#059669; font-weight:800; white-space:nowrap;">Rp ${fmtRp(t.nom_final)}</span><button class="kiosk-hide no-select" style="background: transparent; border: none; color: var(--primary); padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.6; transition: 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'" onclick="editKeteranganPj('${t.id}')" title="Edit Rincian"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button></div></div>`);
                                         }
                                     }
                                     if (t.tipe === 'keluar') dOut += (t.status === 'pending' || t.status === 'talangan' ? t.nom_awal : t.nom_final);
@@ -4895,17 +4945,32 @@
                                 totalDanaDiTangan += sisaPj;
                                 let pjAg = state.anggota.find(a => a.id === pjDompet.id_anggota);
                                 
+                                // Merakit Array menjadi HTML. Jika kosong, tampilkan default.
+                                let purposeHtml = purposeItems.length > 0 
+                                    ? purposeItems.join('<div style="height:6px;"></div>') 
+                                    : 'Pencairan Dana Program';
+                                
                                 pjControlHtml += `
-                                <div style="display:flex; justify-content:space-between; align-items:center; padding: 14px 0; border-bottom: 1px solid #E2E8F0;">
-                                    <div style="display:flex; align-items:center; gap: 14px; flex: 1; min-width: 0;">
-                                        <div style="flex: 1; min-width: 0;">
-                                            <div style="font-size:13px; font-weight:800; color:#0F172A; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(pjAg ? pjAg.nama : 'Panitia')}</div>
-                                            <div style="font-size:10px; font-weight:600; color:#64748B; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(purposeText)}</div>
+                                <div style="display:flex; flex-direction:column; gap:12px; padding: 16px 0; border-bottom: 1px solid #E2E8F0;">
+                                    <div style="display:flex; align-items:center; gap: 8px; font-size:14px; font-weight:900; color:#0F172A;">
+                                        <div style="width: 26px; height: 26px; background: #EFF6FF; color: #3B82F6; border-radius: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(59,130,246,0.1);">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                                         </div>
+                                        <span>${esc(pjAg ? pjAg.nama : 'Panitia')}</span>
                                     </div>
-                                    <div style="text-align:right; flex-shrink: 0; margin-left: 12px;">
-                                        <div style="font-size:14px; font-weight:900; color:#0F172A; margin-bottom:6px;">Rp ${fmtRp(sisaPj)}</div>
-                                        <button class="kiosk-hide no-select" style="background: #1E3A8A; color: white; border: none; font-size: 9px; font-weight: 800; padding: 6px 10px; border-radius: 6px; cursor: pointer; letter-spacing: 0.5px; box-shadow: 0 2px 4px rgba(30, 58, 138, 0.2);" onclick="if(typeof openSmartLpj === 'function') openSmartLpj('${pjDompet.id}', '${ev.id}', ${sisaPj})">TUTUP LPJ</button>
+                                    
+                                    <div style="font-size:11px; font-weight:600; color:#475569; background:#F8FAFC; padding:12px; border-radius:10px; border:1px dashed #CBD5E1; line-height:1.5;">
+                                        ${purposeHtml}
+                                    </div>
+                                    
+                                    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:2px;">
+                                        <div>
+                                            <div style="font-size:9.5px; font-weight:800; color:#64748B; text-transform:uppercase; margin-bottom:4px; letter-spacing:0.5px;">Total Saldo Dibawa:</div>
+                                            <div style="font-size:17px; font-weight:900; color:#1E3A8A; letter-spacing:-0.5px;">Rp ${fmtRp(sisaPj)}</div>
+                                        </div>
+                                        <button class="kiosk-hide no-select" style="background: #1E3A8A; color: white; border: none; font-size: 10px; font-weight: 800; padding: 10px 16px; border-radius: 10px; cursor: pointer; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(30, 58, 138, 0.25);" onclick="if(typeof openSmartLpj === 'function') openSmartLpj('${pjDompet.id}', '${ev.id}', ${sisaPj})">
+                                            TUTUP LPJ
+                                        </button>
                                     </div>
                                 </div>`;
                             });
@@ -5161,7 +5226,10 @@
                         }
                     });
                     
-                    let dompetToDelete = state.dompet.filter(d => (d.id_event === id && d.is_pj) || d.id === orphanDompetId);
+                    let isDompetStillUsed = state.event.some(e => e.id_dompet_default === orphanDompetId);
+                    let safeOrphanId = isDompetStillUsed ? null : orphanDompetId;
+                    
+                    let dompetToDelete = state.dompet.filter(d => (d.id_event === id && d.is_pj) || d.id === safeOrphanId);
                     for (let d of dompetToDelete) {
                         await deleteStore('dompet', d.id);
                     }
@@ -5387,6 +5455,8 @@
 
                     isProcessingTransaction = true;
                     try {
+                        // SURGICAL FIX: JIT DB Connection Healer
+                        try { idb.transaction('trx', 'readonly'); } catch(err) { await initDB(); }
                         let originalDbTrx = await new Promise(r => {
                             const req = idb.transaction('trx', 'readonly').objectStore('trx').get(id);
                             req.onsuccess = e => r(e.target.result);
@@ -5436,15 +5506,14 @@
                 let fetchSuccess = false;
                 try {
                     if (navigator.onLine && typeof loadFromCloud === 'function') {
-                        // Tarik Data Cloud Secara Singkat & Sinkron (Abaikan Error jika timeout)
-                        await loadFromCloud(true);
-                        fetchSuccess = true;
+                        // Tarik Data Cloud Secara Singkat & Sinkron. Tangkap return boolean mutlak.
+                        fetchSuccess = await loadFromCloud(true);
                     }
                 } catch(e) { console.warn("Lokal Cache digunakan."); }
 
                 if(typeof updateDashboard === 'function') updateDashboard();
                 let mod = document.getElementById('mod-identity');
-                
+
                 if (role === 'warga') {
                     mod.style.transition = "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)";
                     mod.style.opacity = "0";
@@ -5465,8 +5534,41 @@
                         
                         document.body.classList.remove('modal-open'); // THE SCROLL-LOCK EXORCISM: Pelepasan kunci layar mutlak untuk Warga
                         
-                        if (fetchSuccess) showToast("Sugeng Rawuh Warga RT 05.");
-                        else showToast("⚠️ Anda sedang Offline. Menggunakan data tersimpan.");
+                        if (fetchSuccess) {
+                            showToast("Sugeng Rawuh Warga RT 05.");
+                        } else {
+                            if (state.trx.length === 0) {
+                                showToast("⚠️ Koneksi lambat/gagal. Silakan ketuk tombol LOAD di kanan atas!");
+                                if (typeof pulseHaptic === 'function') pulseHaptic('warn');
+                                
+                                // THE SOS BEACON: Buat ikon SVG pada tombol LOAD berdenyut merah (Premium Glow)
+                                let btnLoad = document.getElementById('btn-hdr-load');
+                                if (btnLoad) {
+                                    // Injeksi CSS Animasi Organik secara dinamis
+                                    if (!document.getElementById('svg-pulse-css')) {
+                                        document.head.insertAdjacentHTML('beforeend', '<style id="svg-pulse-css">@keyframes svgPulseRed { 0% { filter: drop-shadow(0 0 2px rgba(239,68,68,0.5)); color: #EF4444; transform: scale(1); } 100% { filter: drop-shadow(0 0 15px rgba(239,68,68,1)); color: #FCA5A5; transform: scale(1.15); } }</style>');
+                                    }
+                                    
+                                    let loadSvg = btnLoad.querySelector('svg');
+                                    let loadTxt = btnLoad.querySelector('span');
+                                    
+                                    if (loadSvg) {
+                                        // Terapkan denyut hanya pada Ikon Awan dan Teks
+                                        loadSvg.style.animation = 'svgPulseRed 0.8s infinite alternate';
+                                        if (loadTxt) loadTxt.style.color = '#EF4444';
+                                        
+                                        setTimeout(() => {
+                                            // Kembalikan ke wujud normal yang elegan setelah 10 detik
+                                            loadSvg.style.animation = '';
+                                            if (loadTxt) loadTxt.style.color = '';
+                                        }, 10000);
+                                    }
+                                }
+
+                            } else {
+                                showToast("⚠️ Koneksi terputus. Menggunakan data tersimpan (Offline).");
+                            }
+                        }
                     }, 400);
 
                 } else {
@@ -5782,6 +5884,8 @@
                 
                 try {
                     // GHOST OUTBOX HARD-LIMIT (MAX 10)
+                    // SURGICAL FIX: JIT DB Connection Healer
+                    try { idb.transaction('aspirasi', 'readonly'); } catch(err) { await initDB(); }
                     let localCount = await new Promise(resolve => {
                         try {
                             const tx = idb.transaction('aspirasi', 'readonly');
@@ -5818,6 +5922,8 @@
             async function openInboxAspirasi() {
                 if(isKiosk) return showToast("DITOLAK: Sistem Terkunci dalam Mode Audit.");
                 try {
+                    // SURGICAL FIX: JIT DB Connection Healer
+                    try { idb.transaction('aspirasi', 'readonly'); } catch(err) { await initDB(); }
                     const dataPesan = await new Promise(resolve => {
                         const tx = idb.transaction('aspirasi', 'readonly');
                         const req = tx.objectStore('aspirasi').getAll();
@@ -5880,6 +5986,9 @@
                     const wscols = [{wch: 16}, {wch: 22}, {wch: 15}, {wch: 20}, {wch: 40}, {wch: 25}, {wch: 25}, {wch: 18}, {wch: 18}, {wch: 22}, {wch: 15}];
                     worksheet['!cols'] = wscols;
 
+                    // SURGICAL FIX: JIT DB Connection Healer
+                    try { idb.transaction('dompet', 'readonly'); } catch(err) { await initDB(); }
+                    
                     const dompetData = await new Promise(r => { const req = idb.transaction('dompet', 'readonly').objectStore('dompet').getAll(); req.onsuccess = () => r(req.result || []); });
                     const dbTrx = await new Promise(r => {
                         let res = [];
@@ -5956,16 +6065,17 @@
                         if(t.tipe === 'keluar') saldoAwalDompet[d] -= t.nom_final;
 
                         if (t.id_anggota && anggotaUpdates[t.id_anggota]) {
+                            let safeYear = t.year || new Date(t.ts).getFullYear();
                             if (t.tipe === 'iuran') {
                                 anggotaUpdates[t.id_anggota].hist_iuran_rp += t.nom_final;
                                 anggotaUpdates[t.id_anggota].hist_iuran_count += 1;
-                                anggotaUpdates[t.id_anggota].arsip_iuran_map.push(`${t.year}-${t.bln}`);
-                            } else if (t.tipe === 'masuk' && t.kat !== 'Transfer Internal' && t.kat !== 'Saldo Awal') {
+                                anggotaUpdates[t.id_anggota].arsip_iuran_map.push(`${safeYear}-${t.bln}`);
+                            } else if (t.tipe === 'masuk' && t.kat !== 'Transfer Internal' && t.kat !== 'Saldo Awal' && t.kat !== 'Sisa Uang Muka' && !(t.kat||'').includes('Koreksi Saldo')) {
                                 anggotaUpdates[t.id_anggota].hist_donasi_rp += t.nom_final;
-                                let dY = t.year; let dM = t.bln || (new Date(t.ts).getMonth() + 1);
-                                deletedDonasiMap[`${t.id_anggota}-${dY}-${dM}`] = (deletedDonasiMap[`${t.id_anggota}-${dY}-${dM}`] || 0) + t.nom_final;
+                                let dM = t.bln || (new Date(t.ts).getMonth() + 1);
+                                deletedDonasiMap[`${t.id_anggota}-${safeYear}-${dM}`] = (deletedDonasiMap[`${t.id_anggota}-${safeYear}-${dM}`] || 0) + t.nom_final;
                             } else if ((t.tipe === 'keluar' && t.status === 'talangan') || (t.tipe === 'keluar' && t.status === 'lunas' && t.ket && t.ket.includes('[TALANGAN'))) {
-                                deletedTalanganMap[`${t.id_anggota}-${t.year}`] = (deletedTalanganMap[`${t.id_anggota}-${t.year}`] || 0) + 1;
+                                deletedTalanganMap[`${t.id_anggota}-${safeYear}`] = (deletedTalanganMap[`${t.id_anggota}-${safeYear}`] || 0) + 1;
                             }
                         }
                     });
@@ -6023,13 +6133,15 @@
                             // Ekstraksi Presisi Komponen Donasi XP (Mencegah Double Donasi XP Leak & Double Penalty)
                             let tempRawDonasiXp = ag.hist_xp_bonus || 0;
                             let tempDonasiMap = {};
+
                             state.trx.forEach(t => {
-                                if (t.tipe === 'masuk' && t.id_anggota === ag.id && !t.is_deleted && t.kat !== 'Transfer Internal' && t.kat !== 'Saldo Awal' && !(t.kat||'').includes('Koreksi Saldo')) {
+                                if (t.tipe === 'masuk' && t.id_anggota === ag.id && !t.is_deleted && t.kat !== 'Transfer Internal' && t.kat !== 'Saldo Awal' && t.kat !== 'Sisa Uang Muka' && !(t.kat||'').includes('Koreksi Saldo')) {
                                     let tY = t.year || new Date(t.ts).getFullYear();
                                     let tM = t.bln || (new Date(t.ts).getMonth() + 1);
                                     tempDonasiMap[`${tY}-${tM}`] = (tempDonasiMap[`${tY}-${tM}`] || 0) + t.nom_final;
                                 }
                             });
+
                             for (let y = jY; y <= currY; y++) {
                                 let yearlyDonasi = 0;
                                 for (let m = 1; m <= 12; m++) {
@@ -6074,8 +6186,14 @@
                         // Sinkronisasi RAM mutlak (Pembersihan state yang tertinggal)
                         state.event = state.event.filter(e => !evToDel.some(del => del.id === e.id));
                         
-                        // SURGICAL FIX: Anihilasi Dompet PJ Yatim Piatu (Mencegah Phantom Wallet Leak)
-                        let dompetPjToDel = state.dompet.filter(d => (d.is_pj && evToDel.some(e => e.id === d.id_event)) || evToDel.some(e => e.id_dompet_default === d.id && d.id !== 'DP-UTAMA'));
+                        // SURGICAL FIX: Anihilasi Dompet PJ Yatim Piatu (Mencegah Phantom Wallet Leak & Shared Wallet Corruption)
+                        let survivingEvents = state.event.filter(e => !evToDel.some(del => del.id === e.id));
+                        let dompetPjToDel = state.dompet.filter(d => {
+                            let isPjOrphan = d.is_pj && evToDel.some(e => e.id === d.id_event);
+                            let isCustomDompetToPurge = evToDel.some(e => e.id_dompet_default === d.id && d.id !== 'DP-UTAMA');
+                            let isStillUsedBySurvivors = survivingEvents.some(se => se.id_dompet_default === d.id);
+                            return isPjOrphan || (isCustomDompetToPurge && !isStillUsedBySurvivors);
+                        });
                         dompetPjToDel.forEach(d => tx.objectStore('dompet').delete(d.id));
                         state.dompet = state.dompet.filter(d => !dompetPjToDel.some(del => del.id === d.id));
 
@@ -7144,6 +7262,8 @@
                         else addKet = `\n[UANG MUKA SELESAI] Nota Awal: Rp ${fmtRp(state.trx[idx].nom_awal)} | (Belanja Pas Sesuai Nota)`;
                     }
 
+                    // SURGICAL FIX: JIT DB Connection Healer
+                    try { idb.transaction('trx', 'readonly'); } catch(err) { await initDB(); }
                     let originalDbTrx = await new Promise(r => {
                         const req = idb.transaction('trx', 'readonly').objectStore('trx').get(state.trx[idx].id);
                         req.onsuccess = e => r(e.target.result);
@@ -7736,8 +7856,91 @@
                 openModal('mod-pj-advance');
             };
 
+            window.editKeteranganPj = function(idTrxIn) {
+                let r = localStorage.getItem('nav_role');
+                if (isKiosk || r === 'warga' || r === 'anggota') return showToast("DITOLAK: Otoritas Bendahara diperlukan.");
+                if (isProcessingTransaction) return;
+
+                let tIn = state.trx.find(t => t.id === idTrxIn);
+                if (!tIn) return showToast("Data tidak ditemukan.");
+
+                // Ekstrak teks murni lama
+                let oldText = String(tIn.ket || '').replace('Terima dari Kas Induk: ', '').trim();
+                
+                // Cari pasangan transaksinya (trxOut) menggunakan sinkronisasi atribut mutlak
+                let tOut = state.trx.find(t => 
+                    t.kat === 'Uang Muka Kegiatan' && 
+                    t.id_event === tIn.id_event && 
+                    t.id_anggota === tIn.id_anggota &&
+                    String(t.ket || '') === `Transfer ke PJ: ${oldText}` &&
+                    !t.is_deleted
+                );
+
+                if (typeof openCustomPrompt === 'function') {
+                    openCustomPrompt("Edit Rincian Plot Dana", "Perbaiki rincian tanpa mengubah jumlah uangnya.", "Ketik rincian baru...", async (newVal) => {
+                        let cleanNewVal = newVal.trim();
+                        if (!cleanNewVal || cleanNewVal === oldText) return; // Tolak string kosong atau tanpa perubahan
+                        
+                        try {
+                            isProcessingTransaction = true;
+                            // JIT Connection Healer
+                            try { idb.transaction('trx', 'readonly'); } catch(err) { await initDB(); }
+
+                            // Ambil original object dari IndexedDB untuk menyelamatkan Blob/File jika ada
+                            let originalDbIn = await new Promise(r => {
+                                const req = idb.transaction('trx', 'readonly').objectStore('trx').get(tIn.id);
+                                req.onsuccess = e => r(e.target.result);
+                                req.onerror = () => r(null);
+                            });
+                            
+                            let originalDbOut = tOut ? await new Promise(r => {
+                                const req = idb.transaction('trx', 'readonly').objectStore('trx').get(tOut.id);
+                                req.onsuccess = e => r(e.target.result);
+                                req.onerror = () => r(null);
+                            }) : null;
+
+                            // Manipulasi ganda (Double-Entry Override)
+                            let inUpdate = {...(originalDbIn || tIn), ket: `Terima dari Kas Induk: ${cleanNewVal}`};
+                            let outUpdate = null;
+                            if (originalDbOut || tOut) {
+                                outUpdate = {...(originalDbOut || tOut), ket: `Transfer ke PJ: ${cleanNewVal}`};
+                            }
+
+                            // Tulis ke IDB secara atomik
+                            await new Promise((resolve, reject) => {
+                                let tx = idb.transaction('trx', 'readwrite');
+                                tx.objectStore('trx').put(inUpdate);
+                                if (outUpdate) tx.objectStore('trx').put(outUpdate);
+                                tx.oncomplete = resolve;
+                                tx.onerror = () => reject(tx.error);
+                            });
+
+                            // Sinkronisasi Memori (RAM)
+                            let idxIn = state.trx.findIndex(t => t.id === tIn.id);
+                            if(idxIn > -1) state.trx[idxIn] = inUpdate;
+                            
+                            if (outUpdate) {
+                                let idxOut = state.trx.findIndex(t => t.id === tOut.id);
+                                if(idxOut > -1) state.trx[idxOut] = outUpdate;
+                            }
+
+                            localStorage.setItem('nav_unsynced', 'true');
+                            showToast("✔️ Rincian plot dana PJ berhasil diperbarui.");
+                            
+                            // Re-render UI
+                            if(typeof renderAcara === 'function') renderAcara();
+                            if(typeof renderTrxList === 'function') renderTrxList(false);
+                        } catch(e) {
+                            showToast("❌ Gagal memperbarui rincian dana PJ.");
+                        } finally {
+                            isProcessingTransaction = false;
+                        }
+                    }, oldText); // Injeksi nilai lama agar Bendahara tidak capek mengetik ulang
+                }
+            };
 
             // --- CLOUD SYNC ENGINE (API GATEWAY) ---
+
             async function fetchWithTimeout(url, options = {}, timeoutMs = 7000) {
                 const controller = new AbortController();
                 const id = setTimeout(() => controller.abort(), timeoutMs);
@@ -7921,10 +8124,12 @@
                             if (typeof renderTrxList === 'function' && currView === 'trx') renderTrxList(false);
                             if (typeof renderIuranGrid === 'function' && currView === 'iuran') renderIuranGrid();
                         }
+                        return true; // SURGICAL FIX: Mengirim sinyal SUKSES ke Login Gate
                     } else { throw new Error("Data dari Cloud kosong atau format salah."); }
                 } catch (e) {
                     console.error("Cloud Load Error:", e);
                     if (!isSilent) showToast("❌ Gagal load Cloud: " + (e.name === 'AbortError' ? "Timeout" : e.message));
+                    return false; // SURGICAL FIX: Mengirim sinyal GAGAL secara mutlak
                 } finally { window._isLoadingData = false; }
             }
 
@@ -8094,8 +8299,9 @@
                     if (t.tipe === 'iuran') {
                         totalIuranWajib += t.nom_final; 
                         compliantMonths++; // Bulan berjalan
+
                     } else if (t.tipe === 'masuk') {
-                        if (t.kat !== 'Transfer Internal' && t.kat !== 'Saldo Awal' && !String(t.kat || '').includes('Koreksi Saldo')) {
+                        if (t.kat !== 'Transfer Internal' && t.kat !== 'Saldo Awal' && t.kat !== 'Sisa Uang Muka' && !String(t.kat || '').includes('Koreksi Saldo')) {
                             totalDonasiSukarela += t.nom_final;
                             if (t.id_event) fundedEvents.add(t.id_event);
                         }
@@ -8319,14 +8525,18 @@
 
             // --- SCREENSAVER IDLE TIMER ---
             function resetIdleTimer() {
-                if(!isKiosk) {
+                // SURGICAL FIX: Matikan screensaver JIKA statusnya Admin (!isKiosk) ATAU pengguna belum login/masih di layar Pilih Profil (!nav_role)
+                if(!isKiosk || !localStorage.getItem('nav_role')) {
                     clearTimeout(idleTimer); clearInterval(billboardInterval); clearTimeout(billboardTimeout);
-                    document.getElementById('screensaver').classList.remove('active');
+                    let ss = document.getElementById('screensaver');
+                    if (ss) ss.classList.remove('active');
                     isScreensaverActive = false;
                     return;
                 }
+                
                 if(isScreensaverActive) {
-                    document.getElementById('screensaver').classList.remove('active');
+                    let ss = document.getElementById('screensaver');
+                    if (ss) ss.classList.remove('active');
                     clearInterval(billboardInterval); clearTimeout(billboardTimeout);
                     isScreensaverActive = false;
                 }
@@ -8334,6 +8544,7 @@
             clearTimeout(idleTimer);
             idleTimer = setTimeout(() => {
                 isScreensaverActive = true;
+
                 let ss = document.getElementById('screensaver');
                 ss.classList.add('active');
                 
