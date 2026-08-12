@@ -354,7 +354,7 @@
             document.head.appendChild(curtain);
         }
 
-        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbydTfB5lzSpiqZRFTMPicsdS7JVUe-BsrzfDZi3HF54EliSrphA-teBsnubAtOY_lD2/exec";
+        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbxACnDz12dwg8xmOA8apsb0_1SyyabxjNfqKxGIPKg-y5rdLUYcpmNYo4fYaP3IUTNy/exec";
         const CLOUD_API_TOKEN = "Navasena29082026";
 
         // --- KONFIGURASI INDEXEDDB LOKAL ---
@@ -3643,13 +3643,11 @@
                         <span style="flex: 1;">Konfigurasi Sistem</span>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                     </button>
-
-                    <button class="ios-item" onclick="closeModal('mod-settings'); loadFromCloud();">
+                    <button class="ios-item" onclick="loadFromCloud()">
                         <div class="ios-icon" style="background: transparent; color: #334155;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg></div>
                         <span style="flex: 1;">Load Data Cloud</span>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                     </button>
-
                     <button class="ios-item" onclick="openInboxAspirasi()">
                         <div class="ios-icon" style="background: transparent; color: #334155;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
                         <span style="flex: 1;">Kotak Pesan / Aspirasi</span>
@@ -5660,20 +5658,14 @@
                 let isDirty = localStorage.getItem('nav_unsynced') === 'true';
                 let origHtml = btnElement.innerHTML;
                 
-                if (navigator.onLine) {
+                // PROTEKSI MUTLAK: Jangan lakukan Load Cloud jika ada data lokal yang belum di-upload (Dirty State)
+                if (!isDirty && navigator.onLine) {
                     btnElement.disabled = true;
                     btnElement.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="animation: spin 1s linear infinite;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> SINKRONISASI...`;
                     
                     try {
-                        // JALUR PINTAR (THE AUTO-RESOLVER PROTOCOL):
-                        // Jika ada data Warga yang tersangkut (Aspirasi), Upload dulu ke Cloud secara siluman!
-                        if (isDirty && typeof syncToCloud === 'function') {
-                            await syncToCloud(true);
-                        }
-                        
-                        // Setelah dipastikan bersih, lakukan Pre-Flight Load agar Admin selalu mendapat data terbaru
-                        if (localStorage.getItem('nav_unsynced') !== 'true' && typeof loadFromCloud === 'function') {
-                            await loadFromCloud(true); 
+                        if (typeof loadFromCloud === 'function') {
+                            await loadFromCloud(true); // Menarik data secara senyap
                         }
                     } catch(e) {
                         console.warn("Bypass Pre-Flight Load: Gagal koneksi, lanjut ke mode PIN luring.");
@@ -7213,12 +7205,34 @@
                 let final = getRawRp(document.getElementById('set-final').value);
                 let sisa = t.nom_awal - final;
                 let el = document.getElementById('set-sisa');
-                if(sisa < 0) { 
-                    el.innerText = (t.status === 'talangan' ? "Koreksi Naik: Rp " : "Defisit Kas: Rp ") + fmtRp(Math.abs(sisa)); 
-                    el.style.color = "var(--danger)";
-                } else { 
-                    el.innerText = "Rp " + fmtRp(sisa); 
-                    el.style.color = "var(--text-main)";
+                let lblSisa = document.getElementById('set-ui-lbl-sisa');
+                
+                if (t.status === 'talangan') {
+                    if (lblSisa) lblSisa.innerText = 'Selisih (Koreksi):';
+                    if(sisa < 0) { 
+                        el.innerText = "Koreksi Naik: Rp " + fmtRp(Math.abs(sisa)); 
+                        el.style.color = "var(--danger)";
+                    } else { 
+                        el.innerText = "Rp " + fmtRp(sisa); 
+                        el.style.color = "var(--text-main)";
+                    }
+                } else {
+                    let dName = state.dompet.find(d => d.id === (t.id_dompet || 'DP-UTAMA'))?.nama || 'Kas Utama';
+                    if(sisa < 0) { 
+                        if (lblSisa) {
+                            lblSisa.innerText = `Nombok (Ditarik dari ${dName}):`;
+                            lblSisa.style.color = "var(--danger)";
+                        }
+                        el.innerText = "Rp " + fmtRp(Math.abs(sisa)); 
+                        el.style.color = "var(--danger)";
+                    } else { 
+                        if (lblSisa) {
+                            lblSisa.innerText = `Sisa (Masuk ${dName}):`;
+                            lblSisa.style.color = "var(--text-muted)";
+                        }
+                        el.innerText = "Rp " + fmtRp(sisa); 
+                        el.style.color = "var(--text-main)";
+                    }
                 }
             }
 
