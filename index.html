@@ -957,13 +957,15 @@
             else if(bn.includes('OVO')) { url = 'https://upload.wikimedia.org/wikipedia/commons/e/eb/Logo_ovo_purple.svg'; h = '16px'; }
             else if(bn.includes('SHOPEEPAY')) { url = 'https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee_Pay_logo.svg'; h = '24px'; }
 
-            
-            let displayName = bn.length > 8 ? bn.substring(0, 8) + '...' : bn;
+                        let displayName = bn.length > 8 ? bn.substring(0, 8) + '...' : bn;
             
             if (url) {
                 // Injeksi onerror fallback yang elegan jika Warga benar-benar Offline dan Cache mati
-                return `<img src="${url}" alt="${bn}" style="height:${h}; width:auto; object-fit:contain; flex-shrink:0;" onerror="this.onerror=null; this.outerHTML='<span style=\\'font-weight:900; font-size:10px; color:#475569; background:#E2E8F0; padding:4px 8px; border-radius:6px;\\'>${displayName}</span>';">`;
+                // SURGICAL FIX: Mengamankan displayName dan bn dengan esc() untuk proteksi XSS mutlak pada atribut DOM
+                // DEPENDENCY TRACE: Menggunakan getAttribute('data-name') agar terhindar dari SyntaxError saat browser me-decode entitas HTML (seperti &#39;) di dalam string JavaScript inline.
+                return `<img src="${url}" alt="${esc(bn)}" data-name="${esc(displayName)}" style="height:${h}; width:auto; object-fit:contain; flex-shrink:0;" onerror="this.onerror=null; this.outerHTML='<span style=\\'font-weight:900; font-size:10px; color:#475569; background:#E2E8F0; padding:4px 8px; border-radius:6px;\\'>' + this.getAttribute('data-name') + '</span>';">`;
             }
+
             return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2.5"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="18" cy="12" r="1"/></svg>`;
         };
 
@@ -1219,7 +1221,7 @@
                 let nama = String(rawName).replace(/^(Donasi|Sponsor)\s*(Umum|Dari)?\s*[:-]?\s*/i, '').split('-')[0].trim() || "Hamba Allah";
                 let nominal = new Intl.NumberFormat('id-ID').format(t.nom_final || t.nom_awal || 0);
                 html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:8px;">
-                                <div style="display:flex; align-items:center; gap:10px;">
+                                <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; padding-right:8px;">
                                     <div style="min-width:0; flex:1;">
                                         <p style="margin:0; font-size:12px; font-weight:800; color:#1F2937; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(nama)}</p>
                                         <p style="margin:0; font-size:9px; font-weight:700; color:#6B7280;">${t.tanggal || new Date(t.ts).toLocaleDateString('id-ID')}</p>
@@ -1228,6 +1230,7 @@
                                 <span style="font-size:13px; font-weight:900; color:#059669; flex-shrink:0;">+Rp ${nominal}</span>
                             </div>`;
             });
+
             html += `</div>
                 <button class="no-select" style="width: 100%; margin-top: 16px; padding: 14px; background: var(--primary-grad); color: #FFFFFF; font-size: 12.5px; font-weight: 900; letter-spacing: 0.5px; border-radius: 50px; border: none; cursor: pointer; box-shadow: 0 8px 15px rgba(30, 58, 138, 0.25);" onclick="window.openLeaderboard()">
                     DAFTAR DONASI / SPONSOR
@@ -1707,10 +1710,12 @@
                             if (ag.bank_nama && ag.bank_rek) {
                                 let svgLogo = window.getBankLogoSVG(ag.bank_nama);
                                 // TOMBOL SALIN REKENING (ANTI-TRUNCATION ABSOLUTE FLEX)
+
                                 bankHtml = `
-                                <div class="no-select" style="display: flex; align-items: center; justify-content: space-between; background: #F8FAFC; border: 1.5px solid #E2E8F0; padding: 12px 14px; border-radius: 14px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);" onmousedown="this.style.transform='scale(0.96)'; this.style.borderColor='#94A3B8';" onmouseup="this.style.transform='scale(1)'; this.style.borderColor='#E2E8F0';" onclick="window.copyRekening('${esc(ag.bank_rek)}', '${esc(ag.bank_nama)}')">
+                                <div class="no-select" data-rek="${esc(ag.bank_rek)}" data-bank="${esc(ag.bank_nama)}" style="display: flex; align-items: center; justify-content: space-between; background: #F8FAFC; border: 1.5px solid #E2E8F0; padding: 12px 14px; border-radius: 14px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);" onmousedown="this.style.transform='scale(0.96)'; this.style.borderColor='#94A3B8';" onmouseup="this.style.transform='scale(1)'; this.style.borderColor='#E2E8F0';" onclick="window.copyRekening(this.getAttribute('data-rek'), this.getAttribute('data-bank'))">
                                     <div style="display: flex; align-items: center; justify-content: center; width: 45px; height: 24px; flex-shrink: 0;">${svgLogo}</div>
                                     <div style="width: 1.5px; height: 18px; background: #E2E8F0; flex-shrink: 0; margin: 0 10px;"></div>
+
                                     <span style="font-family: monospace; font-size: 15px; font-weight: 900; color: #475569; letter-spacing: 1px; flex: 1; text-align: left;">${esc(ag.bank_rek)}</span>
                                     <div style="background: #E2E8F0; width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: 8px;">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -1820,9 +1825,10 @@
                         if (m.bank_nama && m.bank_rek) {
                             let svgLogo = window.getBankLogoSVG(m.bank_nama);
                             contactRows += `
-                            <div style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: transform 0.2s; padding: 6px 0;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" onclick="window.copyRekening('${esc(m.bank_rek)}', '${esc(m.bank_nama)}')">
+                            <div data-rek="${esc(m.bank_rek)}" data-bank="${esc(m.bank_nama)}" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: transform 0.2s; padding: 6px 0;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" onclick="window.copyRekening(this.getAttribute('data-rek'), this.getAttribute('data-bank'))">
                                 <div style="display: flex; align-items: center; gap: 12px;">
                                     <div style="display: flex; align-items: center; justify-content: center; width: 45px; flex-shrink: 0;">${svgLogo}</div>
+
                                     <span style="font-family: monospace; font-size: 13px; font-weight: 900; color: #475569; letter-spacing: 0.5px;">${esc(m.bank_rek)}</span>
                                 </div>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5" style="margin-left: 8px; flex-shrink: 0;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -4643,7 +4649,16 @@
                     resetAnggotaForm();
                     renderListAnggota();
 
+                } else if (id === 'mod-trx') {
+                    // SURGICAL FIX: Inisialisasi Mutlak State Modal Transaksi (Anti-Blank State)
+                    document.getElementById('trx-nom').value = '';
+                    document.getElementById('trx-ket').value = '';
+                    document.getElementById('trx-event-val').value = '';
+                    document.getElementById('trx-event-btn').innerText = '-- Tanpa Program --';
+                    setTrxTipe('masuk'); // Eksekutor murni pembuat Chip Kategori
+
                 } else if (id === 'mod-settings') {
+
                     document.getElementById('set-ticker-msg').value = getSetting('ticker_msg', '');
                     document.getElementById('set-iuran-nom').value = fmtRp(getSetting('iuran_nom', 10000));
                     document.getElementById('set-kat-masuk').value = getSetting('kat_masuk', 'Donasi, Sponsor,');
@@ -5059,7 +5074,6 @@
                             if (t.tipe === 'masuk' || t.tipe === 'iuran') {
                                 inAmt += t.nom_final; 
                                 
-                                // --- THE SHADOW ENTITY: FILTER DANA EKSTERNAL (DONASI / SPONSOR) ---
                                 let katLow = String(t.kat || '').toLowerCase();
                                 if (ev.sifat === 'hybrid' && katLow.includes('sponsor')) {
                                     danaEksternalAmt += t.nom_final; 
@@ -5070,13 +5084,21 @@
                             else if (t.tipe === 'keluar') realOutAmt += (t.status === 'pending' || t.status === 'talangan' ? t.nom_awal : t.nom_final);
                         });
 
+                        let rawSifat = (ev.sifat || 'publik').toLowerCase();
+                        
+                        // SURGICAL FIX: Radar Deteksi (Auto-Recovery) - Memaksa jadi Hybrid jika ada peserta terdaftar
+                        let hasPeserta = eventTrxMap[ev.id] && eventTrxMap[ev.id].some(t => t.tipe === 'peserta' && !t.is_deleted);
+                        if (hasPeserta && rawSifat === 'publik') {
+                            rawSifat = 'hybrid';
+                        }
+
                         // --- THE SHADOW ENTITY: DYNAMIC BADGE LOGIC (SMART HIDE) ---
                         let badgeDanaEksternal = '';
-                        if (ev.sifat === 'hybrid') {
+                        if (rawSifat === 'hybrid') {
                             if (danaEksternalAmt > 0) {
                                 badgeDanaEksternal = `<div style="font-size: 9px; font-weight: 800; color: #059669; background: #D1FAE5; padding: 4px 6px; border-radius: 6px; display: inline-block; align-self: flex-start; border: 1px solid #A7F3D0; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.05); margin-top: 4px;">Total Sponsor: <span style="white-space: nowrap;">Rp ${fmtRp(danaEksternalAmt)}</span></div>`;
                             }
-                        } else if (ev.sifat !== 'internal') {
+                        } else if (rawSifat !== 'internal') {
                             if (danaEksternalAmt > 0) {
                                 badgeDanaEksternal = `<div style="font-size: 9px; font-weight: 800; color: #059669; background: #D1FAE5; padding: 4px 6px; border-radius: 6px; display: inline-block; align-self: flex-start; border: 1px solid #A7F3D0; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.05); margin-top: 4px;">Total Donasi: <span style="white-space: nowrap;">Rp ${fmtRp(danaEksternalAmt)}</span></div>`;
                             }
@@ -5143,12 +5165,10 @@
                         let idDompetProgram = ev.id_dompet_default || 'DP-UTAMA';
                         let namaDompetProgram = state.dompet.find(d => d.id === idDompetProgram)?.nama || 'Kas Utama';
 
-                        let rawSifat = (ev.sifat || 'publik').toLowerCase();
                         let sifatLabel = rawSifat === 'internal' ? 'INTERNAL ANGGOTA' : (rawSifat === 'hybrid' ? 'HYBRID' : 'ACARA PUBLIK');
                         let sifatBg = rawSifat === 'internal' ? '#EFF6FF' : '#FAF5FF';
                         let sifatColor = rawSifat === 'internal' ? '#1D4ED8' : '#7E22CE';
                         let sifatBorder = rawSifat === 'internal' ? '#BFDBFE' : '#E9D5FF';
-                        // SURGICAL FIX: Perbaikan Layout Kapsul (Margin Right Dihapus, Teks Dikunci)
                         let sifatBadge = `<div style="font-size: 9px; font-weight: 800; letter-spacing: 0.5px; background: ${sifatBg}; border: 1px solid ${sifatBorder}; color: ${sifatColor}; padding: 4px 8px; border-radius: 6px; white-space: nowrap;">${sifatLabel}</div>`;
 
                         hActive += `
@@ -5208,15 +5228,15 @@
                             </div>` : ''}
 
                             <div style="display: flex; gap: 8px; position: relative; z-index: 10; flex-wrap: wrap;">
-                                ${(ev.sifat === 'internal' || ev.sifat === 'hybrid') ? `
+                                ${(rawSifat === 'internal' || rawSifat === 'hybrid') ? `
                                 <button class="btn no-select" style="flex: 1; min-width: 130px; background: #1E3A8A; color: white; border: none; font-size: 11px; font-weight: 800; padding: 14px 8px; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 10px rgba(30,58,138,0.2);" onclick="event.preventDefault(); event.stopPropagation(); if(typeof window.openKelolaPeserta === 'function') window.openKelolaPeserta('${ev.id}')">
                                     DATA PESERTA
                                 </button>
                                 ` : ''}
 
-                                ${(ev.sifat !== 'internal') ? `
-                                <button class="btn kiosk-hide no-select" style="flex: 1; min-width: 130px; background: ${ev.sifat === 'hybrid' ? '#059669' : '#1E3A8A'}; color: white; border: none; font-size: 11px; font-weight: 800; padding: 14px 8px; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2);" onclick="event.preventDefault(); event.stopPropagation(); if(typeof window.openDonasiRapid === 'function') window.openDonasiRapid('${ev.id}', '${ev.sifat === 'hybrid' ? 'sponsor' : 'donasi'}')">
-                                    ${ev.sifat === 'hybrid' ? '+ TERIMA SPONSOR' : '+ DONASI PROGRAM'}
+                                ${(rawSifat !== 'internal') ? `
+                                <button class="btn kiosk-hide no-select" style="flex: 1; min-width: 130px; background: ${rawSifat === 'hybrid' ? '#059669' : '#1E3A8A'}; color: white; border: none; font-size: 11px; font-weight: 800; padding: 14px 8px; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2);" onclick="event.preventDefault(); event.stopPropagation(); if(typeof window.openDonasiRapid === 'function') window.openDonasiRapid('${ev.id}', '${rawSifat === 'hybrid' ? 'sponsor' : 'donasi'}')">
+                                    ${rawSifat === 'hybrid' ? '+ TERIMA SPONSOR' : '+ DONASI PROGRAM'}
                                 </button>
                                 ` : ''}
 
@@ -5240,16 +5260,25 @@
                         let inAmt = 0, outAmt = 0, danaEksternalAmt = 0;
                         let trxList = (eventTrxMap[ev.id] || []).filter(t => t.status === 'lunas');
                         let historyHtml = '';
+
+                        let rawSifatArc = (ev.sifat || 'publik').toLowerCase();
+                        // SURGICAL FIX: Auto-Recovery Status Hybrid pada Arsip
+                        let hasPesertaArc = eventTrxMap[ev.id] && eventTrxMap[ev.id].some(t => t.tipe === 'peserta' && !t.is_deleted);
+                        if (hasPesertaArc && rawSifatArc === 'publik') rawSifatArc = 'hybrid';
+
                         if (trxList.length === 0) {
                             historyHtml = '<div style="font-size:11px; color:var(--text-muted); text-align:center; padding:10px 0;">Tidak ada riwayat mutasi.</div>';
                         } else {
                             trxList.forEach(t => { 
+                                // SURGICAL FIX: Gatekeeper pencegah Inflasi Akuntansi dari Auto-Sweep
+                                if (t.kat === 'Transfer Internal' || t.kat === 'Uang Muka Kegiatan' || t.kat === 'Sisa Uang Muka') return;
+
                                 if(t.tipe === 'masuk') {
                                     inAmt += t.nom_final; 
                                     let katLow = String(t.kat || '').toLowerCase();
-                                    if (ev.sifat === 'hybrid' && katLow.includes('sponsor')) {
+                                    if (rawSifatArc === 'hybrid' && katLow.includes('sponsor')) {
                                         danaEksternalAmt += t.nom_final;
-                                    } else if ((!ev.sifat || ev.sifat === 'publik') && katLow.includes('donasi')) {
+                                    } else if ((rawSifatArc === 'publik') && katLow.includes('donasi')) {
                                         danaEksternalAmt += t.nom_final;
                                     }
                                 } else {
@@ -5276,15 +5305,12 @@
                             if(trxList.length > 50) historyHtml += `<div style="font-size:11px; color:var(--warning); text-align:center; padding:12px 0; font-weight:700;">+${trxList.length - 50} mutasi lama disembunyikan. Unduh Excel untuk riwayat lengkap.</div>`;
                         }
 
-                        // SURGICAL FIX: The Scope Evacuation Protocol. Deklarasi dinaikkan ke luar blok IF/ELSE untuk mencegah crash rendering (ReferenceError).
-                        let labelDanaEksternalArsip = ev.sifat === 'hybrid' ? 'Murni Sponsor' : 'Murni Donasi';
+                        let labelDanaEksternalArsip = rawSifatArc === 'hybrid' ? 'Murni Sponsor' : 'Murni Donasi';
                         let sisa = inAmt - outAmt;
-                        let rawSifatArc = (ev.sifat || 'publik').toLowerCase();
                         let sifatLabel = rawSifatArc === 'internal' ? 'INTERNAL ANGGOTA' : (rawSifatArc === 'hybrid' ? 'HYBRID' : 'ACARA PUBLIK');
                         let sifatBg = rawSifatArc === 'internal' ? '#EFF6FF' : '#FAF5FF';
                         let sifatColor = rawSifatArc === 'internal' ? '#1D4ED8' : '#7E22CE';
                         let sifatBorder = rawSifatArc === 'internal' ? '#BFDBFE' : '#E9D5FF';
-                        // SURGICAL FIX: Vertical Stack Adjustment (Ubah span ke div, kunci teks)
                         let sifatBadge = `<div style="font-size: 8.5px; font-weight: 800; background: ${sifatBg}; border: 1px solid ${sifatBorder}; color: ${sifatColor}; padding: 3px 6px; border-radius: 6px; white-space: nowrap;">${sifatLabel}</div>`;
 
                         hArsip += `<div class="summary-card no-select" style="padding: 16px; border-left: 4px solid #9CA3AF; margin-bottom: 12px; background: var(--surface); box-shadow: var(--shadow-sm);">
@@ -5304,7 +5330,7 @@
                                     <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">Total Pemasukan</span>
                                     <span style="font-size: 13px; font-weight: 800; color: var(--text-main);">Rp ${fmtRp(inAmt)}</span>
                                 </div>
-                                ${(ev.sifat !== 'internal' && danaEksternalAmt > 0) ? `
+                                ${(rawSifatArc !== 'internal' && danaEksternalAmt > 0) ? `
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                                     <span style="font-size: 9.5px; color: #059669; font-weight: 800; background: #D1FAE5; padding: 2px 6px; border-radius: 4px; border: 1px solid #A7F3D0;">└ ${labelDanaEksternalArsip}</span>
                                     <span style="font-size: 11px; font-weight: 800; color: #059669;">Rp ${fmtRp(danaEksternalAmt)}</span>
@@ -6575,11 +6601,12 @@
                     }
 
                     // 1. Eksekusi Nuke IndexedDB murni dari Root Browser API dengan sistem Promise mutlak
-                    await new Promise((resolve) => {
+                    await new Promise((resolve, reject) => {
                         let req = indexedDB.deleteDatabase('NavasenaFintechDB');
                         req.onsuccess = resolve;
-                        req.onerror = resolve; // Terus melaju meski ada error partisi
-                        req.onblocked = resolve; // Paksa lolos jika diblokir thread lain
+                        // SURGICAL FIX: Cegah Ghost DB Survival. Jika OS memblokir, paksa lempar ke blok Catch!
+                        req.onerror = () => reject(new Error("DB Deletion Failed")); 
+                        req.onblocked = () => reject(new Error("DB Blocked by OS")); 
                     });
                     
                     // 2. Anihilasi Storage Klien
@@ -6661,7 +6688,7 @@
                                             <div><b>[GESER] Distribusi Kas:</b> Usap deretan kartu dompet di bawah saldo ke kiri-kanan untuk melihat pemetaan uang di Laci vs Rekening.</div>
                                         </div>
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
-                                            <div style="color: #10B981; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10"/><path d="M17 4v8a5 5 0 0 1-10 0V4"/><path d="M7 7H5a2 2 0 0 0-2 2v0a2 2 0 0 0 2 2h2"/><path d="M17 7h2a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2h-2"/></svg></div>
+                                            <div style="color: #10B981; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
                                             <div><b>[KLIK] Daftar Donatur:</b> Sentuh tombol DAFTAR DONASI di bawah teks berjalan untuk membuka jendela klasemen penyumbang lengkap.</div>
                                         </div>
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
@@ -6669,7 +6696,7 @@
                                             <div><b>[KLIK] Analitik Interaktif:</b> Klik kotak Pemasukan atau Pengeluaran untuk melompat otomatis ke Menu Mutasi bulan ini.</div>
                                         </div>
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
-                                            <div style="color: #25D366; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
+                                            <div style="color: #25D366; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></div>
                                             <div><b>[KLIK] Kirim Laporan WA:</b> Tekan tombol di paling bawah untuk merangkum arus kas menjadi teks dan mengirimkannya ke WhatsApp Grup.</div>
                                         </div>
                                     </div>
@@ -6696,7 +6723,7 @@
                                             <div><b>[KLIK] Filter Mutasi:</b> Pindah tab "Semua Mutasi" untuk nota reguler, atau tab "Mutasi Talangan" untuk memantau utang kas ke panitia.</div>
                                         </div>
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
-                                            <div style="color: #38BDF8; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+                                            <div style="color: #38BDF8; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
                                             <div><b>[KLIK] Input Baru (+):</b> Tombol bundar di kanan bawah. Untuk mencatat Uang Muka, ubah opsi ke "Modal Belanja" lalu pilih nama PJ. Nota akan berwarna Kuning.</div>
                                         </div>
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
@@ -6728,7 +6755,7 @@
                                 <div id="tut-adm-3" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12.5px; color: var(--text-main); line-height: 1.5;">
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
-                                            <div style="color: #64748B; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
+                                            <div style="color: #64748B; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
                                             <div><b>[KLIK] Kotak Tahun Buku:</b> Di bawah teks "Tahun Buku". Ubah tahun (misal ke 2024) untuk mengawasi sejarah kepatuhan masa lalu.</div>
                                         </div>
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
@@ -6775,7 +6802,7 @@
                                             <div><b>[KLIK] Riwayat Arsip:</b> Buka Laporan Keuangan (LPJ) dari acara yang sudah usai di masa lalu.</div>
                                         </div>
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
-                                            <div style="color: #10B981; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                                            <div style="color: #10B981; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
                                             <div><b>[KLIK] Rincian Dana:</b> Pada kartu berjalan, sentuh kotak nominal "DANA MASUK", "PENGELUARAN", atau "SISA KAS" untuk mengekspos semua rincian donatur dan bon belanja.</div>
                                         </div>
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
@@ -6806,7 +6833,7 @@
                                 <div id="tut-adm-5" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12.5px; color: var(--text-main); line-height: 1.5;">
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
-                                            <div style="color: #64748B; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+                                            <div style="color: #64748B; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
                                             <div><b>[KLIK] Ganti Logo:</b> Sentuh avatar bundar "N" di atas untuk mengganti logo organisasi (Maks 5MB).</div>
                                         </div>
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
@@ -6916,7 +6943,7 @@
                                 <div id="tut-ang-3" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12.5px; color: var(--text-main); line-height: 1.5;">
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
-                                            <div style="color: #64748B; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
+                                            <div style="color: #64748B; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
                                             <div><b>[KLIK] Kotak Tahun Buku:</b> Ubah angka tahun di pojok kiri atas untuk melihat dan melacak sejarah iuran di tahun sebelumnya.</div>
                                         </div>
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
@@ -6947,7 +6974,7 @@
                                 <div id="tut-ang-4" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12.5px; color: var(--text-main); line-height: 1.5;">
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
-                                            <div style="color: var(--primary); padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
+                                            <div style="color: var(--primary); padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
                                             <div><b>[KLIK] Bedah Rincian Dana:</b> Sentuh nominal kotak DANA MASUK, PENGELUARAN, atau SISA KAS pada acara berjalan untuk mengekspos penyumbang dan bon.</div>
                                         </div>
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
@@ -6956,7 +6983,7 @@
                                         </div>
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
                                             <div style="color: #F59E0B; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
-                                            <div><b>[LIHAT] Dana di Bawa PJ:</b> Kotak kuning di tengah. Jika angkanya bukan Rp 0, berarti teman Anda yang bertugas belum menyerahkan nota sisa ke Bendahara.</div>
+                                            <div><b>[LIHAT] Dana di Bawa PJ:</b> Kotak kuning di tengah. Jika angkanya bukan Rp 0, artinya PJ panitia masih membawa sisa uang operasional.</div>
                                         </div>
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
                                             <div style="color: #64748B; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg></div>
@@ -7003,6 +7030,175 @@
                             
                         </div>
                     </div>
+
+                    <!-- PANDUAN WARGA -->
+                    <div id="sop-warga" style="display: none;">
+                        <div style="background: #EFF6FF; border-left: 5px solid #3B82F6; padding: 16px; margin-bottom: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08); display: flex; gap: 12px; align-items: flex-start;">
+                            <div style="background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%); color: white; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); margin-top: 2px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg>
+                            </div>
+                            <div>
+                                <b style="color: #1E3A8A; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">TARIK DATA TERBARU</b>
+                                <p style="font-size: 12px; color: #1E40AF; line-height: 1.5; margin-top: 4px; font-weight: 500;">Selamat datang di Portal Transparansi Publik. Buka lewat HP Anda, klik tombol <span style="display:inline-flex; align-items:center; gap:4px; background:#1D4ED8; color:white; padding:2px 6px; border-radius:4px; font-weight:800; font-size:9.5px; letter-spacing:0.5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg> LOAD</span> di pojok kanan atas untuk menarik mutasi kas termutakhir dari Server Pusat Bendahara.</p>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            
+                            <!-- MENU 1: BERANDA -->
+                            <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden;">
+                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('wrg', 5, 1, this)">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="background: var(--bg); color: #3B82F6; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--border); flex-shrink: 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+                                        <b style="font-size: 14px; color: var(--text-main);">BERANDA</b>
+                                    </div>
+                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-wrg-1" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
+                                </div>
+                                <div id="tut-wrg-1" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
+                                    <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12.5px; color: var(--text-main); line-height: 1.5;">
+                                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                            <div style="color: var(--primary); padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+                                            <div><b>[LIHAT] Hak Pengawas Tertinggi:</b> Pantau layar "Total Saldo Global" di puncak. Warga berhak tahu posisi keuangan secara *real-time*.</div>
+                                        </div>
+                                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                            <div style="color: #38BDF8; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+                                            <div><b>[GESER] Distribusi Dompet Kas:</b> Geser deretan kotak dompet untuk mengetahui uang warga disimpan di Laci Tunai atau disetor ke Rekening.</div>
+                                        </div>
+                                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                            <div style="color: #10B981; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                                            <div><b>[KLIK] Daftar Donasi / Sponsor:</b> Tombol di bawah teks berjalan. Membuka papan apresiasi donatur yang memeringkat donatur terbesar tahun ini.</div>
+                                        </div>
+                                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                            <div style="color: #F59E0B; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+                                            <div><b>[KLIK] Analitik Arus Kas:</b> Klik kotak Pemasukan (Hijau) atau Pengeluaran (Merah) untuk terjun langsung membongkar rincian belanja operasional bulan ini.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- MENU 2: MUTASI -->
+                            <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden;">
+                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('wrg', 5, 2, this)">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="background: var(--bg); color: #3B82F6; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--border); flex-shrink: 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
+                                        <b style="font-size: 14px; color: var(--text-main);">MUTASI</b>
+                                    </div>
+                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-wrg-2" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
+                                </div>
+                                <div id="tut-wrg-2" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
+                                    <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12.5px; color: var(--text-main); line-height: 1.5;">
+                                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                            <div style="color: #64748B; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+                                            <div><b>[KETIK] Kolom Pencarian:</b> Ketik nama Anda. Pastikan dana sumbangan amal yang Anda berikan telah dicatat secara murni oleh pengurus.</div>
+                                        </div>
+                                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                            <div style="color: var(--primary); padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+                                            <div><b>[KLIK] Tab Mutasi Talangan:</b> Mengawasi apakah ada pengurus yang terpaksa nombok acara pakai uang pribadi dan belum diganti oleh kas.</div>
+                                        </div>
+                                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                            <div style="color: #10B981; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
+                                            <div><b>[LIHAT] Sertifikasi NO. TRX:</b> Transaksi dengan label NO. TRX berarti sudah dikunci permanen oleh <i>blockchain</i> lokal dan mustahil dimanipulasi.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- MENU 3: IURAN -->
+                            <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden;">
+                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('wrg', 5, 3, this)">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="background: var(--bg); color: #3B82F6; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--border); flex-shrink: 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
+                                        <b style="font-size: 14px; color: var(--text-main);">IURAN</b>
+                                    </div>
+                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-wrg-3" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
+                                </div>
+
+                                <div id="tut-wrg-3" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
+                                    <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12.5px; color: var(--text-main); line-height: 1.5;">
+                                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                            <div style="color: #64748B; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+                                            <div><b>[KLIK] Filter Tahun Buku:</b> Ubah angka tahun di pojok kiri atas untuk melihat sejarah kedisiplinan pemuda di tahun lampau.</div>
+                                        </div>
+                                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                            <div style="color: var(--primary); padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg></div>
+                                            <div><b>[KLIK] Baris Nama Pemuda:</b> Membongkar kalender 12 bulan. Warga bisa mengawasi kedisiplinan pemuda RT 05. (Hijau/Kuning = Rajin Iuran, Merah = Nunggak Kas).</div>
+                                        </div>
+                                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                            <div style="color: #F59E0B; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+                                            <div><b>[KLIK] Lencana Perisai Pangkat:</b> Sentuh perisai di kiri nama pemuda untuk melihat seberapa besar level apresiasi sistem terhadap kontribusi finansial mereka.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- MENU 4: PROGRAM -->
+                            <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden;">
+                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('wrg', 5, 4, this)">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="background: var(--bg); color: #3B82F6; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--border); flex-shrink: 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                                        <b style="font-size: 14px; color: var(--text-main);">PROGRAM</b>
+                                    </div>
+                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-wrg-4" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
+                                </div>
+                                <div id="tut-wrg-4" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
+                                    <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12.5px; color: var(--text-main); line-height: 1.5;">
+                                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                            <div style="color: var(--primary); padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+                                            <div><b>[KLIK] Rincian Dana Acara:</b> Lacak sumbangan Warga. Klik elemen DANA MASUK, PENGELUARAN, atau SISA KAS pada program untuk membedah tuntas harga bon belanja panitia.</div>
+                                        </div>
+                                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                            <div style="color: #F59E0B; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+                                            <div><b>[LIHAT] Dana di Bawa PJ:</b> Area pantauan jika ada panitia pelaksana yang belum mengembalikan sisa uang belanja ke kas besar. (Bisa digeser vertikal).</div>
+                                        </div>
+                                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                            <div style="color: #64748B; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg></div>
+                                            <div><b>[KLIK] Riwayat Arsip:</b> Tombol di pojok kanan atas. Pilih dan klik kartu nama acara tahun lalu untuk kembali membaca rekap laporan keuangan yang sudah ditutup.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- MENU 5: PROFIL -->
+                            <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden;">
+                                <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--surface-hover); transition: background 0.2s;" onclick="togglePanduan('wrg', 5, 5, this)">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="background: var(--bg); color: #3B82F6; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--border); flex-shrink: 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+                                        <b style="font-size: 14px; color: var(--text-main);">PROFIL</b>
+                                    </div>
+                                    <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-wrg-5" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
+                                </div>
+                                <div id="tut-wrg-5" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
+                                    <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12.5px; color: var(--text-main); line-height: 1.5;">
+                                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                            <div style="color: #10B981; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+                                            <div><b>[LIHAT] Mading Statistik Keuangan:</b> Menampilkan rangkuman persentase keberhasilan organisasi (Dana Terkelola, Program Sukses).</div>
+                                        </div>
+                                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                            <div style="color: #F59E0B; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                                            <div><b>[SENTUH] Papan Apresiasi Donatur:</b> Monumen Kartu Bank Digital 3D interaktif. Sentuh tumpukan kartu untuk menggeser dan melihat daftar penyumbang terbesar tahun ini.</div>
+                                        </div>
+
+                                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                            <div style="color: var(--primary); padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+                                            <div><b>[KLIK] Executive Desk:</b> Sentuh kartu identitas Pengurus. Akan muncul tombol <i>Chat</i> WA atau opsi menyalin Nomor Rekening jika ingin mentransfer donasi.</div>
+                                        </div>
+                                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                            <div style="display:flex; justify-content:center; align-items:center; background:#1E3A8A; width:18px; height:18px; border-radius:4px; flex-shrink:0; margin-top: 2px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="18" x2="20" y2="18"/></svg></div>
+                                            <div><b>[KLIK] Omni-Button & Kotak Suara:</b> Tombol mengambang di pojok kiri bawah. Gunakan "Kotak Suara" untuk mengirim kritik/aduan yang dienkripsi agar pengurus bisa membacanya tanpa tahu identitas Anda.</div>
+                                        </div>
+                                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                            <div style="color: var(--danger); padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+                                            <div><b>[KLIK] Keluar:</b> Menghapus <i>cache</i> memori perangkat Anda dan kembali ke layar beranda publik.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
                     <!-- PANDUAN WARGA -->
                     <div id="sop-warga" style="display: none;">
@@ -7422,7 +7618,7 @@
                     
                     <div class="kiosk-hide" style="margin-top: 16px;">
                         <button class="btn btn-primary no-select" style="width: 100%; padding: 14px; border-radius: 12px; font-size: 13px; box-shadow: 0 4px 10px rgba(30, 58, 138, 0.25);" onclick="openPesertaAdd()">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 6px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> + Tambah Pendaftar
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 6px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Tambah Pendaftar
                         </button>
                     </div>
                 </div>
@@ -8280,6 +8476,12 @@
                 
                 let pesertaTrx = state.trx.filter(t => !t.is_deleted && t.tipe === 'peserta' && t.id_event === idEvent);
                 pesertaTrx.sort((a,b) => b.ts - a.ts);
+
+                // SURGICAL FIX: Injeksi Lencana Total Peserta Secara Dinamis ke Header Modal
+                let titleEl = document.querySelector('#mod-kelola-peserta h3');
+                if (titleEl) {
+                    titleEl.innerHTML = `Daftar Peserta <span style="background:var(--primary-light); color:var(--primary); border: 1.5px solid rgba(59, 130, 246, 0.3); padding:4px 10px; border-radius:12px; font-size:11px; vertical-align:middle; margin-left:8px;">${pesertaTrx.length} Orang</span>`;
+                }
                 
                 if (pesertaTrx.length === 0) {
                     listEl.innerHTML = '<div class="no-select" style="text-align:center; padding:40px 20px; color:var(--text-muted); font-size:12px; border:1.5px dashed var(--border); border-radius:12px;">Belum ada pendaftar.</div>';
@@ -8305,6 +8507,9 @@
                         if (!isLunas) {
                             actionHtml += `<button class="btn btn-success no-select" style="padding: 8px 12px; font-size: 10px; border-radius: 8px; width: auto;" onclick="openPesertaPay('${t.id}')">Terima Uang</button>`;
                         }
+                        // SURGICAL FIX: Injeksi Tombol Edit (Ikon Pena)
+                        actionHtml += `<button class="btn btn-outline no-select" style="padding: 8px 12px; font-size: 10px; border-radius: 8px; width: auto; color: var(--primary); border-color: var(--border); background: var(--surface);" onclick="editPeserta('${t.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>`;
+                        
                         actionHtml += `<button class="btn btn-outline no-select" style="padding: 8px 12px; font-size: 10px; border-radius: 8px; width: auto; color: var(--danger); border-color: var(--danger-light); background: var(--danger-light);" onclick="deletePeserta('${t.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>`;
                     }
 
@@ -8358,6 +8563,15 @@
             };
 
             window.openPesertaAdd = function() {
+                window._editPesertaId = null; // Sterilisasi State Edit
+                
+                // Restorasi Bentuk Asli Form Pendaftaran Baru
+                document.querySelector('#mod-peserta-add h3').innerText = "Pendaftaran Baru";
+                document.querySelector('#mod-peserta-add .seg-control').style.display = 'flex';
+                document.getElementById('wrap-pst-luar').querySelector('label').innerHTML = 'Ketik Nama Warga <span style="color:var(--danger)">*</span>';
+                document.getElementById('pst-luar-val').disabled = false;
+                document.getElementById('btn-pst-save').innerText = "Simpan Pendaftar";
+
                 // --- THE SHADOW ENTITY: PROTEKSI TAB WARGA LUAR ---
                 let idEvent = document.getElementById('kp-event-id').value;
                 let evData = state.event.find(e => e.id === idEvent);
@@ -8379,6 +8593,36 @@
                 openModal('mod-peserta-add');
             };
 
+            window.editPeserta = function(idPeserta) {
+                if(isKiosk) return showToast("Aksi dibatasi.");
+                let pst = state.trx.find(t => t.id === idPeserta);
+                if (!pst) return;
+
+                window._editPesertaId = idPeserta; // Flag Sinyal Mode Edit
+
+                let infoArr = pst.ket.split('|');
+                let pNama = infoArr[0].replace('Peserta:', '').trim();
+                let pVarian = infoArr.length > 1 ? infoArr[1].replace('Varian:', '').trim() : '';
+
+                // THE DOM MORPHING: Mengubah Modal Add menjadi Modal Edit
+                document.querySelector('#mod-peserta-add h3').innerText = "Edit Data Peserta";
+                document.querySelector('#mod-peserta-add .seg-control').style.display = 'none';
+                document.getElementById('wrap-pst-anggota').style.display = 'none';
+
+                let wrapLuar = document.getElementById('wrap-pst-luar');
+                wrapLuar.style.display = 'block';
+                let inpNama = document.getElementById('pst-luar-val');
+                inpNama.value = pNama;
+                inpNama.disabled = true; // Kunci nama agar Bendahara tidak merusak ID Referensi Mutasi
+                wrapLuar.querySelector('label').innerText = "Nama Pendaftar (Dikunci)";
+
+                document.getElementById('pst-varian').value = pVarian;
+                document.getElementById('pst-harga').value = fmtRp(pst.nom_awal);
+
+                document.getElementById('btn-pst-save').innerText = "Simpan Perubahan";
+                openModal('mod-peserta-add');
+            };
+
             window.executePesertaSave = async function() {
                 if(isKiosk || window.isProcessingTransaction) return;
                 
@@ -8389,7 +8633,48 @@
                 let namaLuar = document.getElementById('pst-luar-val').value.trim();
                 let varian = document.getElementById('pst-varian').value.trim() || '-';
                 let harga = getRawRp(document.getElementById('pst-harga').value);
-                
+
+                // --- ZONA EKSEKUSI: MODE EDIT PESERTA ---
+                if (window._editPesertaId) {
+                    let pst = state.trx.find(t => t.id === window._editPesertaId);
+                    if (!pst) return;
+                    if (harga <= 0) return showToast("Target tagihan tidak valid.");
+                    // ACCOUNTING SHIELD: Harga revisi tidak boleh lebih rendah dari uang DP yang sudah terlanjur masuk
+                    if (harga < pst.nom_final) return showToast("TOLAK: Target harga tidak boleh lebih kecil dari uang DP yang sudah masuk (Rp " + fmtRp(pst.nom_final) + ").");
+
+                    window.isProcessingTransaction = true;
+                    let btn = document.getElementById('btn-pst-save');
+                    let oldText = btn.innerText;
+                    btn.disabled = true; btn.innerText = "Memperbarui...";
+
+                    try {
+                        let infoArr = pst.ket.split('|');
+                        let pNama = infoArr[0].replace('Peserta:', '').trim();
+                        let ketString = `Peserta: ${pNama} | Varian: ${varian}`;
+
+                        let t_update = {...pst, ket: ketString, nom_awal: harga};
+                        
+                        // JIT DB Connection Healer
+                        try { idb.transaction('trx', 'readonly'); } catch(err) { await initDB(); }
+                        await saveStore('trx', t_update);
+                        
+                        let idx = state.trx.findIndex(t => t.id === window._editPesertaId);
+                        if(idx > -1) state.trx[idx] = t_update;
+
+                        showToast("✔️ Data Peserta berhasil diperbarui.");
+                        closeModal('mod-peserta-add');
+                        window.renderPesertaList();
+                    } catch(e) {
+                        showToast("❌ Gagal memperbarui data.");
+                    } finally {
+                        window.isProcessingTransaction = false;
+                        btn.disabled = false; btn.innerText = oldText;
+                        window._editPesertaId = null;
+                    }
+                    return;
+                }
+
+                // --- ZONA EKSEKUSI: TAMBAH PESERTA BARU (LOGIKA ORIGINAL) ---
                 if (isAnggota && !idAg) return showToast("Pilih anggota yang mendaftar.");
                 if (!isAnggota && !namaLuar) return showToast("Ketik nama peserta warga.");
                 if (harga <= 0) return showToast("Masukkan target harga/tagihan.");
