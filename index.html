@@ -730,7 +730,10 @@
                     if(modAuth) modAuth.style.background = '#020617';
                     if(modPin) modPin.style.background = '#020617';
                     
-                    if(modIdentity) modIdentity.style.display = 'flex';
+                    if(modIdentity) {
+                        document.body.classList.add('modal-open');
+                        modIdentity.style.display = 'flex';
+                    }
                 }
 
                 // ANGKAT TIRAI CINEMATIC DENGAN MULUS (Diaktifkan SETELAH struktur DOM Modal PORTAL siap)
@@ -1188,8 +1191,10 @@
             if (!fomoContainer) return;
             fomoContainer.style.display = 'block';
             // SURGICAL FIX: Injeksi String() untuk mencegah TypeError Crash pada Data Cacat
+            // [ISOLASI MUTLAK DOOR PRIZE]: Fomo hanya menarik Uang Tunai & Sponsor Barang
             let donasiTrx = state.trx.filter(t => !t.is_deleted && t.tipe === 'masuk' && 
-                (String(t.kat).toLowerCase().includes('donasi') || String(t.kat).toLowerCase().includes('sponsor'))
+                (String(t.kat).toLowerCase().includes('donasi') || String(t.kat).toLowerCase().includes('sponsor')) &&
+                !String(t.ket).includes('[DOORPRIZE]')
             );
             if (donasiTrx.length === 0) {
 
@@ -1210,25 +1215,55 @@
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Donasi Terbaru
                     </div>
                     <div style="background: #D1FAE5; color: #059669; padding: 4px 8px; border-radius: 6px; font-size: 9.5px; font-weight: 900; letter-spacing: 0.5px; border: 1px solid #A7F3D0; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.1);">
-                        TOTAL: RP ${new Intl.NumberFormat('id-ID').format(totalDonasiGlobal)}
+                        TOTAL UANG: RP ${new Intl.NumberFormat('id-ID').format(totalDonasiGlobal)}
                     </div>
                 </div>
                 <div style="display:flex; flex-direction:column; gap:8px;">`;
 
             top.forEach(t => {
                 let rawName = t.id_anggota ? (state.anggota.find(a => a.id === t.id_anggota)?.nama || 'Anonim') : (t.ket || 'Hamba Allah');
+                
+                // Sensor Tag Natura & Ekstraksi Rincian Barang
+                let isSponsorBarang = String(t.ket).includes('[SPONSOR-BARANG]');
+                let rincianBarang = isSponsorBarang && String(t.ket).includes('|') ? String(t.ket).split('|')[1].replace(/Rincian:\s*/i, '').trim() : '-';
+                
+                // Smart Parser: Ubah data lama yang menyamping menjadi vertikal ke bawah
+                rincianBarang = rincianBarang.replace(/(?:\s*•\s*|\s*\/\s*)/g, '\n• ').replace(/^\n/, '');
+                
+                let textValueRender = isSponsorBarang 
+                    ? `<div style="display:flex; align-items:center; gap:4px; font-size:10px; background:#F1F5F9; color:#475569; padding: 4px 8px; border-radius: 6px; border: 1px solid #CBD5E1; cursor:pointer; box-shadow: 0 2px 4px rgba(71, 85, 105, 0.05); transition: 0.2s;" onclick="let b=document.getElementById('fomo-det-${t.id}'); let c=document.getElementById('fomo-chev-${t.id}'); if(b.style.display==='none'){b.style.display='block'; c.style.transform='rotate(180deg)';}else{b.style.display='none'; c.style.transform='rotate(0deg)';}">
+                           <span style="font-weight:900; letter-spacing:0.5px;">WUJUD BARANG</span>
+                           <svg id="fomo-chev-${t.id}" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg>
+                       </div>` 
+                    : `<span style="font-size:13px; font-weight:900; color:#059669;">+Rp ${new Intl.NumberFormat('id-ID').format(t.nom_final || t.nom_awal || 0)}</span>`;
+
+
                 // Bersihkan teks awalan agar tidak dobel
-                let nama = String(rawName).replace(/^(Donasi|Sponsor)\s*(Umum|Dari)?\s*[:-]?\s*/i, '').split('-')[0].trim() || "Hamba Allah";
-                let nominal = new Intl.NumberFormat('id-ID').format(t.nom_final || t.nom_awal || 0);
-                html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:8px;">
+                let cleanedName = String(rawName).replace(/\[SPONSOR-BARANG\]\s*/i, '').replace(/^(Donasi|Sponsor)\s*(Umum|Dari)?\s*[:-]?\s*/i, '').split('|')[0].split('-')[0].trim() || "Hamba Allah";
+                
+                // Pembungkusan Div Multi-Lapis untuk Efek Accordion
+                html += `<div style="display:flex; flex-direction:column; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:8px; overflow:hidden; transition: all 0.3s ease;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px;">
                                 <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; padding-right:8px;">
                                     <div style="min-width:0; flex:1;">
-                                        <p style="margin:0; font-size:12px; font-weight:800; color:#1F2937; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(nama)}</p>
-                                        <p style="margin:0; font-size:9px; font-weight:700; color:#6B7280;">${t.tanggal || new Date(t.ts).toLocaleDateString('id-ID')}</p>
+                                        <p style="margin:0; font-size:12px; font-weight:900; color:#1F2937; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(cleanedName)}</p>
+                                        <p style="margin:0; font-size:9.5px; font-weight:700; color:#6B7280; margin-top:2px;">${t.tanggal || new Date(t.ts).toLocaleDateString('id-ID')}</p>
                                     </div>
                                 </div>
-                                <span style="font-size:13px; font-weight:900; color:#059669; flex-shrink:0;">+Rp ${nominal}</span>
-                            </div>`;
+                                <div style="flex-shrink:0;">${textValueRender}</div>
+                            </div>
+                            ${isSponsorBarang ? `
+
+                            <div id="fomo-det-${t.id}" style="display:none; padding: 0 10px 12px 10px; background: #F9FAFB;">
+                                <div style="border-top: 1px dashed #D1D5DB; padding-top: 10px; margin-top: -2px;">
+                                    <div style="font-size: 9px; font-weight: 900; color: #475569; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px;">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Rincian Sumbangan
+                                    </div>
+                                    <div style="font-size: 11px; font-weight: 700; color: #334155; line-height: 1.6; background: #F8FAFC; padding: 10px; border-radius: 8px; border: 1.5px solid #E2E8F0; max-height: 120px; overflow-y: auto; white-space: pre-wrap; word-break: break-word;">${esc(rincianBarang)}</div>
+                                </div>
+                            </div>` : ''}
+
+                        </div>`;
             });
 
             html += `</div>
@@ -1322,19 +1357,25 @@
                 } else {
                     // [AUTO-PILOT MODE] Nyalakan mesin pencari Donasi dan MVP
 
-                    // 1. Ekstraksi Data Donasi & Sponsor (Top 10)
+                    // 1. Ekstraksi Data Donasi & Sponsor (Top 10) - THE EXCLUSION PROTOCOL
                     let donasiTrxTicker = state.trx.filter(t => !t.is_deleted && t.tipe === 'masuk' && 
-                        (String(t.kat).toLowerCase().includes('donasi') || String(t.kat).toLowerCase().includes('sponsor'))
+                        (String(t.kat).toLowerCase().includes('donasi') || String(t.kat).toLowerCase().includes('sponsor')) &&
+                        !String(t.ket).includes('[DOORPRIZE]')
                     ).sort((a,b) => b.ts - a.ts).slice(0, 10);
                     
                     let donasiArr = donasiTrxTicker.map(t => {
                         let isSponsor = String(t.kat).toLowerCase().includes('sponsor');
+                        let isBarang = String(t.ket).includes('[SPONSOR-BARANG]');
+                        
                         let prefixTxt = isSponsor ? "SPONSOR DARI:" : "DONASI DARI:";
                         
                         let namaDonatur = t.id_anggota ? (state.anggota.find(a => a.id === t.id_anggota)?.nama || 'Anonim') : (t.ket || 'Hamba Allah');
-                        namaDonatur = String(namaDonatur).replace(/^(Donasi|Sponsor)\s*(Umum|Dari)?\s*[:-]?\s*/i, '').split('-')[0].trim() || "Hamba Allah";
+                        // Bersihkan tag siluman sebelum dilempar ke Publik Marquee
+                        namaDonatur = String(namaDonatur).replace(/\[SPONSOR-BARANG\]\s*/i, '').replace(/^(Donasi|Sponsor)\s*(Umum|Dari)?\s*[:-]?\s*/i, '').split('|')[0].split('-')[0].trim() || "Hamba Allah";
                         
-                        return `<span style="margin-right: 36px;"><span style="color: #94A3B8; font-weight: 900; margin-right: 8px;">${prefixTxt}</span><span style="color: #FDE68A; font-weight: 800; margin-right: 8px;">${esc(namaDonatur).toUpperCase()}</span><span style="color: #34D399; font-weight: 900;">+RP ${fmtRp(t.nom_final)}</span></span>`;
+                        let valueTxt = isBarang ? `<span style="color: #FDE68A; font-weight: 900;">+WUJUD BARANG</span>` : `<span style="color: #34D399; font-weight: 900;">+RP ${fmtRp(t.nom_final)}</span>`;
+
+                        return `<span style="margin-right: 36px;"><span style="color: #94A3B8; font-weight: 900; margin-right: 8px;">${prefixTxt}</span><span style="color: #FDE68A; font-weight: 800; margin-right: 8px;">${esc(namaDonatur).toUpperCase()}</span>${valueTxt}</span>`;
                     });
 
                     // 2. Ekstraksi Data MVP Teladan (Top 5 - Zero CPU Spiking)
@@ -1395,8 +1436,8 @@
 
         window.openLabelSelect = function() {
             // Tarik Master List & Normalisasi Ekstrem
-            let jStr = String(getSetting('jabatan_list', 'Ketum NAVASENA, Sekretaris Jenderal, Bendahara Umum, Koordinator Humas, Admin Medsos'));
-            let masterArr = jStr.split(',').map(s => s.replace(/\s+/g, ' ').trim()).filter(s => s !== '');
+            let jStr = String(getSetting('jabatan_list', 'Ketum NAVASENA\nSekretaris Jenderal\nBendahara Umum\nKoordinator Humas\nAdmin Medsos'));
+            let masterArr = jStr.split(/\n|,/).map(s => s.replace(/\s+/g, ' ').trim()).filter(s => s !== '');
             
             // Tarik semua label yang sedang dipakai di database (Dilindungi String Caster)
             let usedLabels = state.anggota.map(a => a.label ? String(a.label).replace(/\s+/g, ' ').trim().toLowerCase() : '');
@@ -1688,8 +1729,8 @@
                     deskEl.innerHTML = '';
                 } else {
                     // Absolute String Caster untuk mencegah Type Error Crash
-                    let jStr = String(getSetting('jabatan_list', 'Ketum NAVASENA, Sekretaris Jenderal, Bendahara Umum, Koordinator Humas, Admin Medsos'));
-                    let masterArr = jStr.split(',').map(s => s.replace(/\s+/g, ' ').trim()).filter(s => s !== '');
+                    let jStr = String(getSetting('jabatan_list', 'Ketum NAVASENA\nSekretaris Jenderal\nBendahara Umum\nKoordinator Humas\nAdmin Medsos'));
+                    let masterArr = jStr.split(/\n|,/).map(s => s.replace(/\s+/g, ' ').trim()).filter(s => s !== '');
                     
                     window.masterDeskGroups = []; 
                     let deskCardsHtml = '';
@@ -1876,18 +1917,22 @@
         };
 
         window.renderDonasiList = function() {
-            // Lapis 1: Perlebar Radar Tangkapan Data
+            // Lapis 1: Perlebar Radar Tangkapan Data (BUANG DOOR PRIZE KE BLACK HOLE)
             let donasiTrx = state.trx.filter(t => !t.is_deleted && t.tipe === 'masuk' && 
-                (String(t.kat || '').toLowerCase().includes('donasi') || String(t.kat || '').toLowerCase().includes('sponsor'))
+                (String(t.kat || '').toLowerCase().includes('donasi') || String(t.kat || '').toLowerCase().includes('sponsor')) &&
+                !String(t.ket).includes('[DOORPRIZE]')
             );
             
             let mapAnggota = {};
             let mapWarga = {};
-            let mapSponsor = {};
+            
+            // MAP KHUSUS SPONSOR UNTUK MENCEGAH PARADOKS PERINGKAT
+            let mapSponsorTunai = {};
+            let arrSponsorBarangList = []; // Array Langsung karena barang tidak perlu diakumulasi nominalnya
             
             let totalAnggota = 0;
             let totalWarga = 0;
-            let totalSponsor = 0;
+            let totalSponsorTunai = 0;
             let totalAnonim = 0;
             
             // Lapis 2: Data Segregation & Pemisah 3 Arah
@@ -1895,17 +1940,25 @@
                 let ketRaw = String(t.ket || '');
                 let katLow = String(t.kat || '').toLowerCase();
                 let isSponsor = katLow.includes('sponsor');
+                let isSponsorBarang = ketRaw.includes('[SPONSOR-BARANG]');
                 let isAnonim = ketRaw.toLowerCase().includes('hamba allah') || ketRaw.toLowerCase().includes('anonim');
                 
                 if (isSponsor) {
-                    let namaClean = ketRaw.replace(/^Sponsor\s*(Dari)?\s*[:-]?\s*/i, '').split('-')[0].trim();
-                    if (!namaClean) namaClean = "Sponsor Umum";
-                    
-                    if (!mapSponsor[namaClean]) mapSponsor[namaClean] = { total: 0, earliest_ts: t.ts };
-                    mapSponsor[namaClean].total += t.nom_final;
-                    if (t.ts < mapSponsor[namaClean].earliest_ts) mapSponsor[namaClean].earliest_ts = t.ts;
-                    totalSponsor += t.nom_final;
-
+                    if (isSponsorBarang) {
+                        // Bersihkan Tag Siluman & Ambil Rinciannya
+                        let rawBarangInfo = ketRaw.replace(/\[SPONSOR-BARANG\]\s*/i, '').replace(/^Sponsor Dari:\s*/i, '');
+                        let namaBarang = rawBarangInfo.split('|')[0].trim();
+                        let rincianBarang = rawBarangInfo.includes('|') ? rawBarangInfo.split('|')[1].replace('Rincian:', '').trim() : '-';
+                        arrSponsorBarangList.push({ nama: namaBarang, rincian: rincianBarang, ts: t.ts });
+                    } else {
+                        let namaClean = ketRaw.replace(/^Sponsor\s*(Dari)?\s*[:-]?\s*/i, '').split('-')[0].trim();
+                        if (!namaClean) namaClean = "Sponsor Umum";
+                        
+                        if (!mapSponsorTunai[namaClean]) mapSponsorTunai[namaClean] = { total: 0, earliest_ts: t.ts };
+                        mapSponsorTunai[namaClean].total += t.nom_final;
+                        if (t.ts < mapSponsorTunai[namaClean].earliest_ts) mapSponsorTunai[namaClean].earliest_ts = t.ts;
+                        totalSponsorTunai += t.nom_final;
+                    }
                 } else {
                     // Logika Donasi Murni
                     if (isAnonim) {
@@ -1935,96 +1988,118 @@
             
             let arrAnggota = Object.keys(mapAnggota).map(k => ({ nama: k, total: mapAnggota[k].total, earliest_ts: mapAnggota[k].earliest_ts }));
             let arrWarga = Object.keys(mapWarga).map(k => ({ nama: k, total: mapWarga[k].total, earliest_ts: mapWarga[k].earliest_ts }));
-            let arrSponsor = Object.keys(mapSponsor).map(k => ({ nama: k, total: mapSponsor[k].total, earliest_ts: mapSponsor[k].earliest_ts }));
+            let arrSponsorTunai = Object.keys(mapSponsorTunai).map(k => ({ nama: k, total: mapSponsorTunai[k].total, earliest_ts: mapSponsorTunai[k].earliest_ts }));
             
             // Lapis 3: Dynamic UI Generator
-            function generatePremiumListHTML(arr, totalNominal, typeLabel, isSponsor = false) {
+            function generatePremiumListHTML(arr, totalNominal, typeLabel, isSponsorMode = false) {
                 let badgeHtml = `
                     <div style="background: #F8FAFC; border-bottom: 1.5px solid #E2E8F0; padding: 12px 16px; margin: 0 -16px 8px -16px; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 11px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px;">Total ${typeLabel}</span>
+                        <span style="font-size: 11px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px;">Total ${isSponsorMode ? 'Sponsor Tunai' : typeLabel}</span>
                         <span style="font-size: 14px; font-weight: 900; color: #059669;">Rp ${fmtRp(totalNominal)}</span>
                     </div>`;
 
                 let rows = '';
                 if (arr.length === 0) {
-                    return `
-                    <div class="no-select" style="background:var(--surface); border:1.5px solid var(--border); border-radius:16px; box-shadow:var(--shadow-sm); padding: 0 16px 8px 16px; margin-bottom: 16px; overflow: hidden;">
-                        ${badgeHtml}
-                        <div style="text-align:center; padding: 30px 10px; color:var(--text-muted); font-size:12px; font-weight:600;">Belum ada data.</div>
-                    </div>`;
+                    rows = `<div style="text-align:center; padding: 30px 10px; color:var(--text-muted); font-size:12px; font-weight:600;">Belum ada data uang tunai.</div>`;
+                } else {
+                    // Tie-Breaker (Nominal > Waktu Awal)
+                    arr.sort((a, b) => {
+                        if (b.total !== a.total) return b.total - a.total; 
+                        return a.earliest_ts - b.earliest_ts; 
+                    });
+
+                    arr.forEach((d, i) => {
+                        let rankNode = '';
+                        if (i === 0) rankNode = `<div style="width:26px; height:26px; background:#FEF3C7; color:#D97706; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:12px; flex-shrink:0; box-shadow: 0 2px 4px rgba(217, 119, 6, 0.2);">1</div>`;
+                        else if (i === 1) rankNode = `<div style="width:26px; height:26px; background:#F1F5F9; color:#64748B; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:12px; flex-shrink:0; box-shadow: 0 2px 4px rgba(100, 116, 139, 0.2);">2</div>`;
+                        else if (i === 2) rankNode = `<div style="width:26px; height:26px; background:#FFEDD5; color:#92400E; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:12px; flex-shrink:0; box-shadow: 0 2px 4px rgba(146, 64, 14, 0.2);">3</div>`;
+                        else rankNode = `<div style="width:26px; text-align:center; font-weight:800; color:#9CA3AF; font-size:13px; flex-shrink:0;">${i+1}</div>`;
+
+                        // Injeksi CSS Premium Marquee secara dinamis (Hanya 1x eksekusi untuk efisiensi RAM)
+                        if (!document.getElementById('css-premium-marquee')) {
+                            document.head.insertAdjacentHTML('beforeend', `
+                            <style id="css-premium-marquee">
+                                @keyframes premiumMarquee {
+                                    0% { transform: translateX(0); }
+                                    100% { transform: translateX(-100%); }
+                                }
+                                .sponsor-marquee-wrap {
+                                    display: flex; flex: 1; min-width: 0; overflow: hidden;
+                                    -webkit-mask-image: linear-gradient(to right, #000 85%, transparent 100%);
+                                    mask-image: linear-gradient(to right, #000 85%, transparent 100%);
+                                }
+                                .sponsor-marquee-text {
+                                    flex-shrink: 0; white-space: nowrap; font-size: 13px; font-weight: 800; 
+                                    color: var(--text-main); padding-right: 32px; 
+                                    animation: premiumMarquee 12s linear infinite;
+                                }
+                            </style>`);
+                        }
+
+                        let nameNode = '';
+                        // SURGICAL FIX: Limit toleransi dinaikkan ke 24. Hanya teks yang sangat panjang yang akan berjalan.
+                        let isLongText = d.nama.length > 24;
+
+                        if (isLongText) {
+                            // The Authentic Dual-Loop Marquee Engine (Sangat Natural, Pelan & Premium)
+                            nameNode = `
+                            <div class="sponsor-marquee-wrap" title="${esc(d.nama)}">
+                                <div class="sponsor-marquee-text">${esc(d.nama)}</div>
+                                <div class="sponsor-marquee-text" aria-hidden="true">${esc(d.nama)}</div>
+                            </div>`;
+                        } else {
+                            // Regular Static Node
+                            nameNode = `<div style="font-size:13px; font-weight:800; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; min-width:0;" title="${esc(d.nama)}">${esc(d.nama)}</div>`;
+                        }
+
+                        rows += `
+                        <div style="display:flex; align-items:center; justify-content:space-between; padding: 14px 0; border-bottom: 1px dashed var(--border);">
+                            <div style="display:flex; align-items:center; gap: 12px; flex:1; min-width:0;">
+                                ${rankNode}
+                                ${nameNode}
+                            </div>
+                            <div style="font-size:13px; font-weight:900; color:var(--success); flex-shrink:0; margin-left:12px;">Rp ${fmtRp(d.total)}</div>
+                        </div>`;
+                    });
                 }
                 
-                // Tie-Breaker (Nominal > Waktu Awal)
-                arr.sort((a, b) => {
-                    if (b.total !== a.total) return b.total - a.total; 
-                    return a.earliest_ts - b.earliest_ts; 
-                });
-
-                arr.forEach((d, i) => {
-                    let rankNode = '';
-                    if (i === 0) rankNode = `<div style="width:26px; height:26px; background:#FEF3C7; color:#D97706; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:12px; flex-shrink:0; box-shadow: 0 2px 4px rgba(217, 119, 6, 0.2);">1</div>`;
-                    else if (i === 1) rankNode = `<div style="width:26px; height:26px; background:#F1F5F9; color:#64748B; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:12px; flex-shrink:0; box-shadow: 0 2px 4px rgba(100, 116, 139, 0.2);">2</div>`;
-                    else if (i === 2) rankNode = `<div style="width:26px; height:26px; background:#FFEDD5; color:#92400E; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:12px; flex-shrink:0; box-shadow: 0 2px 4px rgba(146, 64, 14, 0.2);">3</div>`;
-                    else rankNode = `<div style="width:26px; text-align:center; font-weight:800; color:#9CA3AF; font-size:13px; flex-shrink:0;">${i+1}</div>`;
+                // MURNI UNTUK SPONSOR BARANG: Injeksi Tabel Bawah Bebas Konflik Nominal!
+                let rowsBarangHtml = '';
+                if (isSponsorMode && arrSponsorBarangList.length > 0) {
+                    arrSponsorBarangList.sort((a,b) => b.ts - a.ts); // Urut waktu terbaru
                     
-                    // Injeksi CSS Premium Marquee secara dinamis (Hanya 1x eksekusi untuk efisiensi RAM)
-                    if (!document.getElementById('css-premium-marquee')) {
-                        document.head.insertAdjacentHTML('beforeend', `
-                        <style id="css-premium-marquee">
-                            @keyframes premiumMarquee {
-                                0% { transform: translateX(0); }
-                                100% { transform: translateX(-100%); }
-                            }
-                            .sponsor-marquee-wrap {
-                                display: flex; flex: 1; min-width: 0; overflow: hidden;
-                                -webkit-mask-image: linear-gradient(to right, #000 85%, transparent 100%);
-                                mask-image: linear-gradient(to right, #000 85%, transparent 100%);
-                            }
-                            .sponsor-marquee-text {
-                                flex-shrink: 0; white-space: nowrap; font-size: 13px; font-weight: 800; 
-                                color: var(--text-main); padding-right: 32px; 
-                                animation: premiumMarquee 12s linear infinite;
-                            }
-                        </style>`);
-                    }
+                    let rowsBarang = '';
 
-                    let nameNode = '';
-                    // Deteksi panjang teks (> 18 karakter = diubah jadi Marquee berjalan pelan)
-                    let isLongText = d.nama.length > 18;
-
-                    if (isSponsor && isLongText) {
-                        // The Authentic Dual-Loop Marquee Engine (Sangat Natural, Pelan & Premium)
-                        nameNode = `
-                        <div class="sponsor-marquee-wrap" title="${esc(d.nama)}">
-                            <div class="sponsor-marquee-text">${esc(d.nama)}</div>
-                            <div class="sponsor-marquee-text" aria-hidden="true">${esc(d.nama)}</div>
+                    arrSponsorBarangList.forEach(b => {
+                        // Smart Parser: Ubah data lama yang menyamping menjadi vertikal ke bawah
+                        let formatRincian = String(b.rincian).replace(/(?:\s*•\s*|\s*\/\s*)/g, '\n• ').replace(/^\n/, '');
+                        
+                        rowsBarang += `
+                        <div style="padding: 12px; background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 12px; margin-bottom: 8px;">
+                            <div style="font-size:12px; font-weight:900; color:#334155; margin-bottom: 6px;">${esc(b.nama)}</div>
+                            <div style="font-size:10.5px; font-weight:700; color:#475569; white-space: pre-wrap; word-break: break-word; line-height: 1.6;"><span style="font-weight:900;">🎁 Rincian:</span><br>${esc(formatRincian)}</div>
                         </div>`;
-                    } else {
-                        // Regular Static Node (Berdiam diri untuk nama sponsor pendek / tab anggota & warga)
-                        nameNode = `<div style="font-size:13px; font-weight:800; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; min-width:0;" title="${esc(d.nama)}">${esc(d.nama)}</div>`;
-                    }
-
-                    rows += `
-                    <div style="display:flex; align-items:center; justify-content:space-between; padding: 14px 0; border-bottom: 1px dashed var(--border);">
-                        <div style="display:flex; align-items:center; gap: 12px; flex:1; min-width:0;">
-                            ${rankNode}
-                            ${nameNode}
-                        </div>
-                        <div style="font-size:13px; font-weight:900; color:var(--success); flex-shrink:0; margin-left:12px;">Rp ${fmtRp(d.total)}</div>
+                    });
+                    
+                    rowsBarangHtml = `
+                    <div style="margin-top: 24px;">
+                        <div style="font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Daftar Sponsor Barang </div>
+                        ${rowsBarang}
                     </div>`;
-                });
-                
+                }
+
                 return `
-                <div class="no-select" style="background:var(--surface); border:1.5px solid var(--border); border-radius:16px; box-shadow:var(--shadow-sm); padding: 0 16px 8px 16px; margin-bottom: 16px; overflow: hidden;">
+                <div class="no-select" style="background:var(--surface); border:1.5px solid var(--border); border-radius:16px; box-shadow:var(--shadow-sm); padding: 0 16px 16px 16px; margin-bottom: 16px; overflow: hidden;">
                     ${badgeHtml}
                     ${rows}
+                    ${rowsBarangHtml}
                 </div>`;
             }
 
             // Lapis 4: Merakit Tabs Segments
-            let listAnggotaHtml = generatePremiumListHTML(arrAnggota, totalAnggota, 'Donasi Anggota');
-            let listWargaHtml = generatePremiumListHTML(arrWarga, totalWarga, 'Donasi Warga');
-            let listSponsorHtml = generatePremiumListHTML(arrSponsor, totalSponsor, 'Sponsorship', true);
+            let listAnggotaHtml = generatePremiumListHTML(arrAnggota, totalAnggota, 'Donasi Anggota', false);
+            let listWargaHtml = generatePremiumListHTML(arrWarga, totalWarga, 'Donasi Warga', false);
+            let listSponsorHtml = generatePremiumListHTML(arrSponsorTunai, totalSponsorTunai, 'Sponsorship', true);
 
             let isUserWargaRole = localStorage.getItem('nav_role') === 'warga';
             
@@ -2538,10 +2613,14 @@
                                         : (isMasuk ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>` 
                                                    : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>`);
 
+                let isNaturaRender = String(t.ket).includes('[DOORPRIZE]') || String(t.ket).includes('[SPONSOR-BARANG]');
+
                 let badgeHtml = '';
                 if (isPending) {
                     let statusText = t.status === 'talangan' ? 'HUTANG KAS' : 'UANG MUKA AKTIF';
                     badgeHtml = `<div style="display:inline-flex; align-items:center; gap:4px; background:#FEF3C7; color:#D97706; padding:4px 8px; border-radius:6px; font-size:9.5px; font-weight:900; letter-spacing:0.5px; border: 1px solid #FDE68A;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${statusText}</div>`;
+                } else if (isNaturaRender) {
+                    badgeHtml = `<div style="display:inline-flex; align-items:center; gap:4px; background:#D1FAE5; color:#059669; padding:4px 8px; border-radius:6px; font-size:9.5px; font-weight:900; letter-spacing:0.5px; border: 1px solid #A7F3D0;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> BARANG MASUK</div>`;
                 } else if (isMasuk) {
                     badgeHtml = `<div style="display:inline-flex; align-items:center; gap:4px; background:#D1FAE5; color:#059669; padding:4px 8px; border-radius:6px; font-size:9.5px; font-weight:900; letter-spacing:0.5px; border: 1px solid #A7F3D0;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> DANA MASUK</div>`;
                 } else {
@@ -2621,7 +2700,35 @@
                     finalKet += '</span>';
                 }
 
+                // THE RENDER INTERCEPTOR: Jika ini Natura, Ganti Angka Rp 0 jadi Teks Elegan
+                let textAmtRender = isNaturaRender ? `<span style="font-size: 10px; background: #F3F4F6; padding: 4px 8px; border-radius: 8px; border: 1px solid #D1D5DB; color: #4B5563;">Wujud Barang</span>` : `Rp ${amtView}`;
+
+                let naturaExtraHtml = '';
+
+                // PERAPIAN TEKS UI NATURA (Menghilangkan Tag Sistem & Memecah Baris)
+                if (isNaturaRender) {
+                    finalKet = finalKet.replace(/\[DOORPRIZE\]\s*Donasi Dari:\s*/i, 'Dari: ')
+                                       .replace(/\[SPONSOR-BARANG\]\s*Sponsor Dari:\s*/i, 'Dari: ');
+                    
+                    // Smart Parser: Ekstraksi dan penyusunan peluru (bullet) vertikal
+                    let splitNatura = finalKet.split(/\s*\|\s*Rincian:\s*/i);
+                    if (splitNatura.length > 1) {
+                        let namaNatura = splitNatura[0];
+                        let wujudNatura = splitNatura[1];
+                        
+                        // Ubah spasi peluru/slash yang menyamping menjadi baris baru HTML (<br>)
+                        wujudNatura = wujudNatura.replace(/(?:\s*•\s*|\s*\/\s*)/g, '<br>• ').replace(/^(?:<br>)?/, '');
+                        if (!wujudNatura.startsWith('•') && wujudNatura.trim() !== '') wujudNatura = '• ' + wujudNatura;
+
+                        finalKet = namaNatura; // Hanya sisakan nama di judul utama
+                        
+                        // Breakout Box: Wadah 100% Width di bawah row utama
+                        naturaExtraHtml = `<div style="margin-top: 12px; padding: 14px; background: #F8FAFC; border: 1.5px dashed #CBD5E1; border-radius: 12px; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);"><div style="font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px;">🎁 Rincian Barang:</div><div style="font-size: 13px; line-height: 1.6; color: var(--text-main); font-weight: 700;">${wujudNatura}</div></div>`;
+                    }
+                }
+
                 return `
+
                 <div class="trx-card ${cls} no-select" onclick="pulseHaptic('light')">
                     <div class="trx-header-row">
                         <div style="display: flex; gap: 14px; flex: 1; min-width: 0;">
@@ -2644,8 +2751,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="trx-amt ${cls}" style="letter-spacing: -0.5px;">Rp ${amtView}</div>
+                        <div class="trx-amt ${cls}" style="letter-spacing: -0.5px;">${textAmtRender}</div>
                     </div>
+                    ${naturaExtraHtml}
                     ${footerHtml}
                 </div>`;
             }
@@ -2948,27 +3056,69 @@
                 let teksBisaDiedit = strKet;
                 
                 // 1. Potong Suffix (Ekor Catatan Sistem Settle/Lunas di bagian bawah)
-                let splitIdx = teksBisaDiedit.indexOf('\n[');
-                if (splitIdx !== -1) {
-                    suffixKunci = teksBisaDiedit.substring(splitIdx); // Kunci: \n[TALANGAN LUNAS]... dst
-                    teksBisaDiedit = teksBisaDiedit.substring(0, splitIdx).trim(); // Ambil sisanya
+                // ENGINE REGEX BARU: Menangkap Tag Sistem meski diketik manual dengan spasi (Bukan Enter)
+                let matchSuffix = teksBisaDiedit.match(/(?:\n|\s)*(\[(?:TALANGAN LUNAS|UANG MUKA SELESAI).*)$/i);
+                if (matchSuffix) {
+                    suffixKunci = matchSuffix[0];
+                    teksBisaDiedit = teksBisaDiedit.substring(0, matchSuffix.index).trim();
+                } else {
+                    let matchDialih = teksBisaDiedit.match(/(?:\n|\s)*(\[Dialihkan ke Nota Baru\])$/i);
+                    if (matchDialih) {
+                        suffixKunci = matchDialih[0];
+                        teksBisaDiedit = teksBisaDiedit.substring(0, matchDialih.index).trim();
+                    }
                 }
 
-                // 2. Potong Prefix (Kepala Catatan Donasi di bagian depan)
+                // 2. Potong Prefix (Kepala Catatan Donasi / Tag Siluman Natura di bagian depan)
+                // Deteksi Natura Absolut sebelum String Case di-lower!
+                if (teksBisaDiedit.includes('[DOORPRIZE]')) {
+                    prefixKunci = "[DOORPRIZE] ";
+                    teksBisaDiedit = teksBisaDiedit.replace(/\[DOORPRIZE\]\s*/i, '').trim();
+                } else if (teksBisaDiedit.includes('[SPONSOR-BARANG]')) {
+                    prefixKunci = "[SPONSOR-BARANG] ";
+                    teksBisaDiedit = teksBisaDiedit.replace(/\[SPONSOR-BARANG\]\s*/i, '').trim();
+                }
+                
                 let lowerKet = teksBisaDiedit.toLowerCase();
                 if (lowerKet.startsWith("donasi dari: ")) {
-                    prefixKunci = "Donasi Dari: ";
+                    prefixKunci += "Donasi Dari: ";
                     teksBisaDiedit = teksBisaDiedit.substring(13).trim();
                 } else if (lowerKet.startsWith("donasi umum: ")) {
-                    prefixKunci = "Donasi Dari: ";
+                    prefixKunci += "Donasi Dari: ";
                     teksBisaDiedit = teksBisaDiedit.substring(13).trim(); 
+                } else if (lowerKet.startsWith("sponsor dari: ")) {
+                    prefixKunci += "Sponsor Dari: ";
+                    teksBisaDiedit = teksBisaDiedit.substring(14).trim(); 
+                }
+
+                // THE NATURA PROTECTION SHIELD: Pisahkan Nama dan Rincian Barang agar pembatas " | Rincian: " tidak bisa dirusak Warga!
+                let isNaturaEdit = prefixKunci.includes('[DOORPRIZE]') || prefixKunci.includes('[SPONSOR-BARANG]');
+                let namaDonaturNatura = "";
+                
+                if (isNaturaEdit) {
+                    // Karena format di DB adalah: "Nama | Rincian: Wujud Barang", kita pecah (split) di sini.
+                    let splitData = teksBisaDiedit.split('|');
+                    namaDonaturNatura = splitData[0].trim();
+                    // Buang tulisan "Rincian:" agar pengguna hanya mengedit inti barangnya saja
+                    teksBisaDiedit = splitData.length > 1 ? splitData[1].replace(/Rincian:\s*/i, '').trim() : '';
                 }
 
                 if (typeof openCustomPrompt === 'function') {
-                    openCustomPrompt("Edit Rincian Mutasi", "Perbaiki kesalahan ketik tanpa mengubah waktu riil dan nominal.", "Ketik rincian baru...", async (newVal) => {
+                    // Ubah teks judul agar lebih elegan jika yang diedit adalah barang Natura
+                    let pTitle = isNaturaEdit ? "Edit Rincian Barang" : "Edit Rincian Mutasi";
+                    let pDesc = isNaturaEdit ? `Ubah barang sumbangan dari: <b>${namaDonaturNatura}</b>` : "Perbaiki kesalahan ketik tanpa mengubah waktu riil dan nominal.";
+                    
+                    openCustomPrompt(pTitle, pDesc, "Ketik rincian baru...", async (newVal) => {
                         
-                        // Rakit kembali secara atomik: [Kepala] + [Isi Edit] + [Ekor]
-                        let finalKet = prefixKunci + newVal.trim() + suffixKunci; 
+                        // Rakit kembali string secara utuh dan aman
+                        let finalKet = "";
+                        if (isNaturaEdit) {
+                            // Kembalikan batas | Rincian: secara paksa (Sistem yang merakit, bukan User)
+                            finalKet = prefixKunci + namaDonaturNatura + " | Rincian: " + newVal.trim() + suffixKunci;
+                        } else {
+                            finalKet = prefixKunci + newVal.trim() + suffixKunci; 
+                        }
+                        
                         if (finalKet === tTarget.ket) return; // Abaikan jika tidak ada perubahan
                         
                         try {
@@ -3281,7 +3431,7 @@
                         mvpId = trxThisMonth[0].id_anggota;
                     }
                     
-                    let jArrList = getSetting('jabatan_list', 'Ketum NAVASENA, Sekretaris Jenderal, Bendahara Umum, Koordinator Humas, Admin Medsos').split(',').map(s=>s.replace(/\s+/g, ' ').trim().toLowerCase());
+                let jArrList = getSetting('jabatan_list', 'Ketum NAVASENA\nSekretaris Jenderal\nBendahara Umum\nKoordinator Humas\nAdmin Medsos').split(/\n|,/).map(s=>s.replace(/\s+/g, ' ').trim().toLowerCase());
 
                     filteredAnggota.forEach(ag => {
                         const bNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
@@ -4189,18 +4339,18 @@
                             <div class="form-group" style="margin-bottom: 20px;">
                                 <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px;">
                                     <label style="margin-bottom: 0; font-size: 12px; color: var(--text-main); display: flex; align-items: center; gap: 6px;"><div style="width: 8px; height: 8px; border-radius: 50%; background: #10B981;"></div> Dana Masuk</label>
-                                    <span style="font-size: 9px; font-weight: 700; color: #94A3B8; background: #F1F5F9; padding: 2px 6px; border-radius: 4px;">Pemisah: Koma ( , )</span>
+                                    <span style="font-size: 9px; font-weight: 700; color: #94A3B8; background: #F1F5F9; padding: 2px 6px; border-radius: 4px;">Pemisah: Enter (Baris Baru)</span>
                                 </div>
-                                <textarea id="set-kat-masuk" rows="3" style="line-height: 1.6; font-size: 13px; font-weight: 600; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.03); resize: none;">Donasi, Sponsor,</textarea>
+                                <textarea id="set-kat-masuk" rows="4" style="line-height: 1.6; font-size: 13px; font-weight: 600; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.03); resize: none;">Donasi&#10;Sponsor</textarea>
                             </div>
                             
                             <div class="form-group" style="margin-bottom: 4px;">
                                 <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px;">
                                     <label style="margin-bottom: 0; font-size: 12px; color: var(--text-main); display: flex; align-items: center; gap: 6px;"><div style="width: 8px; height: 8px; border-radius: 50%; background: #EF4444;"></div> Dana Keluar</label>
-                                    <span style="font-size: 9px; font-weight: 700; color: #94A3B8; background: #F1F5F9; padding: 2px 6px; border-radius: 4px;">Pemisah: Koma ( , )</span>
+                                    <span style="font-size: 9px; font-weight: 700; color: #94A3B8; background: #F1F5F9; padding: 2px 6px; border-radius: 4px;">Pemisah: Enter (Baris Baru)</span>
                                 </div>
                                 
-                                <textarea id="set-kat-keluar" rows="3" style="line-height: 1.6; font-size: 13px; font-weight: 600; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.03); resize: none;">Operasional, Konsumsi, HUT RI</textarea>
+                                <textarea id="set-kat-keluar" rows="4" style="line-height: 1.6; font-size: 13px; font-weight: 600; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.03); resize: none;">Operasional&#10;Konsumsi&#10;HUT RI</textarea>
                             </div>
 
                             <div class="form-group" style="margin-bottom: 4px; padding-top: 16px; border-top: 1px dashed var(--border);">
@@ -4209,9 +4359,9 @@
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                                         Hierarki Jabatan Resmi
                                     </label>
-                                    <span style="font-size: 9px; font-weight: 700; color: #94A3B8; background: #F1F5F9; padding: 2px 6px; border-radius: 4px;">Pemisah: Koma ( , )</span>
+                                    <span style="font-size: 9px; font-weight: 700; color: #94A3B8; background: #F1F5F9; padding: 2px 6px; border-radius: 4px;">Pemisah: Enter (Baris Baru)</span>
                                 </div>
-                                <textarea id="set-jabatan-list" rows="3" style="line-height: 1.6; font-size: 13px; font-weight: 600; background: var(--primary-light); border: 1.5px solid rgba(59, 130, 246, 0.3); color: var(--primary); border-radius: 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); resize: none;">Ketum NAVASENA, Sekretaris Jenderal, Bendahara Umum, Koordinator Humas, Admin Medsos</textarea>
+                                <textarea id="set-jabatan-list" rows="5" style="line-height: 1.6; font-size: 13px; font-weight: 600; background: var(--primary-light); border: 1.5px solid rgba(59, 130, 246, 0.3); color: var(--primary); border-radius: 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); resize: none;">Ketum NAVASENA&#10;Sekretaris Jenderal&#10;Bendahara Umum&#10;Koordinator Humas&#10;Admin Medsos</textarea>
                             </div>
                         </div>
                     </div>
@@ -4609,7 +4759,7 @@
 
             function openCustomPrompt(title, desc, placeholder, onConfirm, defaultValue = '') {
                 document.getElementById('prompt-title').innerText = title;
-                document.getElementById('prompt-desc').innerText = desc;
+                document.getElementById('prompt-desc').innerHTML = desc;
                 
                 let inp = document.getElementById('prompt-input-val');
                 inp.placeholder = placeholder;
@@ -4690,9 +4840,16 @@
 
                     document.getElementById('set-ticker-msg').value = getSetting('ticker_msg', '');
                     document.getElementById('set-iuran-nom').value = fmtRp(getSetting('iuran_nom', 10000));
-                    document.getElementById('set-kat-masuk').value = getSetting('kat_masuk', 'Donasi, Sponsor,');
-                    document.getElementById('set-kat-keluar').value = getSetting('kat_keluar', 'Operasional, Konsumsi, HUT RI');
-                    document.getElementById('set-jabatan-list').value = getSetting('jabatan_list', 'Ketum NAVASENA, Sekretaris Jenderal, Bendahara Umum, Koordinator Humas, Admin Medsos');
+                    
+                    // Auto-Migration System: Ubah koma warisan masa lalu menjadi format Enter (Baris Baru)
+                    let kMasuk = getSetting('kat_masuk', 'Donasi\nSponsor');
+                    let kKeluar = getSetting('kat_keluar', 'Operasional\nKonsumsi\nHUT RI');
+                    let jList = getSetting('jabatan_list', 'Ketum NAVASENA\nSekretaris Jenderal\nBendahara Umum\nKoordinator Humas\nAdmin Medsos');
+                    
+                    document.getElementById('set-kat-masuk').value = kMasuk.includes(',') && !kMasuk.includes('\n') ? kMasuk.split(',').map(s=>s.trim()).filter(s=>s!=='').join('\n') : kMasuk;
+                    document.getElementById('set-kat-keluar').value = kKeluar.includes(',') && !kKeluar.includes('\n') ? kKeluar.split(',').map(s=>s.trim()).filter(s=>s!=='').join('\n') : kKeluar;
+                    document.getElementById('set-jabatan-list').value = jList.includes(',') && !jList.includes('\n') ? jList.split(',').map(s=>s.trim()).filter(s=>s!=='').join('\n') : jList;
+                    
                     if(document.getElementById('set-pin-baru')) document.getElementById('set-pin-baru').value = '';
 
                 } else if (id === 'mod-tutorial') {
@@ -4842,7 +4999,7 @@
                 document.getElementById('ang-rek').value = ag.bank_rek || '';
 
                 let currentLabel = ag.label ? ag.label.replace(/\s+/g, ' ').trim() : '';
-                let jArr = getSetting('jabatan_list', 'Ketum NAVASENA, Sekretaris Jenderal, Bendahara Umum, Koordinator Humas, Admin Medsos').split(',').map(s=>s.replace(/\s+/g, ' ').trim()).filter(s=>s!=='');
+                let jArr = getSetting('jabatan_list', 'Ketum NAVASENA\nSekretaris Jenderal\nBendahara Umum\nKoordinator Humas\nAdmin Medsos').split(/\n|,/).map(s=>s.replace(/\s+/g, ' ').trim()).filter(s=>s!=='');
                 if (currentLabel && !jArr.find(j => j.toLowerCase() === currentLabel.toLowerCase())) {
                     jArr.push(`[Legacy] ${currentLabel}`);
                 }
@@ -5279,6 +5436,25 @@
                                     ${pjControlHtml}
                                 </div>
                             </div>` : ''}
+
+                            <!-- DOOR PRIZE RADAR COUNTER -->
+                            ${(function(){
+                                let doorPrizeTrx = state.trx.filter(t => !t.is_deleted && t.id_event === ev.id && String(t.ket).includes('[DOORPRIZE]'));
+                                if (doorPrizeTrx.length > 0) {
+                                    return `
+                                    <div style="background: #FDF4FF; border: 1px dashed #E9D5FF; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s;" onclick="window.openDrillDown('${ev.id}', 'DOORPRIZE')">
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <div style="width: 28px; height: 28px; background: #F3E8FF; border-radius: 8px; display: flex; align-items: center; justify-content: center;"><span style="font-size: 14px;">🎁</span></div>
+                                            <div>
+                                                <div style="font-size: 10px; font-weight: 800; color: #9333EA; text-transform: uppercase;">Door Prize Dari Warga</div>
+                                                <div style="font-size: 13px; font-weight: 900; color: #7E22CE;">Total: ${doorPrizeTrx.length} Warga</div>
+                                            </div>
+                                        </div>
+                                        <div style="background: #E9D5FF; color: #7E22CE; font-size: 9px; font-weight: 900; padding: 4px 8px; border-radius: 6px;">LIHAT DAFTAR</div>
+                                    </div>`;
+                                }
+                                return '';
+                            })()}
 
                             <div style="display: flex; gap: 8px; position: relative; z-index: 10; flex-wrap: wrap;">
                                 ${(rawSifat === 'internal' || rawSifat === 'hybrid') ? `
@@ -5983,6 +6159,7 @@
             }
 
             function openPhoneAuthLocal() {
+                document.body.classList.add('modal-open');
                 document.getElementById('mod-identity').style.display = 'flex';
                 document.getElementById('mod-auth-phone').style.background = '#0F172A';
                 document.getElementById('auth-phone-input').value = '';
@@ -5991,6 +6168,7 @@
             }
 
             function closeAuthPhone() {
+                document.body.classList.add('modal-open');
                 document.getElementById('mod-auth-phone').style.display = 'none';
                 localStorage.removeItem('nav_role');
                 document.body.classList.remove('role-warga');
@@ -6489,10 +6667,12 @@
                                 anggotaUpdates[t.id_anggota].hist_iuran_count += 1;
                                 anggotaUpdates[t.id_anggota].arsip_iuran_map.push(`${safeYear}-${t.bln}`);
 
-                            } else if (t.tipe === 'masuk' && t.kat !== 'Transfer Internal' && t.kat !== 'Saldo Awal' && t.kat !== 'Sisa Uang Muka' && !(t.kat||'').includes('Koreksi Saldo')) {
+                            } else if (t.tipe === 'masuk' && t.kat !== 'Transfer Internal' && t.kat !== 'Saldo Awal' && t.kat !== 'Sisa Uang Muka' && t.kat !== 'Pembayaran Program' && !(t.kat||'').includes('Koreksi Saldo')) {
                                 anggotaUpdates[t.id_anggota].hist_donasi_rp += t.nom_final;
-                                let dM = t.bln || (new Date(t.ts).getMonth() + 1);
-                                deletedDonasiMap[`${t.id_anggota}_${safeYear}_${dM}`] = (deletedDonasiMap[`${t.id_anggota}_${safeYear}_${dM}`] || 0) + t.nom_final;
+                                if (!String(t.kat||'').toLowerCase().includes('sponsor')) {
+                                    let dM = t.bln || (new Date(t.ts).getMonth() + 1);
+                                    deletedDonasiMap[`${t.id_anggota}_${safeYear}_${dM}`] = (deletedDonasiMap[`${t.id_anggota}_${safeYear}_${dM}`] || 0) + t.nom_final;
+                                }
                             } else if (t.tipe === 'keluar' && (t.status === 'talangan' || (t.status === 'lunas' && t.ket && t.ket.includes('[TALANGAN') && !t.ket.startsWith('Penyelesaian Talangan:')))) {
                                 deletedTalanganMap[`${t.id_anggota}_${safeYear}`] = (deletedTalanganMap[`${t.id_anggota}_${safeYear}`] || 0) + 1;
                             }
@@ -7363,9 +7543,32 @@
                         <input type="text" id="donasi-luar-val" placeholder="Ketik nama donatur luar...">
                     </div>
 
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Klasifikasi Penerimaan <span style="color:var(--danger)">*</span></label>
+                        <div class="seg-control no-select" style="margin-bottom: 0;">
+                            <button class="seg-btn active" id="seg-klasifikasi-donasi" onclick="document.getElementById('donasi-klasifikasi-val').value='donasi'; this.classList.add('active'); document.getElementById('seg-klasifikasi-sponsor').classList.remove('active');">Donasi / Door Prize</button>
+                            <button class="seg-btn" id="seg-klasifikasi-sponsor" onclick="document.getElementById('donasi-klasifikasi-val').value='sponsor'; this.classList.add('active'); document.getElementById('seg-klasifikasi-donasi').classList.remove('active');">Sponsorship</button>
+                        </div>
+                        <input type="hidden" id="donasi-klasifikasi-val" value="donasi">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Bentuk Sumbangan <span style="color:var(--danger)">*</span></label>
+                        <div class="seg-control no-select" style="margin-bottom: 0;">
+                            <button class="seg-btn active" id="seg-bentuk-uang" onclick="document.getElementById('donasi-bentuk-val').value='uang'; this.classList.add('active'); document.getElementById('seg-bentuk-barang').classList.remove('active'); document.getElementById('donasi-nom').disabled=false; document.getElementById('donasi-nom').placeholder='Rp 0'; document.getElementById('donasi-nom').value=''; document.getElementById('donasi-nom').style.opacity='1'; document.getElementById('wrap-donasi-barang-ket').style.display='none';">Uang Tunai</button>
+                            <button class="seg-btn" id="seg-bentuk-barang" onclick="document.getElementById('donasi-bentuk-val').value='barang'; this.classList.add('active'); document.getElementById('seg-bentuk-uang').classList.remove('active'); document.getElementById('donasi-nom').disabled=true; document.getElementById('donasi-nom').value=''; document.getElementById('donasi-nom').placeholder='NON-TUNAI (BARANG)'; document.getElementById('donasi-nom').style.opacity='0.5'; document.getElementById('wrap-donasi-barang-ket').style.display='block';">Barang / Natura</button>
+                        </div>
+                        <input type="hidden" id="donasi-bentuk-val" value="uang">
+                    </div>
+
                     <div class="form-group" style="margin-bottom: 24px;">
                         <label style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Nominal Donasi <span style="color:var(--danger)">*</span></label>
-                        <input type="tel" id="donasi-nom" placeholder="Rp 0" oninput="formatRupiah(this)" style="font-size: 24px; font-weight: 900; color: #059669; height: 54px;">
+                        <input type="tel" id="donasi-nom" placeholder="Rp 0" oninput="formatRupiah(this)" style="font-size: 24px; font-weight: 900; color: #059669; height: 54px; transition: 0.2s;">
+                    </div>
+                    
+                    <div class="form-group" id="wrap-donasi-barang-ket" style="display: none; margin-bottom: 24px;">
+                        <label style="font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase;">Rincian Barang <span style="color:var(--danger)">*</span></label>
+                        <textarea id="donasi-barang-ket" rows="4" placeholder="Ketik rincian menurun ke bawah...&#10;(Gunakan tombol Enter untuk ganti baris)" style="font-size: 13px; font-weight: 700; border-color: var(--primary); border-radius: 12px; padding: 14px; resize: none; line-height: 1.5;"></textarea>
                     </div>
 
                     <button class="btn no-select" id="btn-rapid-save" style="width: 100%; padding: 16px; font-size: 14px; font-weight: 900; background: #10B981; color: white; box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);" onclick="executeDonasiRapid(this)">SIMPAN DONASI</button>
@@ -7730,8 +7933,8 @@
                 if(document.getElementById('trx-keluar-tipe-btn')) document.getElementById('trx-keluar-tipe-btn').innerText = 'Selesai (Lunas)';
                 toggleUangMukaNama();
 
-                let kStr = tipe === 'masuk' ? getSetting('kat_masuk', 'Donasi, Sponsor,') : getSetting('kat_keluar', 'Operasional, Konsumsi, HUT RI');
-                let kArr = kStr.split(',').map(s=>s.trim());
+                let kStr = tipe === 'masuk' ? getSetting('kat_masuk', 'Donasi\nSponsor') : getSetting('kat_keluar', 'Operasional\nKonsumsi\nHUT RI');
+                let kArr = kStr.split(/\n|,/).map(s=>s.trim()).filter(s=>s!=='');
                 let cHtml = '';
                 kArr.forEach(k => { if(k) cHtml += `<div class="chip no-select" onclick="selTrxKat(this, this.innerText)">${esc(k)}</div>`; });
                 document.getElementById('trx-kats').innerHTML = cHtml;
@@ -8354,12 +8557,43 @@
                             </div>
                         </div>
                     </div>`;
+
+                } else if (tipe === 'DOORPRIZE') {
+                    // TABEL KHUSUS DOOR PRIZE TANPA NOMINAL UANG
+                    title = 'RINCIAN DOOR PRIZE (BARANG)';
+                    let dpTrx = state.trx.filter(t => !t.is_deleted && t.id_event === idEvent && String(t.ket).includes('[DOORPRIZE]'));
+                    dpTrx.sort((a,b) => b.ts - a.ts);
+                    
+                    if (dpTrx.length === 0) html = '<div style="font-size:11px; color:var(--text-muted); text-align:center;">Belum ada warga yang mengumpulkan Door Prize.</div>';
+                    
+                    dpTrx.forEach(t => {
+                        let dDate = new Date(t.ts).toLocaleDateString('id-ID');
+                        
+                        // Ekstraksi Parsing Natura: [DOORPRIZE] Donasi Dari: Ibu A | Rincian: Kipas
+                        let rawKet = String(t.ket).replace(/\[DOORPRIZE\]\s*/i, '').replace(/^Donasi Dari:\s*/i, '');
+                        let namaDp = rawKet.split('|')[0].trim();
+                        let wujudDp = rawKet.includes('|') ? rawKet.split('|')[1].replace('Rincian:', '').trim() : '-';
+                        
+                        // Smart Parser: Ubah data lama yang menyamping menjadi vertikal ke bawah
+                        wujudDp = wujudDp.replace(/(?:\s*•\s*|\s*\/\s*)/g, '\n• ').replace(/^\n/, '');
+
+                        html += `
+                        <div style="display:flex; flex-direction:column; padding: 12px; background: #FAF5FF; border: 1px solid #E9D5FF; border-radius: 12px; margin-bottom: 10px;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
+                                <div style="font-size:13px; font-weight:900; color:#7E22CE;">${esc(namaDp)}</div>
+                                <div style="font-size:9.5px; font-weight:700; color:#A855F7;">${dDate}</div>
+                            </div>
+                            <div style="font-size:11.5px; font-weight:800; color:#9333EA; padding: 8px; background: #F3E8FF; border-radius: 8px; border-left: 3px solid #7E22CE; white-space: pre-wrap; word-break: break-word; line-height: 1.6;">🎁 Rincian:<br>${esc(wujudDp)}</div>
+                        </div>`;
+                    });
+
                 } else {
 
                     title = tipe === 'TERKUMPUL' ? 'RINCIAN DANA TERKUMPUL' : 'RINCIAN BIAYA TERPAKAI';
                     let listTrx = [];
                     if (tipe === 'TERKUMPUL') {
-                        listTrx = state.trx.filter(t => !t.is_deleted && t.id_event === idEvent && (t.tipe === 'masuk' || t.tipe === 'iuran') && t.kat !== 'Transfer Internal' && t.kat !== 'Sisa Uang Muka');
+                        // SURGICAL FIX: Filter Natura dari Uang Riil agar total Sinkron dengan Saldo
+                        listTrx = state.trx.filter(t => !t.is_deleted && t.id_event === idEvent && (t.tipe === 'masuk' || t.tipe === 'iuran') && t.kat !== 'Transfer Internal' && t.kat !== 'Sisa Uang Muka' && !String(t.ket).includes('[DOORPRIZE]') && !String(t.ket).includes('[SPONSOR-BARANG]'));
                     } else {
                         listTrx = state.trx.filter(t => !t.is_deleted && t.id_event === idEvent && t.tipe === 'keluar' && t.kat !== 'Transfer Internal' && t.kat !== 'Uang Muka Kegiatan');
                     }
@@ -8382,7 +8616,7 @@
                         </div>`;
                     });
                 }
-                
+               
                 document.getElementById('drill-title').innerText = title;
                 document.getElementById('drill-list').innerHTML = html;
                 
@@ -8775,28 +9009,52 @@
                 let isWarga = segWarga ? segWarga.classList.contains('active') : true;
                 let idAg = activeModal.querySelector('#donasi-warga-val') ? activeModal.querySelector('#donasi-warga-val').value : '';
                 let namaLuar = activeModal.querySelector('#donasi-luar-val') ? activeModal.querySelector('#donasi-luar-val').value.trim() : '';
+                
+                let isBarang = activeModal.querySelector('#donasi-bentuk-val') && activeModal.querySelector('#donasi-bentuk-val').value === 'barang';
+                let ketBarang = activeModal.querySelector('#donasi-barang-ket') ? activeModal.querySelector('#donasi-barang-ket').value.trim() : '';
+                
                 let nomStr = activeModal.querySelector('#donasi-nom') ? activeModal.querySelector('#donasi-nom').value : '0';
-                let nom = parseInt(String(nomStr).replace(/\D/g, ''), 10) || 0;
+                let nom = isBarang ? 0 : (parseInt(String(nomStr).replace(/\D/g, ''), 10) || 0);
                 let evId = activeModal.querySelector('#donasi-event-id') ? activeModal.querySelector('#donasi-event-id').value : '';
 
-                if(nom <= 0) return showToast("Masukkan nominal valid.");
                 if(isWarga && !idAg) return showToast("Pilih anggota yang berdonasi.");
                 if(!isWarga && !namaLuar) return showToast("Ketik nama donatur.");
+                
+                // BYPASS VALIDASI MUTLAK JIKA BARANG
+                if(isBarang) {
+                    if(!ketBarang) return showToast("Ketik rincian barang/door prize yang disumbangkan.");
+                } else {
+                    if(nom <= 0) return showToast("Masukkan nominal uang tunai yang valid.");
+                }
 
                 let oldText = btn ? btn.innerHTML : 'SIMPAN DONASI';
                 if(btn) { btn.disabled = true; btn.innerHTML = 'MEMPROSES...'; }
                 window.isProcessingTransaction = true;
 
                 try {
+
                     let evData = state.event.find(e => e.id === evId);
                     let targetDompet = (evData && evData.id_dompet_default) ? evData.id_dompet_default : 'DP-UTAMA';
                     
-                    // Baca Mode (Sponsor / Donasi) dari tombol
-                    let entryMode = btnElement.dataset.mode || 'donasi';
+                    // Baca Mode (Sponsor / Donasi) dari Saklar UI (Manual Override)
+                    let klasifikasiInput = activeModal.querySelector('#donasi-klasifikasi-val');
+                    let entryMode = klasifikasiInput ? klasifikasiInput.value : (btnElement.dataset.mode || 'donasi');
+                    
                     let namaPenyumbang = isWarga ? (state.anggota.find(a=>a.id===idAg)?.nama || 'Anggota') : namaLuar;
                     
-                    let ket = entryMode === 'sponsor' ? `Sponsor Dari: ${namaPenyumbang}` : `Donasi Dari: ${namaPenyumbang}`;
+                    let ket = '';
                     let katFix = entryMode === 'sponsor' ? 'Sponsorship' : 'Donasi Acara';
+
+                    // THE NATURA INJECTION ALGORITHM
+                    if (isBarang) {
+                        if (entryMode === 'sponsor') {
+                            ket = `[SPONSOR-BARANG] Sponsor Dari: ${namaPenyumbang} | Rincian: ${ketBarang}`;
+                        } else {
+                            ket = `[DOORPRIZE] Donasi Dari: ${namaPenyumbang} | Rincian: ${ketBarang}`;
+                        }
+                    } else {
+                        ket = entryMode === 'sponsor' ? `Sponsor Dari: ${namaPenyumbang}` : `Donasi Dari: ${namaPenyumbang}`;
+                    }
 
                     let trx = {
                         id: genID('TX'), 
@@ -8807,7 +9065,7 @@
                     };
                     await saveStore('trx', trx); state.trx.unshift(trx);
                     
-                    showToast("Donasi Berhasil Dicatat!");
+                    showToast(isBarang ? "Sumbangan Barang Berhasil Dicatat!" : "Donasi Uang Berhasil Dicatat!");
                     activeModal.style.display = 'none'; document.body.classList.remove('modal-open');
                     
                     if(typeof updateDashboard === 'function') updateDashboard(); 
@@ -8928,18 +9186,29 @@
                 // Kita gunakan atribut custom dataset untuk membawa state mode (donasi / sponsor) ke tombol eksekusi
                 document.getElementById('btn-rapid-save').dataset.mode = mode;
                 
-                // Ubah Judul Modal agar sesuai dengan konteks
+                // Ubah Judul Modal agar sesuai dengan konteks (Door Prize disembunyikan dalam mode Donasi)
                 let judulModal = document.querySelector('#mod-donasi-rapid h3');
                 if (judulModal) {
-                    judulModal.innerText = mode === 'sponsor' ? 'Sponsor / Subsidi Acara' : 'Donasi Program Acara';
-                    judulModal.style.color = mode === 'sponsor' ? '#059669' : '#059669'; // Tetap hijau
+                    judulModal.innerText = mode === 'sponsor' ? 'Sponsor / Subsidi Acara' : 'Donasi / Door Prize Acara';
+                    judulModal.style.color = '#059669'; 
                 }
 
+                // Reset Kognitif UI Modal
                 document.getElementById('donasi-warga-val').value = '';
                 document.getElementById('donasi-warga-btn').innerText = '-- Pilih Nama --';
                 document.getElementById('donasi-luar-val').value = '';
-                document.getElementById('donasi-nom').value = '';
+                document.getElementById('donasi-barang-ket').value = '';
+                document.getElementById('seg-bentuk-uang').click(); // Kembalikan ke mode Uang Tunai
+                
+                // Set default toggle klasifikasi sesuai dengan mode pemicu
+                if (mode === 'sponsor') {
+                    document.getElementById('seg-klasifikasi-sponsor').click();
+                } else {
+                    document.getElementById('seg-klasifikasi-donasi').click();
+                }
+                
                 toggleSegDonasi('warga');
+                
                 let modEl = document.getElementById('mod-donasi-rapid');
                 if (modEl) document.body.appendChild(modEl);
                 openModal('mod-donasi-rapid');
@@ -9106,8 +9375,8 @@
                         payload.settings = {
                             ticker_msg: getSetting('ticker_msg', ''),
                             iuran_nom: getSetting('iuran_nom', 10000),
-                            kat_masuk: getSetting('kat_masuk', 'Donasi, Sponsor,'),
-                            kat_keluar: getSetting('kat_keluar', 'Operasional, Konsumsi, HUT RI'),
+                            kat_masuk: getSetting('kat_masuk', 'Donasi\nSponsor'),
+                            kat_keluar: getSetting('kat_keluar', 'Operasional\nKonsumsi\nHUT RI'),
                             kiosk_pin: getSetting('kiosk_pin', btoa('170823'))
                         };
                     }
@@ -9304,6 +9573,9 @@
 
                         eTrx.forEach(t => {
                         if (t.kat === 'Transfer Internal' || t.kat === 'Uang Muka Kegiatan' || t.kat === 'Sisa Uang Muka') return;
+                        
+                        let isNaturaPDF = String(t.ket).includes('[DOORPRIZE]') || String(t.ket).includes('[SPONSOR-BARANG]');
+                        
                         let rIn = (t.tipe === 'masuk') ? t.nom_final : 0;
                         let rOut = (t.tipe === 'keluar') ? (t.status === 'pending' || t.status === 'talangan' ? t.nom_awal : t.nom_final) : 0;
                         eIn += rIn; eOut += rOut;
@@ -9312,10 +9584,13 @@
                         let tg = `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`;
                         let pen = t.status === 'pending' ? ' <b style="color:#92400e;">[Nota Uang Muka]</b>' : (t.status === 'talangan' ? ` <br><i style="color:#b45309; font-size: 11px;">(Status: Ditalangi Anggota Rp ${fmtRp(t.nom_awal)})</i>` : '');
                         
+                        // Render Value untuk Kolom LPJ (Angka Rp jika uang, 'Barang / Natura' jika non-tunai)
+                        let textInPrint = isNaturaPDF ? '<i>Barang / Natura</i>' : (rIn > 0 ? 'Rp '+fmtRp(rIn) : '-');
+                        
                         eRows += `<tr>
                             <td style="padding:6px; border:1px solid #000; text-align:center;">${tg}</td>
                             <td style="padding:6px; border:1px solid #000;">${esc(t.ket)}${pen}</td>
-                            <td style="padding:6px; border:1px solid #000; text-align:right;">${rIn > 0 ? 'Rp '+fmtRp(rIn) : '-'}</td>
+                            <td style="padding:6px; border:1px solid #000; text-align:right;">${textInPrint}</td>
                             <td style="padding:6px; border:1px solid #000; text-align:right;">${rOut > 0 ? 'Rp '+fmtRp(rOut) : '-'}</td>
                         </tr>`;
                     });
