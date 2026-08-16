@@ -1512,33 +1512,45 @@
                 <div style="font-size: 11px; font-weight: 800; color: #94A3B8; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> STATISTIK KEUANGAN
                 </div>
-                <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; box-shadow: var(--shadow-sm); padding: 20px; display: grid; grid-template-columns: 1fr; gap: 16px;">
-                    <div style="display:flex; align-items:center; gap: 14px;">
-                        <div style="width:40px; height:40px; background:#ECFDF5; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#059669;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; box-shadow: var(--shadow-sm); padding: 12px; display: flex; flex-direction: column; gap: 4px;">
+                    
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding: 12px; border-radius: 12px; cursor: pointer; transition: 0.2s;" onclick="pulseHaptic('light'); window.openDetailStatistik('dana')" onmousedown="this.style.background='var(--surface-hover)'; this.style.transform='scale(0.98)'" onmouseup="this.style.background='transparent'; this.style.transform='scale(1)'" ontouchstart="this.style.background='var(--surface-hover)'; this.style.transform='scale(0.98)'" ontouchend="this.style.background='transparent'; this.style.transform='scale(1)'">
+                        <div style="display:flex; align-items:center; gap: 14px;">
+                            <div style="width:40px; height:40px; background:#ECFDF5; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#059669; flex-shrink: 0;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            </div>
+                            <div>
+                                <div style="font-size:10px; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:2px; letter-spacing: 0.5px;">Dana Terkelola</div>
+                                <div style="font-size:16px; font-weight:900; color:var(--text-main); letter-spacing: -0.5px;">Rp ${fmtRp(tDana)}</div>
+                            </div>
                         </div>
-                        <div>
-                            <div style="font-size:10px; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:2px;">Dana Terkelola</div>
-                            <div style="font-size:16px; font-weight:900; color:var(--text-main);">Rp ${fmtRp(tDana)}</div>
-                        </div>
+                        <div style="color: #CBD5E1;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg></div>
                     </div>
-                    <div style="display:flex; align-items:center; gap: 14px;">
-                        <div style="width:40px; height:40px; background:#EFF6FF; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#2563EB;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding: 12px; border-radius: 12px; cursor: pointer; transition: 0.2s;" onclick="pulseHaptic('light'); window.openDetailStatistik('program')" onmousedown="this.style.background='var(--surface-hover)'; this.style.transform='scale(0.98)'" onmouseup="this.style.background='transparent'; this.style.transform='scale(1)'" ontouchstart="this.style.background='var(--surface-hover)'; this.style.transform='scale(0.98)'" ontouchend="this.style.background='transparent'; this.style.transform='scale(1)'">
+                        <div style="display:flex; align-items:center; gap: 14px;">
+                            <div style="width:40px; height:40px; background:#EFF6FF; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#2563EB; flex-shrink: 0;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                            </div>
+                            <div>
+                                <div style="font-size:10px; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:2px; letter-spacing: 0.5px;">Program Sukses</div>
+                                <div style="font-size:16px; font-weight:900; color:var(--text-main); letter-spacing: -0.5px;">${pSukses} Kegiatan</div>
+                            </div>
                         </div>
-                        <div>
-                            <div style="font-size:10px; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:2px;">Program Sukses</div>
-                            <div style="font-size:16px; font-weight:900; color:var(--text-main);">${pSukses} Kegiatan</div>
-                        </div>
+                        <div style="color: #CBD5E1;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg></div>
                     </div>
-                    <div style="display:flex; align-items:center; gap: 14px;">
-                        <div style="width:40px; height:40px; background:#FFFBEB; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#D97706;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding: 12px; border-radius: 12px; cursor: pointer; transition: 0.2s;" onclick="pulseHaptic('light'); window.openDetailStatistik('pasukan')" onmousedown="this.style.background='var(--surface-hover)'; this.style.transform='scale(0.98)'" onmouseup="this.style.background='transparent'; this.style.transform='scale(1)'" ontouchstart="this.style.background='var(--surface-hover)'; this.style.transform='scale(0.98)'" ontouchend="this.style.background='transparent'; this.style.transform='scale(1)'">
+                        <div style="display:flex; align-items:center; gap: 14px;">
+                            <div style="width:40px; height:40px; background:#FFFBEB; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#D97706; flex-shrink: 0;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            </div>
+                            <div>
+                                <div style="font-size:10px; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:2px; letter-spacing: 0.5px;">Pasukan NAVASENA</div>
+                                <div style="font-size:16px; font-weight:900; color:var(--text-main); letter-spacing: -0.5px;">${sdm} Anggota Terdaftar</div>
+                            </div>
                         </div>
-                        <div>
-                            <div style="font-size:10px; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:2px;">Pasukan NAVASENA</div>
-                            <div style="font-size:16px; font-weight:900; color:var(--text-main);">${sdm} Anggota Terdaftar</div>
-                        </div>
+                        <div style="color: #CBD5E1;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg></div>
                     </div>
                 </div>`;
                 madingEl.style.display = 'block';
@@ -2984,7 +2996,8 @@
                                     let t_update = {...(originalDbTrx || tTarget), is_deleted: true};
                                     await saveStore('trx', t_update);
                                     
-                                    state.trx[idx] = t_update;
+                                    let safeIdx = state.trx.findIndex(t => t.id === tTarget.id);
+                                    if(safeIdx > -1) state.trx[safeIdx] = t_update;
 
                                     // --- THE SHADOW ENTITY SYNCHRONIZER (MENGEMBALIKAN PIUTANG INVOICE) ---
                                     if (tTarget.tipe === 'masuk' && tTarget.kat === 'Pembayaran Program' && String(tTarget.ket).includes('[ID:PST-')) {
@@ -3268,7 +3281,8 @@
                                     let updatedTrx = {...(originalDbTrx || state.trx[idx]), is_deleted: true};
                                     await saveStore('trx', updatedTrx);
                                     
-                                    state.trx[idx] = updatedTrx;
+                                    let safeIdxTrx = state.trx.findIndex(t => t.id === idTrx);
+                                    if(safeIdxTrx > -1) state.trx[safeIdxTrx] = updatedTrx;
                                     
                                     if(navigator.vibrate) navigator.vibrate(20);
                                     
@@ -5691,7 +5705,9 @@
                             });
 
                             // Sinkronisasi Memori RAM
-                            state.event[idx] = ev_update;
+                            let safeEvIdx = state.event.findIndex(e => e.id === id);
+                            if(safeEvIdx > -1) state.event[safeEvIdx] = ev_update;
+                            
                             trxsToSave.forEach(t => state.trx.unshift(t));
                             if (dompetToArchive) {
                                 let dIdx = state.dompet.findIndex(d => d.id === dompetToArchive.id);
@@ -6012,7 +6028,8 @@
                         let t_update = {...(originalDbTrx || targetTrx), is_deleted: false};
                         await saveStore('trx', t_update);
                         
-                        state.trx[idx] = t_update;
+                        let safeIdxRestore = state.trx.findIndex(t => t.id === id);
+                        if(safeIdxRestore > -1) state.trx[safeIdxRestore] = t_update;
 
                         // --- THE SHADOW ENTITY SYNCHRONIZER (PEMULIHAN PIUTANG INVOICE) ---
                         if (t_update.tipe === 'masuk' && t_update.kat === 'Pembayaran Program' && String(t_update.ket).includes('[ID:PST-')) {
@@ -7100,8 +7117,13 @@
                                     </div>
                                     <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-adm-5" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
                                 </div>
+
                                 <div id="tut-adm-5" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12.5px; color: var(--text-main); line-height: 1.5;">
+                                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                            <div style="color: #10B981; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+                                            <div><b>[FITUR PUBLIK] Mading Statistik Interaktif:</b> Panel statistik di halaman Profil Publik kini bisa diklik oleh Warga untuk membedah transparansi rincian Dana Terkelola dan Program Sukses yang Anda input di sistem ini.</div>
+                                        </div>
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
                                             <div style="color: #64748B; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
                                             <div><b>[KLIK] Ganti Logo:</b> Sentuh avatar bundar "N" di atas untuk mengganti logo organisasi (Maks 5MB).</div>
@@ -7292,8 +7314,13 @@
                                     </div>
                                     <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-ang-5" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
                                 </div>
+
                                 <div id="tut-ang-5" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12.5px; color: var(--text-main); line-height: 1.5;">
+                                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                            <div style="color: #10B981; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+                                            <div><b>[FITUR PUBLIK] Mading Statistik Interaktif:</b> Saat Anda di mode Warga (Keluar/Logout), panel statistik di halaman Profil bisa diklik untuk membedah transparansi rincian Dana Terkelola dan Program Sukses.</div>
+                                        </div>
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
                                             <div style="color: var(--danger); padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
                                             <div><b>[LIHAT] Executive Billing:</b> Panel raksasa berwarna merah yang akan otomatis muncul di bawah KTA Anda jika Anda punya utang tagihan kas.</div>
@@ -7465,11 +7492,12 @@
                                     </div>
                                     <div style="color: var(--text-muted); display: flex; align-items: center;"><svg id="ic-wrg-5" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg></div>
                                 </div>
+
                                 <div id="tut-wrg-5" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12.5px; color: var(--text-main); line-height: 1.5;">
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
-                                            <div style="color: #10B981; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-                                            <div><b>[LIHAT] Mading Statistik Keuangan:</b> Menampilkan rangkuman persentase keberhasilan organisasi (Dana Terkelola, Program Sukses).</div>
+                                            <div style="color: #10B981; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+                                            <div><b>[KLIK] Mading Statistik Keuangan:</b> Sentuh kotak "Dana Terkelola", "Program Sukses", atau "Pasukan Navasena" untuk membongkar rinciannya secara transparan dan interaktif.</div>
                                         </div>
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
                                             <div style="color: #F59E0B; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
@@ -7553,6 +7581,17 @@
                         <h3 id="drill-title" style="font-size: 16px; font-weight: 900; text-transform: uppercase; color: var(--primary); padding-right: 24px; line-height: 1.4;">RINCIAN DATA</h3>
                     </div>
                     <div id="drill-list" style="padding: 20px;"></div>
+                </div>
+            </div>
+
+            <!-- MODAL STATISTIK KEUANGAN DETAIL (WARGA) -->
+            <div id="mod-statistik-detail" class="modal">
+                <div class="modal-box" style="background: var(--bg); padding: 0; display: flex; flex-direction: column; max-height: 85vh;">
+                    <div style="background: var(--surface); padding: 20px; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border); border-radius: 24px 24px 0 0;">
+                        <button class="close-modal" style="top: 16px;" onclick="closeModal('mod-statistik-detail')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                        <h3 id="stat-detail-title" style="font-size: 16px; font-weight: 900; text-transform: uppercase; color: var(--primary); padding-right: 24px; line-height: 1.4; display: flex; align-items: center; gap: 8px;">RINCIAN DATA</h3>
+                    </div>
+                    <div id="stat-detail-list" style="padding: 20px; overflow-y: auto; flex: 1;"></div>
                 </div>
             </div>
 
@@ -8218,7 +8257,8 @@
                         });
 
                         localStorage.setItem('nav_unsynced', 'true');
-                        state.trx[idx] = t_update;
+                        let safeIdxTalangan = state.trx.findIndex(x => x.id === id);
+                        if(safeIdxTalangan > -1) state.trx[safeIdxTalangan] = t_update;
                         state.trx.unshift(t_baru);
                     } else {
                         // THE ARCHITECT BULLETPROOF SETTLEMENT (PENDING / UANG MUKA)
@@ -8252,7 +8292,8 @@
                         });
 
                         localStorage.setItem('nav_unsynced', 'true');
-                        state.trx[idx] = t_update;
+                        let safeIdxPending = state.trx.findIndex(x => x.id === id);
+                        if(safeIdxPending > -1) state.trx[safeIdxPending] = t_update;
                         if (trxToSave.length > 1) {
                             state.trx.unshift(trxToSave[1]);
                         }
@@ -8472,7 +8513,10 @@
                     
                     localStorage.setItem('nav_unsynced', 'true');
                     trxToSave.forEach(t => state.trx.unshift(t));
-                    if (dUpdate) state.dompet[idxD] = dUpdate;
+                    if (dUpdate) {
+                        let safeIdxD = state.dompet.findIndex(d => d.id === idDompet);
+                        if(safeIdxD > -1) state.dompet[safeIdxD] = dUpdate;
+                    }
                     
                     showToast("LPJ Ditutup sesuai rekapan nota aktual.");
                     closeModal('mod-smart-lpj'); 
@@ -8674,6 +8718,160 @@
 
                 openModal('mod-drilldown');
             }
+
+            window.openDetailStatistik = function(tipe) {
+                let titleEl = document.getElementById('stat-detail-title');
+                let listEl = document.getElementById('stat-detail-list');
+                if(!titleEl || !listEl) return;
+
+                let html = '';
+
+                if (tipe === 'dana') {
+                    titleEl.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> <span style="color:#059669;">RINCIAN DANA TERKELOLA</span>`;
+                    
+                    let tIuran = 0, tDonasi = 0, tSaldoAwal = 0;
+                    state.trx.forEach(t => {
+                        if(!t.is_deleted && (t.tipe === 'masuk' || t.tipe === 'iuran') && t.kat !== 'Transfer Internal' && t.kat !== 'Sisa Uang Muka' && !(t.ket||'').includes('Koreksi Saldo')) {
+                            if (t.tipe === 'iuran') tIuran += t.nom_final;
+                            else if (t.kat === 'Saldo Awal') tSaldoAwal += t.nom_final;
+                            else tDonasi += t.nom_final;
+                        }
+                    });
+
+                    let tTotal = tIuran + tDonasi + tSaldoAwal;
+
+                    html = `
+                    <div style="background: #ECFDF5; border: 1.5px solid #A7F3D0; border-radius: 16px; padding: 20px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.1);">
+                        <div style="font-size: 11px; font-weight: 800; color: #047857; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px;">TOTAL DANA MASUK</div>
+                        <div style="font-size: 28px; font-weight: 900; color: #065F46; letter-spacing: -1px;">Rp ${fmtRp(tTotal)}</div>
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <div style="background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: 14px; display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; padding-right: 8px;">
+                                <div style="width: 36px; height: 36px; background: #EFF6FF; color: #2563EB; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                                </div>
+                                <div style="flex: 1; min-width: 0;">
+                                    <div style="font-size: 12px; font-weight: 900; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Iuran Wajib</div>
+                                    <div style="font-size: 10px; font-weight: 700; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Anggota NAVASENA</div>
+                                </div>
+                            </div>
+                            <div style="font-size: 14px; font-weight: 900; color: #2563EB; flex-shrink: 0; white-space: nowrap; word-break: keep-all; min-width: max-content; text-align: right;">Rp&nbsp;${fmtRp(tIuran)}</div>
+                        </div>
+
+                        <div style="background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: 14px; display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; padding-right: 8px;">
+                                <div style="width: 36px; height: 36px; background: #FEF3C7; color: #D97706; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                                </div>
+                                <div style="flex: 1; min-width: 0;">
+                                    <div style="font-size: 12px; font-weight: 900; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Total Donasi</div>
+                                    <div style="font-size: 10px; font-weight: 700; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Publik & Sponsor</div>
+                                </div>
+                            </div>
+                            <div style="font-size: 14px; font-weight: 900; color: #D97706; flex-shrink: 0; white-space: nowrap; word-break: keep-all; min-width: max-content; text-align: right;">Rp&nbsp;${fmtRp(tDonasi)}</div>
+                        </div>
+
+                        ${tSaldoAwal > 0 ? `
+                        <div style="background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: 14px; display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; padding-right: 8px;">
+                                <div style="width: 36px; height: 36px; background: #F1F5F9; color: #64748B; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M22 10v4"/><circle cx="18" cy="12" r="1"/></svg>
+                                </div>
+                                <div style="flex: 1; min-width: 0;">
+                                    <div style="font-size: 12px; font-weight: 900; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Saldo Awal / Pindahan</div>
+                                    <div style="font-size: 10px; font-weight: 700; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Limpahan dari pembukuan lama</div>
+                                </div>
+                            </div>
+                            <div style="font-size: 14px; font-weight: 900; color: #64748B; flex-shrink: 0; white-space: nowrap; word-break: keep-all; min-width: max-content; text-align: right;">Rp&nbsp;${fmtRp(tSaldoAwal)}</div>
+                        </div>` : ''}
+                    </div>`;
+
+                } else if (tipe === 'program') {
+                    titleEl.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> <span style="color:#2563EB;">DAFTAR PROGRAM SUKSES</span>`;
+                    
+                    let arrArc = state.event.filter(e => e.status === 'arsip');
+                    
+                    if (arrArc.length === 0) {
+                        html = '<div style="text-align:center; padding: 40px 20px; color:var(--text-muted); font-size:13px; border: 1.5px dashed var(--border); border-radius: 12px;">Belum ada program acara yang selesai & diarsipkan.</div>';
+                    } else {
+                        html = `<div style="display:flex; flex-direction:column; gap:12px;">`;
+                        arrArc.forEach(ev => {
+                            let eOut = 0;
+                            state.trx.forEach(t => {
+                                if (!t.is_deleted && t.id_event === ev.id && t.tipe === 'keluar' && t.kat !== 'Transfer Internal' && t.kat !== 'Uang Muka Kegiatan') {
+                                    eOut += (t.status === 'pending' || t.status === 'talangan' ? t.nom_awal : t.nom_final);
+                                }
+                            });
+                            
+                            let rawSifat = (ev.sifat || 'publik').toLowerCase();
+                            let sBadge = rawSifat === 'internal' ? '<span style="background:#EFF6FF; color:#1D4ED8; padding:4px 8px; border-radius:6px; font-size:9px; font-weight: 900; border:1px solid #BFDBFE;">INTERNAL</span>' : (rawSifat === 'hybrid' ? '<span style="background:#FAF5FF; color:#7E22CE; padding:4px 8px; border-radius:6px; font-size:9px; font-weight: 900; border:1px solid #E9D5FF;">HYBRID</span>' : '<span style="background:#F0FDF4; color:#15803D; padding:4px 8px; border-radius:6px; font-size:9px; font-weight: 900; border:1px solid #BBF7D0;">PUBLIK</span>');
+
+                            html += `
+                            <div style="background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: 14px; box-shadow: var(--shadow-sm);">
+                                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 12px;">
+                                    <div style="font-size:13px; font-weight:900; color:var(--text-main); flex:1; padding-right:12px; line-height: 1.4;">${esc(ev.nama)}</div>
+                                    <div style="flex-shrink:0;">${sBadge}</div>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; padding-top:12px; border-top: 1px dashed var(--border);">
+                                    <div style="font-size:10px; font-weight:800; color:var(--text-muted); text-transform:uppercase; display:flex; align-items:center; gap:6px;">
+                                        <div style="background: #FEE2E2; color: #DC2626; width: 20px; height: 20px; border-radius: 6px; display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg></div>
+                                        Dana Terserap
+                                    </div>
+                                    <div style="font-size:14px; font-weight:900; color:#DC2626; letter-spacing: -0.5px;">Rp ${fmtRp(eOut)}</div>
+                                </div>
+                            </div>`;
+                        });
+                        html += `</div>`;
+                    }
+
+                } else if (tipe === 'pasukan') {
+                    titleEl.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> <span style="color:#D97706;">STRUKTUR PASUKAN NAVASENA</span>`;
+                    
+                    let sortedAnggota = [...state.anggota].sort((a,b) => (b.xp_total || 0) - (a.xp_total || 0));
+                    
+                    if (sortedAnggota.length === 0) {
+                        html = '<div style="text-align:center; padding: 40px 20px; color:var(--text-muted); font-size:13px; border: 1.5px dashed var(--border); border-radius: 12px;">Belum ada anggota terdaftar.</div>';
+                    } else {
+                        html = `<div style="display:flex; flex-direction:column; gap:12px;">`;
+                        let jArrList = getSetting('jabatan_list', 'Ketum NAVASENA\nSekretaris Jenderal\nBendahara Umum\nKoordinator Humas\nAdmin Medsos').split(/\n|,/).map(s=>s.replace(/\s+/g, ' ').trim().toLowerCase());
+
+                        sortedAnggota.forEach(ag => {
+                            let isCustom = ag.label && !jArrList.includes(ag.label.replace(/\s+/g, ' ').trim().toLowerCase());
+                            let isDev = ag.label && /developer|architect|creator/i.test(ag.label.trim());
+                            
+                            let badgeLabel = '';
+                            if (ag.label) {
+                                if (isDev) {
+                                    badgeLabel = `<div class="dev-badge-box" style="margin-left: 0; margin-top: 6px;"><span class="dev-badge-text">${esc(ag.label).toUpperCase()}</span></div>`;
+                                } else {
+                                    let badgeStyle = isCustom 
+                                        ? 'background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%); color: #FFFFFF; border: 1px solid rgba(239, 68, 68, 0.5);'
+                                        : 'background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%); color: #FFFFFF; border: 1px solid rgba(56, 189, 248, 0.4);';
+                                    badgeLabel = `<div style="font-size: 8.5px; font-weight: 900; letter-spacing: 0.8px; ${badgeStyle} padding: 4px 8px; border-radius: 8px; display: inline-block; margin-top: 6px;">${esc(ag.label).toUpperCase()}</div>`;
+                                }
+                            }
+                            
+                            let rClass = ag.rank_class || 'r-warrior'; 
+
+                            html += `
+                            <div style="background: var(--surface); border: 1px solid var(--border); padding: 14px 16px; border-radius: 14px; display: flex; align-items: center; gap: 14px; box-shadow: var(--shadow-sm);">
+                                <div class="rank-shield ${rClass}" style="width: 44px; height: 44px; flex-shrink: 0; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));"></div>
+                                <div style="flex: 1; min-width: 0;">
+                                    <div style="font-size:14px; font-weight:900; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(ag.nama)}</div>
+                                    <div style="font-size:10px; font-weight:800; color:var(--text-muted); margin-top: 2px;">RANK: <span style="color:var(--primary); font-weight:900;">${ag.rank_name || 'WARRIOR'}</span></div>
+                                    ${badgeLabel}
+                                </div>
+                            </div>`;
+                        });
+                        html += `</div>`;
+                    }
+                }
+
+                listEl.innerHTML = html;
+                openModal('mod-statistik-detail');
+            };
 
             // --- THE SHADOW ENTITY PROTOCOL (PESERTA SYSTEM) ---
             window.openKelolaPeserta = function(idEvent) {
@@ -10034,8 +10232,19 @@
                 s1.innerHTML = '<div style="transform:scale(1.1); pointer-events:none; display:flex; flex-direction:column; align-items:center;">' + mvpHtml + '</div>';
                
                 // Slide 2: Log Transaksi Vertikal
-                // SURGICAL FIX: Sembunyikan tipe 'peserta' (Invoice/Tagihan) agar tidak bocor ke Log Mutasi Kas
-                let recentTrx = state.trx.filter(t => !t.is_deleted && t.tipe !== 'peserta').slice(0, 3);
+                // SURGICAL FIX: Sembunyikan mutasi sistem (Internal, Uang Muka, Talangan) agar warga tidak bingung. Hanya tampilkan transaksi riil.
+                let recentTrx = state.trx.filter(t => {
+                    if (t.is_deleted || t.tipe === 'peserta') return false;
+                    
+                    let kat = t.kat || '';
+                    let ket = t.ket || '';
+                    
+                    // THE PUBLIC SHIELD: Blokir semua istilah akuntansi ganda / mutasi internal
+                    if (kat === 'Transfer Internal' || kat === 'Uang Muka Kegiatan' || kat === 'Sisa Uang Muka' || kat === 'Saldo Awal') return false;
+                    if (ket.includes('[Dialihkan ke Nota Baru]') || ket.includes('Penyelesaian Talangan:') || ket.includes('Reimburse Nombok')) return false;
+                    
+                    return true;
+                }).slice(0, 3);
 
                     let trxHtml = '';
 
@@ -10046,8 +10255,22 @@
                         let nm = t.status === 'pending' ? t.nom_awal : t.nom_final;
                         let colorAmt = isM ? '#10B981' : '#EF4444';
                         
-                        // INJEKSI SMART PARSER: Membunuh semua System Tags (seperti [ID:PST-...], dll) murni untuk UI Screensaver
-                        let cleanKet = String(t.ket || '').replace(/\[.*?\]/g, '').replace(/\s+/g, ' ').trim();
+                        // THE NATURA DETECTOR: Deteksi apakah sumbangan ini berbentuk barang
+                        let isNatura = String(t.ket || '').includes('[DOORPRIZE]') || String(t.ket || '').includes('[SPONSOR-BARANG]');
+                        let amtRender = isNatura 
+                            ? `<span style="font-size:10px; font-weight:800; color:#94A3B8; background:rgba(255,255,255,0.1); padding:4px 8px; border-radius:6px; border:1px solid rgba(255,255,255,0.2);">WUJUD BARANG</span>` 
+                            : `Rp ${fmtRp(nm)}`;
+                        
+                        // INJEKSI SMART PARSER: Membunuh semua System Tags & Jargon Akuntansi agar mudah dibaca warga
+                        let cleanKet = String(t.ket || '')
+                            .split('|')[0] // THE NATURA SILENCER: Potong dan buang semua rincian barang setelah tanda pipa (|)
+                            .replace(/\[.*?\]/g, '') // Hapus tag sistem seperti [ID:...] atau [TALANGAN LUNAS...]
+                            .replace(/^Pengeluaran Aktual LPJ.*?:\s*/i, '') // Bersihkan awalan jargon LPJ
+                            .replace(/^Sponsor Dari:\s*/i, 'Sponsor: ')
+                            .replace(/^Donasi Dari:\s*/i, 'Donasi: ')
+                            .replace(/^Terima Pembayaran:\s*/i, 'Pembayaran: ')
+                            .replace(/\s+/g, ' ') // Rapikan spasi ganda
+                            .trim();
                         
                         trxHtml += `
                         <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid rgba(255,255,255,0.05);">
@@ -10056,7 +10279,7 @@
                                 <div style="font-size:12px; font-weight:600; color:#F8FAFC; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${esc(cleanKet)}</div>
                             </div>
                             <div style="display:flex; align-items:center; gap:8px;">
-                                <div style="font-size:14px; font-weight:900; color:${colorAmt};">Rp ${fmtRp(nm)}</div>
+                                <div style="font-size:14px; font-weight:900; color:${colorAmt};">${amtRender}</div>
                                 ${icon}
                             </div>
                         </div>`;
