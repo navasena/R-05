@@ -354,7 +354,7 @@
             document.head.appendChild(curtain);
         }
 
-        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbwY_l5u-gHsnuCQ6pCYStdGWtTYbkVL7DyrPMcCg3ZH9y9bSkxfdgnTwWgheSDl6HK-/exec";
+        const CLOUD_API_URL = "LINK GOOGLE SHEET";
         const CLOUD_API_TOKEN = "Navasena29082026";
 
         // --- KONFIGURASI INDEXEDDB LOKAL ---
@@ -1373,7 +1373,8 @@
                         // Bersihkan tag siluman sebelum dilempar ke Publik Marquee
                         namaDonatur = String(namaDonatur).replace(/\[SPONSOR-BARANG\]\s*/i, '').replace(/^(Donasi|Sponsor)\s*(Umum|Dari)?\s*[:-]?\s*/i, '').split('|')[0].split('-')[0].trim() || "Hamba Allah";
                         
-                        let valueTxt = isBarang ? `<span style="color: #FDE68A; font-weight: 900;">+WUJUD BARANG</span>` : `<span style="color: #34D399; font-weight: 900;">+RP ${fmtRp(t.nom_final)}</span>`;
+                        // [SURGICAL FIX] Ubah warna +WUJUD BARANG menjadi #34D399 (Hijau) agar selaras dengan warna nominal masuk
+                        let valueTxt = isBarang ? `<span style="color: #34D399; font-weight: 900;">+WUJUD BARANG</span>` : `<span style="color: #34D399; font-weight: 900;">+RP ${fmtRp(t.nom_final)}</span>`;
 
                         return `<span style="margin-right: 36px;"><span style="color: #94A3B8; font-weight: 900; margin-right: 8px;">${prefixTxt}</span><span style="color: #FDE68A; font-weight: 800; margin-right: 8px;">${esc(namaDonatur).toUpperCase()}</span>${valueTxt}</span>`;
                     });
@@ -3451,6 +3452,8 @@
                     
                 let jArrList = getSetting('jabatan_list', 'Ketum NAVASENA\nSekretaris Jenderal\nBendahara Umum\nKoordinator Humas\nAdmin Medsos').split(/\n|,/).map(s=>s.replace(/\s+/g, ' ').trim().toLowerCase());
 
+// KODE BARU (Wajib utuh, lolos simulasi, bebas error, TIDAK ADA PEMOTONGAN KODE):
+
                     filteredAnggota.forEach(ag => {
                         const bNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
                         let joinBln = ag.join_bln || 1;
@@ -3511,6 +3514,174 @@
                             }
                         }
 
+                        // --- INJEKSI RADAR KEPATUHAN (ZERO-CLICK STATUS) ---
+                        let radarStatus = 'NA';
+                        let radarHtml = '';
+                        let hasNunggak = false;
+                        let hasAdvance = false;
+                        let isAllClearUntilNow = true;
+                        let hasAnyObligation = false;
+
+                        // Fast-Scan 1: Nunggak Check (Masa Lalu hingga Bulan Ini)
+                        for (let chkY = joinYear; chkY <= currYearReal; chkY++) {
+                            let startM = (chkY === joinYear) ? joinBln : 1;
+                            let endM = (chkY === currYearReal) ? currMonthReal : 12;
+                            for (let chkM = startM; chkM <= endM; chkM++) {
+                                hasAnyObligation = true;
+                                if (!iuranMapGlobalSync[`${ag.id}-${chkY}-${chkM}`]) {
+                                    hasNunggak = true;
+                                    isAllClearUntilNow = false;
+                                    break;
+                                }
+                            }
+                            if (hasNunggak) break;
+                        }
+
+                        // Fast-Scan 2: Advance Check (Masa Depan) - Hanya dijalankan jika tidak nunggak
+                        if (!hasNunggak) {
+                            for (let chkY = currYearReal; chkY <= currYearReal + 2; chkY++) {
+                                let startM = (chkY === currYearReal) ? currMonthReal + 1 : 1;
+                                for (let chkM = startM; chkM <= 12; chkM++) {
+                                    if (iuranMapGlobalSync[`${ag.id}-${chkY}-${chkM}`]) {
+                                        hasAdvance = true;
+                                        break;
+                                    }
+                                }
+                                if (hasAdvance) break;
+                            }
+                        }
+
+                        // THE HIGHEST PRIORITY ENGINE
+                        if (!hasAnyObligation) {
+                            radarStatus = 'NA';
+                        } else if (hasNunggak) {
+                            radarStatus = 'CRITICAL';
+                        } else if (hasAdvance && isAllClearUntilNow) {
+                            radarStatus = 'GOLD';
+                        } else if (isAllClearUntilNow) {
+                            radarStatus = 'VERIFIED';
+                        }
+
+                        // CSS ANIMATION DEFS (Hanya Diinjeksi 1x ke dalam DOM)
+                        if (!document.getElementById('radar-css-anims')) {
+                            document.head.insertAdjacentHTML('beforeend', `
+                            <style id="radar-css-anims">
+                                @keyframes reflectorSpin {
+                                    0% { transform: translateX(0) scaleX(1); fill: #FFFFFF; filter: drop-shadow(0 0 4px #FFFFFF); }
+                                    25% { transform: translateX(3px) scaleX(0); fill: #FCA5A5; filter: drop-shadow(0 0 2px #FCA5A5); }
+                                    50% { transform: translateX(0) scaleX(-1); fill: #7F1D1D; filter: none; }
+                                    75% { transform: translateX(-3px) scaleX(0); fill: #FCA5A5; filter: drop-shadow(0 0 2px #FCA5A5); }
+                                    100% { transform: translateX(0) scaleX(1); fill: #FFFFFF; filter: drop-shadow(0 0 4px #FFFFFF); }
+                                }
+                                @keyframes auraPulse {
+                                    0% { opacity: 0.9; transform: scale(1.4); }
+                                    25% { opacity: 0.3; transform: scale(1); }
+                                    50% { opacity: 0; transform: scale(0.8); }
+                                    75% { opacity: 0.3; transform: scale(1); }
+                                    100% { opacity: 0.9; transform: scale(1.4); }
+                                }
+                                @keyframes singleCoinRotate {
+                                    /* FASE 1: SPIN CEPAT DAN NAIK (0% - 35%) */
+                                    0% { transform: perspective(200px) rotateX(15deg) rotateY(0deg) translateY(0); filter: drop-shadow(0 4px 6px rgba(217, 119, 6, 0.3)); animation-timing-function: ease-in-out; }
+                                    17% { transform: perspective(200px) rotateX(15deg) rotateY(180deg) translateY(-4px); filter: drop-shadow(0 8px 12px rgba(217, 119, 6, 0.15)); animation-timing-function: ease-in-out; }
+                                    35% { transform: perspective(200px) rotateX(15deg) rotateY(360deg) translateY(0); filter: drop-shadow(0 4px 6px rgba(217, 119, 6, 0.3)); animation-timing-function: ease-in-out; }
+                                    
+                                    /* FASE 2: JEDA BERPUTAR + MENGAMBANG HALUS (35% - 100%) */
+                                    65% { transform: perspective(200px) rotateX(15deg) rotateY(360deg) translateY(-2px); filter: drop-shadow(0 5px 8px rgba(217, 119, 6, 0.2)); animation-timing-function: ease-in-out; }
+                                    100% { transform: perspective(200px) rotateX(15deg) rotateY(360deg) translateY(0); filter: drop-shadow(0 4px 6px rgba(217, 119, 6, 0.3)); }
+                                }
+                                .single-coin-3d {
+                                    width: 24px;
+                                    height: 24px;
+                                    border-radius: 50%;
+                                    background: linear-gradient(135deg, #FEF08A 0%, #F59E0B 40%, #D97706 60%, #92400E 100%);
+                                    border: 1.5px solid #92400E;
+                                    box-shadow: inset 0 0 4px 1px rgba(255,255,255,0.7), inset 0 0 0 3px rgba(245,158,11,0.5);
+                                    animation: singleCoinRotate 4s infinite;
+                                    transform-style: preserve-3d;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    position: relative;
+                                    will-change: transform, filter;
+                                }
+                                .single-coin-3d::before {
+                                    content: '';
+                                    position: absolute;
+                                    inset: 2px;
+                                    border-radius: 50%;
+                                    border: 1px dashed rgba(120, 53, 15, 0.5);
+                                }
+                                .single-coin-3d::after {
+                                    content: 'Rp';
+                                    font-size: 8px;
+                                    font-weight: 900;
+                                    color: #78350F;
+                                    position: absolute;
+                                    text-shadow: 0.5px 0.5px 0px rgba(255,255,255,0.5);
+                                    letter-spacing: -0.5px;
+                                }
+                                @keyframes sleepFloat {
+                                    0% { transform: translateY(0); }
+                                    50% { transform: translateY(-2px); }
+                                    100% { transform: translateY(0); }
+                                }
+                                .radar-icon-container { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; flex-shrink: 0; margin-left: auto; margin-right: 8px; }
+                            </style>`);
+                        }
+
+                        // SVG HTML GENERATOR BERDASARKAN STATUS RADAR
+                        if (radarStatus === 'CRITICAL') {
+                            radarHtml = `
+                            <div class="radar-icon-container" title="Ada Tunggakan!" style="position: relative;">
+                                <!-- Intense Rotary Aura Glow (Sync dengan pantulan depan) -->
+                                <div style="position: absolute; inset: 4px; border-radius: 50%; background: #EF4444; filter: blur(5px); animation: auraPulse 0.7s infinite linear; z-index: 0; pointer-events: none;"></div>
+                                
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: relative; z-index: 1; transform: translateZ(0); will-change: transform;">
+                                    <!-- Base Bottom -->
+                                    <rect x="6" y="16" width="12" height="3" rx="1.5" fill="#1E293B"/>
+                                    <!-- Base Lip -->
+                                    <rect x="4" y="14" width="16" height="2" rx="1" fill="#475569"/>
+                                    
+                                    <!-- Glass Dome (Warna Merah Gelap Statis sebagai Kontras) -->
+                                    <path d="M6 14V9a6 6 0 0 1 12 0v5H6z" fill="#7F1D1D" stroke="#EF4444" stroke-width="1.5" stroke-opacity="0.6"/>
+                                    
+                                    <!-- Mechanical Spinning Reflector (Rotasi Putar 3D Ilusi Cepat) -->
+                                    <ellipse cx="12" cy="9.5" rx="3.5" ry="4.5" style="animation: reflectorSpin 0.7s infinite linear; transform-origin: 12px 9.5px;"/>
+                                    
+                                    <!-- Front Glass Reflection (Statis - Memberi kesan bulat pada kaca) -->
+                                    <path d="M8 8.5A4.5 4.5 0 0 1 11 5" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+                                    <path d="M16 11.5 A 2 2 0 0 0 17 9" stroke="#FFFFFF" stroke-width="1" stroke-linecap="round" opacity="0.3"/>
+                                </svg>
+                            </div>`;
+                        } else if (radarStatus === 'GOLD') {
+
+                            radarHtml = `
+                            <div class="radar-icon-container" title="Sultan (Bayar Lebih Awal)" style="position: relative; overflow: visible;">
+                                <!-- Single Majestic Rotating Gold Coin -->
+                                <div class="single-coin-3d"></div>
+                            </div>`;
+                        } else if (radarStatus === 'VERIFIED') {
+
+                            radarHtml = `
+                            <div class="radar-icon-container" title="Lunas Tepat Waktu">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="#10B981" stroke="#10B981" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 2px 4px rgba(16,185,129,0.3)); transform: translateZ(0);">
+                                    <path d="M12 2l3.09 2.26L19 5l.77 3.63L22 12l-2.23 3.37L19 19l-3.91.74L12 22l-3.09-2.26L5 19l-.77-3.63L2 12l2.23-3.37L5 5l3.91-.74L12 2z"/>
+                                    <polyline points="9 12 11 14 15 10" stroke="#FFFFFF" stroke-width="3"/>
+                                </svg>
+                            </div>`;
+                        } else {
+                            radarHtml = `
+                            <div class="radar-icon-container" title="Tidak Wajib Iuran Pada Tahun Ini">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="animation: sleepFloat 3s infinite ease-in-out; transform: translateZ(0); filter: drop-shadow(0 2px 4px rgba(148, 163, 184, 0.15)); will-change: transform;">
+                                    <!-- Soft Silver Base -->
+                                    <circle cx="12" cy="12" r="10" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="2"/>
+                                    <!-- Universal 'Not Applicable / Null' Dash -->
+                                    <path d="M8 12h8" stroke="#94A3B8" stroke-width="3" stroke-linecap="round"/>
+                                </svg>
+                            </div>`;
+                        }
+
                         if (!isKiosk) {
                             // ==========================================
                             // RENDERING MODE BENDAHARA (ADMIN UI)
@@ -3555,7 +3726,8 @@
                                             <div style="display:flex; flex-wrap:wrap; gap:4px;">${badgeLabel}</div>
                                         </div>
                                     </div>
-                                    <div style="background: rgba(0,0,0,0.03); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: 12px;">
+                                    ${radarHtml}
+                                    <div style="background: rgba(0,0,0,0.03); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: 0;">
                                         <svg id="chevron-${ag.id}" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2.5" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg>
                                     </div>
                                 </div>
@@ -3628,7 +3800,8 @@
                                             <div style="display:flex; flex-wrap:wrap; gap:4px;">${badgeLabel}</div>
                                         </div>
                                     </div>
-                                    <div style="background: rgba(0,0,0,0.03); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: 12px;">
+                                    ${radarHtml}
+                                    <div style="background: rgba(0,0,0,0.03); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: 0;">
                                         <svg id="chevron-${ag.id}" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2.5" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><polyline points="6 9 12 15 18 9"/></svg>
                                     </div>
                                 </div>
@@ -3653,7 +3826,7 @@
                     });
 
                 }
-
+                
                 // Pengamanan Container Omni-Button
                 if (!document.getElementById('omni-button-container') && document.getElementById('search-iuran')) {
                     let searchGroup = document.getElementById('search-iuran').parentElement;
@@ -6731,6 +6904,18 @@
                     // JIT DB CONNECTION HEALER: Membangkitkan memori IndexedDB yang ditidurkan OS
                     try { idb.transaction(['trx', 'anggota', 'event', 'dompet'], 'readonly'); } catch(err) { await initDB(); }
 
+                    // [SURGICAL FIX]: PRE-COMPUTED HASH MAP UNTUK O(1) LOOKUP
+                    // Mencegah deadlock IDB akibat nested loop O(A * T) di dalam transaksi readwrite
+                    let globalDonasiMap = {};
+                    state.trx.forEach(t => {
+                        if (t.tipe === 'masuk' && t.id_anggota && !t.is_deleted && t.kat !== 'Transfer Internal' && t.kat !== 'Saldo Awal' && t.kat !== 'Sisa Uang Muka' && !(t.kat||'').includes('Koreksi Saldo')) {
+                            let tY = t.year || new Date(t.ts).getFullYear();
+                            let tM = t.bln || (new Date(t.ts).getMonth() + 1);
+                            let key = `${t.id_anggota}_${tY}_${tM}`;
+                            globalDonasiMap[key] = (globalDonasiMap[key] || 0) + t.nom_final;
+                        }
+                    });
+
                     await new Promise((resolve, reject) => {
                         const tx = idb.transaction(['trx', 'anggota', 'event', 'dompet'], 'readwrite');
                         const storeTrx = tx.objectStore('trx');
@@ -6753,20 +6938,11 @@
                             
                             // Ekstraksi Presisi Komponen Donasi XP (Mencegah Double Donasi XP Leak & Double Penalty)
                             let tempRawDonasiXp = ag.hist_xp_bonus || 0;
-                            let tempDonasiMap = {};
-
-                            state.trx.forEach(t => {
-                                if (t.tipe === 'masuk' && t.id_anggota === ag.id && !t.is_deleted && t.kat !== 'Transfer Internal' && t.kat !== 'Saldo Awal' && t.kat !== 'Sisa Uang Muka' && !(t.kat||'').includes('Koreksi Saldo')) {
-                                    let tY = t.year || new Date(t.ts).getFullYear();
-                                    let tM = t.bln || (new Date(t.ts).getMonth() + 1);
-                                    tempDonasiMap[`${tY}-${tM}`] = (tempDonasiMap[`${tY}-${tM}`] || 0) + t.nom_final;
-                                }
-                            });
 
                             for (let y = jY; y <= currY; y++) {
                                 let yearlyDonasi = 0;
                                 for (let m = 1; m <= 12; m++) {
-                                    let d = tempDonasiMap[`${y}-${m}`] || 0;
+                                    let d = globalDonasiMap[`${ag.id}_${y}_${m}`] || 0;
                                     if (d > 0) yearlyDonasi += Math.floor(d / 10000) * 10;
                                 }
                                 tempRawDonasiXp += Math.min(yearlyDonasi, 500);
@@ -8827,7 +9003,7 @@
                     }
 
                 } else if (tipe === 'pasukan') {
-                    titleEl.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> <span style="color:#D97706;">STRUKTUR PASUKAN NAVASENA</span>`;
+                    titleEl.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> <span style="color:#D97706;">DAFTAR PASUKAN NAVASENA</span>`;
                     
                     let sortedAnggota = [...state.anggota].sort((a,b) => (b.xp_total || 0) - (a.xp_total || 0));
                     
