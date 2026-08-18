@@ -1406,32 +1406,38 @@
                     tickerEl.innerHTML = fusionHtml || '<span style="color: #94A3B8; font-weight: 800;">[BELUM ADA INFORMASI, DONASI ATAU MVP ANGGOTA NAVASENA]</span>';
                 }
                 
-                // [SURGICAL FIX]: CONSTANT SPEED MATRIX (Ticker Auto-Pilot)
-                // Matikan mesin animasi sementara untuk mencegah glitch/lompatan saat update teks
-                tickerEl.style.animation = 'none';
-                
-                // Memberi jeda 1 frame agar browser selesai merender teks ke layar sebelum diukur
-                requestAnimationFrame(() => {
-                    // Paksa reflow untuk mendapatkan ukuran piksel fisik mutlak
-                    void tickerEl.offsetWidth; 
+                // [SURGICAL FIX]: CONSTANT SPEED MATRIX (Ticker Auto-Pilot) dengan DOM Jitter Protection
+                // Mencegah animasi reset ke awal jika tidak ada perubahan string data (Anti-Stuttering)
+                let newHtmlState = tickerEl.innerHTML;
+                if (tickerEl.dataset.currentState !== newHtmlState) {
+                    tickerEl.dataset.currentState = newHtmlState;
                     
-                    // JARAK FISIK MUTLAK: offsetWidth sudah terenkapsulasi 100vw dari CSS padding-left
-                    let distance = tickerEl.offsetWidth; 
+                    // Matikan mesin animasi sementara untuk mencegah glitch/lompatan saat update teks
+                    tickerEl.style.animation = 'none';
                     
-                    // Kecepatan konstan: 55 pixel per detik (Kecepatan baca ideal standar TV/Berita)
-                    let speedPxPerSec = 55; 
-                    let calculatedDuration = distance / speedPxPerSec;
-                    
-                // PROTEKSI CHAOS ENGINEERING: Cegah kalkulasi 0s yang akan memicu Infinite CPU Loop/Tab Crash jika UI sedang disuspen OS
-                if (calculatedDuration < 5) calculatedDuration = 20; // Default failsafe 20 detik
-                
-                // Nyalakan kembali mesin animasi dari titik nol dengan durasi presisi matematis
-                // Dipecah untuk menghindari CSS Shorthand Override pada fitur animation-play-state (Hover/Touch Pause)
-                tickerEl.style.animationName = 'ticker';
-                tickerEl.style.animationDuration = `${calculatedDuration}s`;
-                tickerEl.style.animationTimingFunction = 'linear';
-                tickerEl.style.animationIterationCount = 'infinite';
-            });
+                    // Memberi jeda 1 frame agar browser selesai merender teks ke layar sebelum diukur
+                    requestAnimationFrame(() => {
+                        // Paksa reflow untuk mendapatkan ukuran piksel fisik mutlak
+                        void tickerEl.offsetWidth; 
+                        
+                        // JARAK FISIK MUTLAK: offsetWidth sudah terenkapsulasi 100vw dari CSS padding-left
+                        let distance = tickerEl.offsetWidth; 
+                        
+                        // Kecepatan konstan: 55 pixel per detik (Kecepatan baca ideal standar TV/Berita)
+                        let speedPxPerSec = 55; 
+                        let calculatedDuration = distance / speedPxPerSec;
+                        
+                        // PROTEKSI CHAOS ENGINEERING: Cegah kalkulasi 0s yang akan memicu Infinite CPU Loop/Tab Crash jika UI sedang disuspen OS
+                        if (calculatedDuration < 5) calculatedDuration = 20; // Default failsafe 20 detik
+                        
+                        // Nyalakan kembali mesin animasi dari titik nol dengan durasi presisi matematis
+                        // Dipecah untuk menghindari CSS Shorthand Override pada fitur animation-play-state (Hover/Touch Pause)
+                        tickerEl.style.animationName = 'ticker';
+                        tickerEl.style.animationDuration = `${calculatedDuration}s`;
+                        tickerEl.style.animationTimingFunction = 'linear';
+                        tickerEl.style.animationIterationCount = 'infinite';
+                    });
+                }
             }
 
             window.renderFomoWidget(); // PEMANGGILAN AMAN
@@ -1535,7 +1541,7 @@
                             </div>
                             <div>
                                 <div style="font-size:10px; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:2px; letter-spacing: 0.5px;">Program Sukses</div>
-                                <div style="font-size:16px; font-weight:900; color:var(--text-main); letter-spacing: -0.5px;">${pSukses} Kegiatan</div>
+                                <div style="font-size:16px; font-weight:900; color:var(--text-main); letter-spacing: -0.5px;">${pSukses} Program Kerja</div>
                             </div>
                         </div>
                         <div style="color: #CBD5E1;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg></div>
@@ -3452,8 +3458,6 @@
                     
                 let jArrList = getSetting('jabatan_list', 'Ketum NAVASENA\nSekretaris Jenderal\nBendahara Umum\nKoordinator Humas\nAdmin Medsos').split(/\n|,/).map(s=>s.replace(/\s+/g, ' ').trim().toLowerCase());
 
-// KODE BARU (Wajib utuh, lolos simulasi, bebas error, TIDAK ADA PEMOTONGAN KODE):
-
                     filteredAnggota.forEach(ag => {
                         const bNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
                         let joinBln = ag.join_bln || 1;
@@ -5292,7 +5296,7 @@
                 let tabBtn = document.getElementById('tab-list-anggota');
                 if (tabBtn) tabBtn.innerText = `Data Anggota (${state.anggota.length})`;
 
-                let jArrList = getSetting('jabatan_list', 'Ketum NAVASENA, Sekretaris Jenderal, Bendahara Umum, Koordinator Humas, Admin Medsos').split(',').map(s=>s.replace(/\s+/g, ' ').trim().toLowerCase());
+                let jArrList = getSetting('jabatan_list', 'Ketum NAVASENA\nSekretaris Jenderal\nBendahara Umum\nKoordinator Humas\nAdmin Medsos').split(/\n|,/).map(s=>s.replace(/\s+/g, ' ').trim().toLowerCase());
                 let h = '';
                 state.anggota.forEach(a => {
 
@@ -6908,7 +6912,7 @@
                     // Mencegah deadlock IDB akibat nested loop O(A * T) di dalam transaksi readwrite
                     let globalDonasiMap = {};
                     state.trx.forEach(t => {
-                        if (t.tipe === 'masuk' && t.id_anggota && !t.is_deleted && t.kat !== 'Transfer Internal' && t.kat !== 'Saldo Awal' && t.kat !== 'Sisa Uang Muka' && !(t.kat||'').includes('Koreksi Saldo')) {
+                        if (t.tipe === 'masuk' && t.id_anggota && !t.is_deleted && t.kat !== 'Transfer Internal' && t.kat !== 'Saldo Awal' && t.kat !== 'Sisa Uang Muka' && t.kat !== 'Pembayaran Program' && !String(t.kat||'').toLowerCase().includes('sponsor') && !(t.kat||'').includes('Koreksi Saldo')) {
                             let tY = t.year || new Date(t.ts).getFullYear();
                             let tM = t.bln || (new Date(t.ts).getMonth() + 1);
                             let key = `${t.id_anggota}_${tY}_${tM}`;
@@ -7326,7 +7330,7 @@
                                         </div>
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
                                             <div style="color: var(--danger); padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-                                            <div><b>[KLIK] Tutup Buku Tahunan:</b> Fitur pamungkas memusnahkan riwayat masa lalu menjadi "Saldo Awal Pindahan" agar aplikasi super ringan. <b>WAJIB EXCEL DULU!</b></div>
+                                            <div><b>[KLIK] Tutup Buku Tahunan:</b> Fitur pamungkas memusnahkan riwayat masa lalu menjadi "Saldo Awal Pindahan" agar aplikasi kembali super ringan. <b>WAJIB EXCEL DULU!</b></div>
                                         </div>
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
                                             <div style="color: #991B1B; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></div>
@@ -7335,6 +7339,7 @@
                                     </div>
                                 </div>
                             </div>
+                            
                         </div>
                     </div>
 
@@ -7458,7 +7463,7 @@
                                 <div id="tut-ang-4" style="display: none; padding: 16px; border-top: 1.5px solid var(--border); background: var(--surface);">
                                     <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12.5px; color: var(--text-main); line-height: 1.5;">
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
-                                            <div style="color: var(--primary); padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+                                            <div style="color: var(--primary); padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
                                             <div><b>[KLIK] Bedah Rincian Dana:</b> Sentuh nominal kotak DANA MASUK, PENGELUARAN, atau SISA KAS pada acara berjalan untuk mengekspos penyumbang dan bon.</div>
                                         </div>
                                         <div style="display: flex; gap: 10px; align-items: flex-start;">
@@ -9926,13 +9931,38 @@
                 } finally { window._isLoadingData = false; }
             }
 
-            setInterval(() => {
-                const isUserTyping = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA');
-                const isModalOpen = document.body.classList.contains('modal-open');
-                if (!isProcessingTransaction && !isProcessingMaster && !isUserTyping && !isModalOpen && navigator.onLine) {
-                if(localStorage.getItem('nav_unsynced') !== 'true') loadFromCloud(true);
-                }
-            }, 60000);
+            // THE ANTI-DDOS JITTER PROTOCOL & ROLE-BASED RATE LIMITING (CHAOS ENGINEERING DEFENSE)
+            // Menghancurkan Interval Statis untuk mencegah 150 warga menyerang Server GAS di detik yang sama
+            function scheduleNextAutoSync() {
+                let role = localStorage.getItem('nav_role');
+                
+                // Distribusi Beban Server: 
+                // Admin/Bendahara menarik data setiap ~60 detik.
+                // Warga Publik diredam tarikannya menjadi setiap ~3 Menit (180.000 ms) untuk menghemat kuota Google.
+                let baseTime = (role === 'warga' || !role) ? 180000 : 60000;
+                
+                // Jitter Engine (Pengacak Antrean): Menambah delay acak 10 hingga 40 detik.
+                // Memastikan tidak akan pernah ada 2 HP yang melakukan Request ke Server di milidetik yang sama.
+                let jitter = Math.floor(Math.random() * 30000) + 10000; 
+
+                setTimeout(() => {
+                    const isUserTyping = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA');
+                    const isModalOpen = document.body.classList.contains('modal-open');
+                    
+                    // Eksekusi Tarik Data Asinkron
+                    if (!window.isProcessingTransaction && !window.isProcessingMaster && !isUserTyping && !isModalOpen && navigator.onLine) {
+                        if(localStorage.getItem('nav_unsynced') !== 'true') {
+                            loadFromCloud(true);
+                        }
+                    }
+                    
+                    // Siklus Terus Berjalan Sendiri (Tail-Call Loop)
+                    scheduleNextAutoSync(); 
+                }, baseTime + jitter);
+            }
+            
+            // Picu Mesin Siklus Otomatis
+            scheduleNextAutoSync();
 
             // --- ENGINE LAPORAN PDF (GENERATE LPJ) ---
             function generateLPJ() {
